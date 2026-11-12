@@ -1,8 +1,8 @@
 # ZEUS Terminal — complete feature checklist
 
-[中文 → FEATURES_zh.md](FEATURES_zh.md) · [User guide](USER_GUIDE.md) · [Back to README](../README.md)
+[中文 → FEATURES_zh.md](FEATURES_zh.md) · [User manual](USER_GUIDE.md) · [What's new](../CHANGELOG.md) · [Back to README](../README.md)
 
-ZEUS does far more than the screenshots in the README show. There are 7 pages in the top bar, about 30 jobs that run by themselves in the background, and more than 200 API endpoints. This page lists every feature you can reach from the interface today. Pull requests are welcome, and new features may be added over time ([Contributing](../CONTRIBUTING.md)).
+ZEUS does far more than the screenshots in the README show. There are 7 pages in the top bar, about 30 jobs that run by themselves in the background, and more than 200 API endpoints. This page lists every feature you can reach from the interface today. Pull requests are welcome, and new features may be added over time ([Contributing](../CONTRIBUTING.md)). Features marked <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> arrived in version 0.2.0 ([changelog](../CHANGELOG.md)); how to use each one is in the [user manual](USER_GUIDE.md).
 
 **What each feature needs:**
 
@@ -81,7 +81,7 @@ ZEUS does far more than the screenshots in the README show. There are 7 pages in
 | ✅ | Concentration, correlation, liquidity | Position size as % of net liquidation, correlation matrix, cash-reserve guard | Free |
 | ✅ | Decision-log reminders | Reminds you to record why you opened or closed a trade | Free |
 | ✅ | Desktop notifications | Everything above as macOS notifications, even with the browser closed | macOS |
-| ✅ | E-mail alerts | Every alert above also by e-mail; the same alert at most once per 30 minutes and at most 20 alerts per hour; test button in Settings | SMTP account (macOS, Linux) |
+| ✅ | E-mail alerts <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | Every alert above also by e-mail; the same alert at most once per 30 minutes and at most 20 alerts per hour; test button in Settings | SMTP account (macOS, Linux) |
 
 ## 🩺 Pre-trade checkup and liquidity
 
@@ -101,8 +101,8 @@ ZEUS does far more than the screenshots in the README show. There are 7 pages in
 | ✅ | Sorting and filters | By market cap, today's change or TA score; by earnings date and bullish / bearish setup | Free |
 | ✅ | 🚀 AI picks | Trend-following and dip-buying candidates with strikes, chance of profit and orders you can paste; AI re-ranks them with news and earnings | Free (AI re-rank needs AI) |
 | ✅ | 🧭 Market judgement | How bad the news is versus how much price has absorbed, crash probability against base rates, three layers of support, and what would prove the view wrong | AI |
-| ✅ | 🔄 Sector rotation | 80 industry groups (575 tickers) ranked by their moves over 5 days to a year, with each group's trend and the share above the 50- and 200-day averages | Free |
-| ✅ | 🎲 Options sentiment | IV percentile, 25-delta skew percentile and put/call percentiles by sector, against their own history | Free (needs a few weeks of after-close crawls) |
+| ✅ | 🔄 Sector rotation <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | 80 industry groups (575 tickers) ranked by their moves over 5 days to a year, with each group's trend and the share above the 50- and 200-day averages | Free |
+| ✅ | 🎲 Options sentiment <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | IV percentile, 25-delta skew percentile and put/call percentiles by sector, against their own history | Free (needs a few weeks of after-close crawls) |
 | ✅ | 📊 Barchart lists | Intersect or union your saved Barchart screeners and signal pages | Barchart account |
 | ✅ | Ticker detail | Chart (1 week to 2 years), Finviz technicals and fundamentals, news, ⚖️ bull/bear narratives, 🏢 company profile written from the latest 10-Q, 📑 jump to SEC filings | Free (narratives and profile need AI) |
 | ✅ | ⚡ After-close crawl | Pull the day's closing data for the whole universe on demand | Free |
@@ -117,7 +117,7 @@ ZEUS does far more than the screenshots in the README show. There are 7 pages in
 | ✅ | 📋 Order ticket | Copy the spread as an order ticket | Free |
 | ✅ | ⚡ Paper Trade | Open the recommended spread in the Paper Trade builder (shortcut **B** on a ticker page) | Free |
 
-## 🧪 Paper Trade
+## 🧪 Paper Trade <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!">
 
 | ✓ | Feature | What it does | Needs |
 |---|---|---|---|

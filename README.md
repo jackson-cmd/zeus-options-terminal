@@ -8,11 +8,26 @@
 
 **Live positions & Greeks · P/L and risk · exit discipline · paper trading with option and stock legs · a four-source news desk (Benzinga · Finviz · WSJ · MarketWatch) · stock picker · earnings & SEC filings · an honest trade journal — tastytrade API or a plain CSV, running entirely on your own computer, in 中文 / 双语 / English.**
 
-[中文说明 → README_zh.md](README_zh.md) · [All features](docs/FEATURES.md) · [User guide](docs/USER_GUIDE.md) · [Quick start](#-quick-start) · [Contributing](#-contributing) · [License](#-license-non-commercial)
+[中文说明 → README_zh.md](README_zh.md) · [What's new](#-whats-new) · [All features](docs/FEATURES.md) · [User manual](docs/USER_GUIDE.md) · [Quick start](#-quick-start) · [Contributing](#-contributing) · [License](#-license-non-commercial)
 
 ![Python](https://img.shields.io/badge/python-3.10%2B-3776ab) ![Self-hosted](https://img.shields.io/badge/self--hosted-100%25%20local-2ea043) ![Languages](https://img.shields.io/badge/UI-中文%20%7C%20双语%20%7C%20English-e3b341) ![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial-b31b1b)
 
 </div>
+
+---
+
+## 🆕 What's new
+
+<sub>Latest release **0.2.0** (2026-11-12). The full history is in the [changelog](CHANGELOG.md).</sub>
+
+| | New in 0.2.0 |
+|---|---|
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🧪 Paper Trade**: build any strategy on the live option chain with option *and* stock legs, save it as a simulated trade and follow its P/L. [How to use it →](docs/USER_GUIDE.md#8-paper-trade) |
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **📧 E-mail alerts**: every desktop alert can also arrive in your inbox, on macOS and on Linux. [How to set it up →](docs/USER_GUIDE.md#123-e-mail-alerts) |
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🔄 Sector rotation**: 80 industry groups ranked by momentum and trend, and **🎲 options sentiment** works out of the box. [How to use it →](docs/USER_GUIDE.md#66-sector-rotation) |
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **∞ Exact max profit and loss**: short puts and stock are measured down to zero, and unlimited strategies show ∞. [How it is calculated →](docs/USER_GUIDE.md#47-how-positions-are-grouped-and-priced) |
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🌐 English everywhere**: the TA screener and single-ticker page now follow 中文 / 双语 / English. [Languages →](docs/USER_GUIDE.md#13-interface-languages) |
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **📚 A complete user manual** and a feature checklist, in English and Chinese, with clickable contents. [Open the manual →](docs/USER_GUIDE.md) |
 
 ---
 
@@ -60,7 +75,7 @@ I have lived inside this tool through rallies, crashes and earnings seasons, and
 
 ## 🗺️ Feature tour
 
-This tour covers the highlights. ZEUS does far more than fits on one page: the **[complete feature checklist](docs/FEATURES.md)** lists every page, button, alert and background job, and the **[user guide](docs/USER_GUIDE.md)** walks you through setup and a full trading day.
+This tour covers the highlights. ZEUS does far more than fits on one page: the **[complete feature checklist](docs/FEATURES.md)** lists every page, button, alert and background job, and the **[user manual](docs/USER_GUIDE.md)** explains how to use every one of them, with clickable contents.
 
 ### ⚔️ Positions — the command center
 - **Every strategy recognized automatically**: verticals, calendars, diagonals, iron condors, butterflies, naked and covered legs, stock. Legs are grouped by the order that opened them, so spreads stay together even when you leg in or roll.

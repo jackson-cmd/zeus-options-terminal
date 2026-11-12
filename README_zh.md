@@ -8,11 +8,26 @@
 
 **实时持仓与希腊值 · 盈亏与风险 · 出场纪律 · 期权和股票都能下的模拟盘 · 四路新闻台（Benzinga · Finviz · 华尔街日报 · MarketWatch）· 选股 · 财报与 SEC 文件 · 不说假话的交易日记 —— 接 tastytrade API 或者一份 CSV 就能用，完全跑在你自己的电脑上，界面支持 中文 / 双语 / English。**
 
-[English → README.md](README.md) · [全部功能](docs/FEATURES_zh.md) · [使用说明](docs/USER_GUIDE_zh.md) · [快速开始](#-快速开始) · [参与贡献](#-参与贡献) · [许可证](#-许可证禁止商业使用)
+[English → README.md](README.md) · [新功能](#-新功能) · [全部功能](docs/FEATURES_zh.md) · [使用手册](docs/USER_GUIDE_zh.md) · [快速开始](#-快速开始) · [参与贡献](#-参与贡献) · [许可证](#-许可证禁止商业使用)
 
 ![Python](https://img.shields.io/badge/python-3.10%2B-3776ab) ![本地部署](https://img.shields.io/badge/100%25-本地部署-2ea043) ![界面语言](https://img.shields.io/badge/界面-中文%20%7C%20双语%20%7C%20English-e3b341) ![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial-b31b1b)
 
 </div>
+
+---
+
+## 🆕 新功能
+
+<sub>最新版本 **0.2.0**（2026-11-12）。完整的更新历史见[更新记录](CHANGELOG_zh.md)。</sub>
+
+| | 0.2.0 新加入 |
+|---|---|
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🧪 模拟盘**：在实时期权链上搭任何策略，期权腿和股票腿都能加，存成模拟单后跟踪盈亏。[怎么用 →](docs/USER_GUIDE_zh.md#8-模拟盘) |
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **📧 邮件提醒**：每条桌面提醒都能同时发到你的邮箱，macOS 和 Linux 都支持。[怎么配置 →](docs/USER_GUIDE_zh.md#123-邮件提醒) |
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🔄 行业轮动**：80 个细分行业按动量和趋势排名，**🎲 期权情绪** 也开箱即用。[怎么用 →](docs/USER_GUIDE_zh.md#66-行业轮动) |
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **∞ 精确的最大盈亏**：卖出看跌和股票一直算到价格为 0，没有上限的策略显示 ∞。[怎么算的 →](docs/USER_GUIDE_zh.md#47-持仓怎么归组和估值) |
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🌐 全面支持英文**：TA 扫描和单票详情页也跟着中文 / 双语 / English 切换。[界面语言 →](docs/USER_GUIDE_zh.md#13-界面语言) |
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **📚 完整使用手册** 和功能清单，中英文各一份，目录可以点击跳转。[打开手册 →](docs/USER_GUIDE_zh.md) |
 
 ---
 
@@ -60,7 +75,7 @@ ZEUS Terminal（宙斯期权终端）是我给自己做的网站。前前后后�
 
 ## 🗺️ 功能全景
 
-这里只挑重点讲。ZEUS 的功能远不止这一页写得下的：**[功能清单](docs/FEATURES_zh.md)** 列出了每个页面、按钮、提醒和后台任务，**[使用说明](docs/USER_GUIDE_zh.md)** 从安装设置一直讲到怎么过一个完整的交易日。
+这里只挑重点讲。ZEUS 的功能远不止这一页写得下的：**[功能清单](docs/FEATURES_zh.md)** 列出了每个页面、按钮、提醒和后台任务，**[使用手册](docs/USER_GUIDE_zh.md)** 讲清每一项怎么用，目录可以点击跳转。
 
 ### ⚔️ 持仓 —— 指挥中心
 - **自动识别所有策略**：垂直价差、日历、对角、铁鹰、蝶式、裸腿和备兑、股票。按开仓那一单把各条腿归到一起，分批建仓、移仓也不会拆散。
