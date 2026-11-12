@@ -4678,7 +4678,10 @@ HEATMAP_JS = r"""
       // 长在 Graph 卡片上(🚀 AI 行含当天新闻总结), 所以通知深链改为直接开图墙。
       // 不能再切 movernews: 那个模式没有 chip 可以切回来, 作者会被卡住。
       if (window.hmSetDataMode) window.hmSetDataMode('stocks');
-      if (window.hmSetView) window.hmSetView('graph');
+      // through hmSubView, so the Picker's sub-tabs follow: hmSetView alone drew the chart wall
+      // under an open 🧭 Market Brief, the two stacked on one page
+      if (window.hmSubView) window.hmSubView('kline');
+      else if (window.hmSetView) window.hmSetView('graph');
       if (slot) _hmPopupToast(slot);
     } catch (e) {}
   };
@@ -5659,9 +5662,10 @@ HEATMAP_JS = r"""
       const lbl = M[slot] || '异动新闻';
       let t = document.getElementById('hmPopupToast');
       if (!t) {
-        // pointer-events:none: for its 4.5 s on screen it must not swallow clicks on the buttons under it
+        // bottom centre and pointer-events:none: in the top right it sat on the Market Brief's
+        // 🔄 Re-analyze button and swallowed clicks for its 4.5 s on screen
         t = document.createElement('div'); t.id = 'hmPopupToast';
-        t.style.cssText = 'position:fixed;top:54px;right:16px;z-index:99999;background:#1f6feb;color:#fff;padding:10px 14px;border-radius:8px;font-size:13px;font-weight:600;box-shadow:0 6px 22px rgba(0,0,0,.55);max-width:300px;pointer-events:none';
+        t.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:99999;background:#1f6feb;color:#fff;padding:10px 14px;border-radius:8px;font-size:13px;font-weight:600;box-shadow:0 6px 22px rgba(0,0,0,.55);max-width:300px;pointer-events:none';
         document.body.appendChild(t);
       }
       t.textContent = '📰 ' + lbl + ' — 今日 ±1% 异动票新闻已为你打开';
@@ -5686,7 +5690,8 @@ HEATMAP_JS = r"""
       if (window.hmSetDataMode && window.hmState && window.hmState.dataMode !== 'stocks')
         window.hmSetDataMode('stocks');
       if (window.hmSetMcapMin) window.hmSetMcapMin(100);          // compact 大盘≥100B
-      if (window.hmSetView) window.hmSetView('graph');           // K线图墙
+      if (window.hmSubView) window.hmSubView('kline');           // K线图墙 (sub-tabs follow)
+      else if (window.hmSetView) window.hmSetView('graph');
       _hmGraphRenderWhenReady(16);                                // ~8s 内等数据补渲
       _hmPopupToast(slot);
     } catch (e) {}
