@@ -4,7 +4,7 @@
   /api/settings               read (public view) / write settings
   /api/trades*                manual mode: add, import CSV, list, delete, export
   /api/zeus/status         mode + capabilities for the UI badge
-  /api/zeus/test/*         connection tests (tastytrade, AI, news, Benzinga)
+  /api/zeus/test/*         connection tests (tastytrade, AI, news, Benzinga, e-mail, MCP)
   /api/freenews/*             Finviz / WSJ / MarketWatch wire status and refresh
 
 Security: the server listens on 127.0.0.1 by default. Write endpoints require
@@ -99,6 +99,9 @@ async def settings_page():
 @router.post("/api/zeus/test/{what}")
 async def test_connection(what: str, request: Request):
     _guard(request)
+    if what == "mcp":
+        import zeus_mcp
+        return await zeus_mcp.self_test()
     loop = asyncio.get_event_loop()
 
     def run():

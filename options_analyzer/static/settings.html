@@ -58,6 +58,11 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
 .note b{color:var(--text)}
 .en{color:var(--text2);font-size:.92em;margin-top:3px}
 .lab-en{color:var(--text2);font-weight:500;font-size:11.5px}
+.client{margin-top:14px}
+.client h3{font-size:13px;margin:0;display:flex;align-items:center;gap:8px;justify-content:space-between}
+.client h3 button{padding:3px 10px;font-size:12px;flex-shrink:0}
+pre.snip{background:var(--bg);border:1px solid #21262d;border-radius:8px;padding:10px 12px;margin:6px 0 0;font:12px/1.5 ui-monospace,Menlo,monospace;white-space:pre-wrap;word-break:break-all;color:var(--text)}
+code{font:12px ui-monospace,Menlo,monospace;background:var(--bg3);border-radius:4px;padding:1px 5px;color:var(--text)}
 @media (max-width:720px){.row{grid-template-columns:1fr}header .tag{display:none}}
 </style>
 </head>
@@ -106,6 +111,19 @@ const T = {
   s_start: ['初始现金', 'Starting cash'],
   del: ['删除', 'Delete'], confirm_clear: ['确定删除全部手动交易?不可恢复。', 'Delete ALL manual trades? This cannot be undone.'],
   imported: ['导入完成', 'Imported'], dup: ['重复跳过', 'duplicates skipped'], errs: ['行无法识别', 'rows not understood'],
+  testmcp: ['测试 MCP', 'Test MCP'], agents_card: ['AI 智能体', 'AI agents'], paper_on: ['可下模拟单', 'paper trades on'],
+  agents_intro: ['让本机的 AI 智能体直接读 ZEUS：Claude Code、Claude Desktop、通过 Codex 的 GPT、Gemini CLI，或者你自己写的智能体。不用 API key，也不用另起服务，ZEUS 开着接口就在。持仓、风险、体检、新闻、事件、交易日记都能读，真实订单一笔也下不了。打开第二个开关后，智能体还能在模拟盘里开仓、平仓。',
+                 'Let AI agents on this computer read ZEUS directly: Claude Code, Claude Desktop, GPT through Codex, Gemini CLI, or an agent you build. No API key and no extra service: while ZEUS runs, the endpoint is there. Agents can read positions, risk, checkups, news, events and the trade journal, and can never place a real order. With the second switch on, they can also open and close paper trades.'],
+  connect: ['连接你的智能体', 'Connect your agent'], endpoint: ['接口地址', 'Endpoint'],
+  copy: ['复制', 'Copy'], copied: ['已复制', 'Copied'],
+  c_claude: ['Claude Code：在终端里运行一次', 'Claude Code: run once in a terminal'],
+  c_codex: ['Codex CLI：用 ChatGPT 订阅里的 GPT 模型', 'Codex CLI: GPT models on your ChatGPT plan'],
+  c_gemini: ['Gemini CLI', 'Gemini CLI'],
+  c_desktop: ['Claude Desktop：设置 → 开发者 → 编辑配置，把这段并进 claude_desktop_config.json，然后重启 Claude', 'Claude Desktop: Settings → Developer → Edit Config, merge this into claude_desktop_config.json, then restart Claude'],
+  c_own: ['自己的智能体：任何 MCP SDK（Python、TypeScript 等）连上面的地址即可；不用 SDK 也能直接发 JSON-RPC', 'Your own agent: point any MCP SDK (Python, TypeScript, …) at the endpoint, or send JSON-RPC yourself'],
+  c_try: ['连上以后直接问就行，比如「用 zeus 看看我的持仓，哪些该止盈？」。Claude Code 里还有现成的斜杠命令：', 'Once connected, just ask, for example "Use zeus to review my positions: which ones should I take profit on?". Claude Code also gets ready-made slash commands:'],
+  tools_n: ['个工具（✎ = 只在允许模拟单时可用）', 'tools (✎ = only when paper trades are allowed)'],
+  mcp_off: ['MCP 接口已关闭：把上面的开关改成 on 并保存，智能体才连得上。', 'The MCP server is off: set the switch above to on and save, or agents cannot connect.'],
   privacy: ['隐私:所有 token、密码、交易都只保存在本机 ~/.zeus-terminal/(权限 600),不在代码仓库里,也不会上传到任何地方;浏览器端读不回已保存的密钥。',
             'Privacy: every token, password and trade is stored only on this computer in ~/.zeus-terminal/ (mode 600), never inside the code repository, never uploaded anywhere; saved secrets cannot be read back by the browser.'],
 };
@@ -153,6 +171,7 @@ function renderCards() {
   h += card(t('benzinga'), s.benzinga ? '● ' + t('connected') : '○ ' + t('notconnected'), s.benzinga ? 'ok' : '');
   h += card(t('ai'), ai.provider && ai.provider !== 'off' ? '● ' + esc(ai.provider) + ' · ' + esc(ai.fast || '') : '○ ' + t('off'), ai.provider && ai.provider !== 'off' ? 'ok' : '');
   h += card(t('news'), 'Finviz' + (s.finviz_elite ? ' Elite' : '') + ' · WSJ · MarketWatch', 'ok');
+  h += card(t('agents_card'), s.mcp ? '● MCP /mcp' + (s.mcp_paper_trades ? ' · ' + t('paper_on') : '') : '○ ' + t('off'), s.mcp ? 'ok' : '');
   $('#cards').innerHTML = h;
 }
 function renderTabs() {
@@ -174,7 +193,7 @@ function field(key, s) {
   } else {
     const enums = { language: ['auto', 'zh', 'bi', 'en'], ai_provider: ['auto', 'claude_cli', 'anthropic', 'openai', 'off'],
       ai_language: ['auto', 'zh', 'en'], news_translate: ['google', 'bing', 'ai', 'off'], desktop_notifications: ['on', 'off'],
-      ai_schedules: ['on', 'off'], finviz_ai_crawl: ['on', 'off'] };
+      ai_schedules: ['on', 'off'], finviz_ai_crawl: ['on', 'off'], mcp_server: ['on', 'off'], mcp_paper_trades: ['off', 'on'] };
     if (enums[key]) {
       input = '<select data-k="' + key + '">' + enums[key].map(o => '<option' + (String(s.value) === o ? ' selected' : '') + '>' + o + '</option>').join('') + '</select>';
     } else {
@@ -183,7 +202,8 @@ function field(key, s) {
   }
   return '<div class="row"><label>' + esc(label) + labelEn + (help ? '<div class="help">' + esc(help) + '</div>' : '') + '</label><div>' + input + '</div></div>';
 }
-const TESTS = { broker: 'tastytrade', news: 'news', ai: 'ai', email: 'email' };
+const TESTS = { broker: 'tastytrade', news: 'news', ai: 'ai', email: 'email', agents: 'mcp' };
+const TEST_LABEL = { email: 'testmail', agents: 'testmcp' };
 function renderSection() {
   const g = (VIEW.groups || []).find(x => x[0] === ACTIVE) || VIEW.groups[0];
   const keys = Object.keys(VIEW.settings).filter(k => VIEW.settings[k].group === g[0]);
@@ -191,21 +211,58 @@ function renderSection() {
   if (g[0] === 'news') h += '<p class="intro">' + pickBlock('Benzinga Pro 负责实时 Digest、盘前、市场事件和信号。不填也能用:Digest 自动切到免费双语新闻源 Finviz + WSJ + MarketWatch。', 'Benzinga Pro powers the live digest, pre-market, market events and signals. Without it, the Digest runs on the free bilingual wire: Finviz + WSJ + MarketWatch.') + '</p>';
   if (g[0] === 'ai') h += '<p class="intro">' + pickBlock('自带模型。什么都不配,AI 按钮会提示去设置;其余功能不依赖 AI。', 'Bring your own model. With nothing configured every AI button simply says so; the rest of ZEUS works without AI.') + '</p>';
   if (g[0] === 'broker') h += '<p class="intro">' + pickBlock('连接 tastytrade 得到实时持仓、实时报价推送和自动交易日记;留空则使用下方的手动上传模式。', 'Connect tastytrade for live positions, streaming quotes and automatic journal sync. Leave it empty to use manual upload mode below.') + '</p>';
+  if (g[0] === 'agents') h += '<p class="intro">' + tb('agents_intro') + '</p>';
   if (g[0] === 'email') h += '<p class="intro">' + pickBlock('填好并保存后，每个桌面提醒（止盈、漏挂 GTC、风险雷达、支撑阻力、AI 选股……）都会同时发一封邮件。同一条提醒 30 分钟内只发一次，每小时最多 20 封。Linux 没有桌面通知，也能靠邮件收到提醒；Windows 暂不支持。', 'Once this is filled in and saved, every desktop alert (take-profit, missing GTC, risk radar, support / resistance, AI picks…) is also sent by e-mail. The same alert goes out at most once per 30 minutes, and at most 20 alerts per hour. On Linux, which has no desktop notifications here, this is how alerts reach you; not available on Windows yet.') + '</p>';
   h += keys.map(k => field(k, VIEW.settings[k])).join('');
   h += '<div class="actions"><button class="primary" id="saveBtn">' + t('save') + '</button>';
-  if (TESTS[g[0]]) h += '<button id="testBtn">' + t(g[0] === 'email' ? 'testmail' : 'test') + '</button>';
+  if (TESTS[g[0]]) h += '<button id="testBtn">' + t(TEST_LABEL[g[0]] || 'test') + '</button>';
   if (g[0] === 'news') h += '<button id="testBz">' + t('test') + ' · Benzinga</button>';
   h += '<span class="msg" id="msg"></span></div>';
   if (g[0] === 'general') h += '<div class="note">' + tb('restart') + '</div>';
   h += '<div class="note">' + tb('privacy') + '</div></section>';
   if (g[0] === 'broker') h += tradesHtml();
+  if (g[0] === 'agents') h += '<section class="on" id="agentsSec"><h2>' + t('connect') + '</h2><div id="agentsBody"><span class="msg">…</span></div></section>';
   $('#sections').innerHTML = h;
   $('#saveBtn').onclick = save;
   document.querySelectorAll('[data-clear]').forEach(b => b.onclick = () => saveValues({ [b.dataset.clear]: '' }));
   if ($('#testBtn')) $('#testBtn').onclick = () => runTest(TESTS[g[0]], $('#testBtn'));
   if ($('#testBz')) $('#testBz').onclick = () => runTest('benzinga', $('#testBz'));
   if (g[0] === 'broker') bindTrades();
+  if (g[0] === 'agents') loadAgents();
+}
+// ---------------------------------------------------------------- AI agents (MCP)
+function snip(label, code, id) {
+  return '<div class="client"><h3><span>' + esc(label) + '</span><button class="ghost" data-copy="' + id + '">' + t('copy') + '</button></h3>'
+    + '<pre class="snip" id="' + id + '">' + esc(code) + '</pre></div>';
+}
+function loadAgents() {
+  api('/api/zeus/mcp').then(m => {
+    const url = m.url;
+    const desktop = JSON.stringify({ mcpServers: { zeus: { command: m.python, args: [m.bridge] } } }, null, 2);
+    const body = JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'get_status', arguments: {},
+      _meta: { 'io.modelcontextprotocol/protocolVersion': '2026-07-28', 'io.modelcontextprotocol/clientCapabilities': {} } } });
+    const curl = 'curl -s ' + url + " -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream'"
+      + " -H 'MCP-Protocol-Version: 2026-07-28' -H 'Mcp-Method: tools/call' -H 'Mcp-Name: get_status' -d '" + body + "'";
+    let h = m.enabled ? '' : '<div class="note"><span class="warn">' + tb('mcp_off') + '</span></div>';
+    h += snip(t('endpoint'), url, 'snUrl');
+    h += snip(t('c_claude'), 'claude mcp add --transport http --scope user zeus ' + url, 'snClaude');
+    h += snip(t('c_codex'), 'codex mcp add zeus --url ' + url, 'snCodex');
+    h += snip(t('c_gemini'), 'gemini mcp add --transport http --scope user zeus ' + url, 'snGemini');
+    h += snip(t('c_desktop'), desktop, 'snDesktop');
+    h += snip(t('c_own'), curl, 'snCurl');
+    h += '<p class="intro" style="margin-top:16px">' + tb('c_try') + ' '
+      + m.prompts.map(p => '<code>/mcp__zeus__' + esc(p.name) + '</code>').join(' ') + '</p>';
+    h += '<p class="intro">' + m.tools.length + ' ' + t('tools_n') + ': '
+      + m.tools.map(x => '<code>' + esc(x.name) + (x.write ? ' ✎' : '') + '</code>').join(' ') + '</p>';
+    $('#agentsBody').innerHTML = h;
+    document.querySelectorAll('[data-copy]').forEach(b => b.onclick = () => {
+      const el = $('#' + b.dataset.copy);
+      const done = () => { b.textContent = t('copied'); setTimeout(() => { b.textContent = t('copy'); }, 1500); };
+      const select = () => { const r = document.createRange(); r.selectNodeContents(el); const s = getSelection(); s.removeAllRanges(); s.addRange(r); };
+      if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(el.textContent).then(done, select);
+      else select();
+    });
+  }).catch(e => { $('#agentsBody').innerHTML = '<span class="bad">✗ ' + esc(e) + '</span>'; });
 }
 function render() { applyStatic(); renderCards(); renderTabs(); renderSection(); }
 function collect() {
