@@ -1801,7 +1801,10 @@ async def startup():
     asyncio.create_task(periodic_mark_refresh())
     asyncio.create_task(hourly_journal_refresh())
     if _tt:
-        asyncio.create_task(backtest_scheduler())     # tastytrade backtester
+        # backtest_scheduler (the signal backtest) is not started: it opens trades
+        # from SSP1 screener signals, which this repository does not ship, and it
+        # has no page, so it would only download 264 option chains every weekday.
+        # The code and /api/backtest/* stay for whoever adds a signal source and a page.
         asyncio.create_task(missing_gtc_loop())       # reads working orders on the broker
     if _ai:
         asyncio.create_task(positions_ai_scheduler())
@@ -12906,7 +12909,10 @@ async def positions_ai_scheduler():
 async def backtest_scheduler():
     """Weekdays at 15:45 local: snapshot full 264-ticker universe (chain
     Parquet) + compute P/L for any open positions inline, then open new
-    positions from today's screener signals."""
+    positions from today's screener signals.
+
+    Not started by default (see the startup block): it needs SSP1 signals,
+    which are not shipped, and the backtest view has no entry point yet."""
     await asyncio.sleep(60)  # let server settle
     while True:
         try:
