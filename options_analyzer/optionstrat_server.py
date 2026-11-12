@@ -148,6 +148,18 @@ async def _stamp_request_ts(request, call_next):
     return await call_next(request)
 
 
+@app.middleware("http")
+async def _zeus_static_revalidate(request, call_next):
+    # The page's own scripts and styles change with every update. Without a Cache-Control
+    # header browsers keep them "fresh" for a while on their own, and a new page laid out
+    # with an old zeus.css / zeus.js breaks. Revalidating is a cheap 304 on localhost.
+    resp = await call_next(request)
+    path = request.url.path
+    if path.startswith("/static/") and path.endswith((".js", ".css", ".html", ".json")):
+        resp.headers["Cache-Control"] = "no-cache"
+    return resp
+
+
 def _live_on() -> bool:
     """DXLink 实时流本拍是否该连。读 /tmp/pwa_power_mode + state 的 override/idle。
     翻档(full↔lite↔off)时复位 override;idle 超时由 power_mode.live_on 懒复位。"""
@@ -1937,15 +1949,27 @@ async def index():
   padding: 0 16px; height: 38px; flex-shrink: 0;
   position: sticky; top: 0; z-index: 1000;
 }
-.top-nav-brand { font-size: 14px; font-weight: 800; color: #58a6ff; margin-right: 24px; }
+.top-nav-brand { font-size: 14px; font-weight: 800; color: #58a6ff; margin-right: 14px; flex-shrink: 0; white-space: nowrap; }
+/* Every item stays on one line in every language. Tabs that do not fit scroll sideways (wheel or
+   trackpad, zeus.js) instead of wrapping: wrapped labels grew taller than the bar and were cut off. */
+.top-nav-tabs {
+  display: flex; align-self: stretch; flex: 1 1 auto; min-width: 0; margin-bottom: -2px;
+  overflow-x: auto; overflow-y: hidden; scrollbar-width: none; overscroll-behavior-x: contain;
+}
+.top-nav-tabs::-webkit-scrollbar { display: none; }
+.top-nav-tabs.zs-more-r { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 32px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 32px), transparent); }
+.top-nav-tabs.zs-more-l { -webkit-mask-image: linear-gradient(90deg, transparent, #000 32px); mask-image: linear-gradient(90deg, transparent, #000 32px); }
+.top-nav-tabs.zs-more-l.zs-more-r { -webkit-mask-image: linear-gradient(90deg, transparent, #000 32px, #000 calc(100% - 32px), transparent); mask-image: linear-gradient(90deg, transparent, #000 32px, #000 calc(100% - 32px), transparent); }
 .top-nav-tab {
-  padding: 8px 20px; font-size: 12px; font-weight: 600;
+  display: flex; align-items: center; gap: 4px; flex-shrink: 0; white-space: nowrap;
+  padding: 0 13px; font-size: 12px; font-weight: 600;
   color: #8b949e; cursor: pointer; border-bottom: 2px solid transparent;
-  margin-bottom: -2px;
 }
 .top-nav-tab:hover { color: #e6edf3; }
 .top-nav-tab.active { color: #58a6ff; border-bottom-color: #1f6feb; }
-.top-nav-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+.top-nav-right { margin-left: 10px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.top-nav-right > * { flex-shrink: 0; white-space: nowrap; }
+@media (max-width: 1100px) { .top-nav-brand > span, #trStatusCur { display: none; } }
 .top-tab-panel { display: none; flex: 1; min-height: 0; }
 .top-tab-panel.active { display: flex; flex-direction: column; }
 /* Benzinga Digest rendered markdown */
@@ -2384,6 +2408,8 @@ if ('serviceWorker' in navigator) {
     top_nav_html = """
 <div class="top-nav" id="topNav">
   <div class="top-nav-brand" data-no-i18n title="ZEUS Terminal · 宙斯期权终端 — self-hosted options trading terminal · 本地部署的全方位期权交易终端">ZEUS <span style="opacity:.6;font-weight:600">Terminal</span></div>
+  <!-- tabs scroll sideways when the window is too narrow, instead of wrapping (.top-nav-tabs above, zeus.js) -->
+  <div class="top-nav-tabs" id="topNavTabs">
   <div class="top-nav-tab active" data-tab="positions" onclick="switchTopTab('positions')">Positions</div>
   <!-- --- heatmap --- -->
   <div class="top-nav-tab" data-tab="heatmap" onclick="switchTopTab('heatmap')">🎯 选股</div>
@@ -2397,6 +2423,7 @@ if ('serviceWorker' in navigator) {
   <div class="top-nav-tab" data-tab="journal" onclick="switchTopTab('journal')">Trade Journal <span id="dl-pending-badge" style="display:none;background:#f85149;color:#fff;border-radius:10px;padding:1px 6px;font-size:10px;font-weight:700;margin-left:4px"></span></div>
   <div class="top-nav-tab" data-tab="paper" onclick="switchTopTab('paper')">🧪 模拟盘</div>
   <!-- Strategy Builder / Screener / Options 量稳定性 tab 已在 2026-07-30 轻量化重构里删除 -->
+  </div>
   <div class="top-nav-right">
     <button id="powerPill" class="privacy-btn" onclick="togglePowerLive()" title="电源模式" style="font-size:11px;font-weight:700;display:none"></button>
     <button id="aiPauseBtn" class="privacy-btn" onclick="event.stopPropagation();toggleAiPause();return false;" title="暂停定时 AI(选股/叙事)" style="font-size:11px;font-weight:700">AI</button>
@@ -2790,7 +2817,9 @@ __HEATMAP_HTML__
 .tj-sub-pill { background:transparent; color:#8b949e; border:1px solid transparent; padding:6px 14px; border-radius:5px; cursor:pointer; font-size:12px; font-weight:600; }
 .tj-sub-pill:hover { color:#e6edf3; background:#21262d; }
 
-/* Events calendar grid */
+/* Events calendar grid: three months side by side on wide screens, two or one when the
+   window is narrower, so a day is never too narrow to read its events */
+.ev-cal-months { display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 560px), 1fr)); gap:14px; }
 .ev-cal-month { background:#0d1117; border:1px solid #30363d; border-radius:8px; padding:12px; }
 .ev-cal-month-title { font-size:14px; font-weight:700; color:#e6edf3; margin-bottom:10px; text-align:center; letter-spacing:.3px; }
 .ev-cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; }
@@ -2802,7 +2831,7 @@ __HEATMAP_HTML__
 .ev-cal-day.ev-cal-today { border-color:#1f6feb; box-shadow:0 0 0 1px #1f6feb44 inset; }
 .ev-cal-daynum { font-size:11px; font-weight:700; color:#8b949e; margin-bottom:2px; }
 .ev-cal-today .ev-cal-daynum { color:#58a6ff; }
-.ev-econ { font-size:9px; color:#3fb950; background:#0d3a1f44; border-left:2px solid #3fb950; padding:1px 4px; border-radius:2px; cursor:default; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.ev-econ { font-size:9px; color:#3fb950; background:#0d3a1f44; border-left:2px solid #3fb950; padding:1px 4px; border-radius:2px; cursor:default; line-height:1.25; overflow:hidden; overflow-wrap:anywhere; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
 .ev-earn-row { display:flex; flex-wrap:wrap; gap:2px; margin-top:2px; }
 .ev-earn { font-size:9px; font-weight:700; padding:1px 4px; border-radius:2px; cursor:default; line-height:1.2; }
 .ev-earn.ev-bmo { background:#1f3d5a; color:#79c0ff; border:1px solid #1f6feb55; }
@@ -6753,7 +6782,7 @@ function _eventsRender(p) {
       <span style="color:#8b949e;font-size:11px">📊 ${(p.earnings||[]).length} earnings · 🌐 ${(p.econ||[]).length} high-impact econ</span>
     </div>
     ${econErr}
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
+    <div class="ev-cal-months">
       ${_renderMonthGrid(m1, byDate, today)}
       ${_renderMonthGrid(m2, byDate, today)}
       ${_renderMonthGrid(m3, byDate, today)}
@@ -6808,7 +6837,7 @@ function _renderDayCell(day, data, isToday, isPast, isWeekend) {
     const payload = encodeURIComponent(JSON.stringify(e));
     return `<div class="ev-econ" data-ev-econ="${payload}"
       onmouseenter="evShowEconTip(this, event)" onmousemove="evMoveTip(event)" onmouseleave="evHideTip()"
-      >⚡ ${e.time_local} ${_truncEvent(e.title)}</div>`;
+      >⚡ ${_truncEvent(e.title)} <span style="opacity:.6">${e.time_local}</span></div>`;
   }).join('');
   const cellClasses = ['ev-cal-day'];
   if (isToday) cellClasses.push('ev-cal-today');
@@ -6841,7 +6870,7 @@ function evShowEconTip(el, event) {
     <div class="ev-tt-title">⚡ ${e.title}</div>
     <div class="ev-tt-row">${e.date} · <b>${e.time_local}</b> local</div>
     <div class="ev-tt-row">forecast <b>${e.forecast || '—'}</b> · prev <b>${e.previous || '—'}</b>${e.actual ? ` · actual <b>${e.actual}</b>` : ''}</div>
-    <div class="ev-tt-row" style="font-size:10px;margin-top:4px;color:#666">High-impact USD · source: ForexFactory</div>
+    <div class="ev-tt-row" style="font-size:10px;margin-top:4px;color:#666">High-impact ${e.country || 'USD'} · source: ${e.source || 'TradingView'}</div>
   `;
   tip.style.display = 'block';
   evMoveTip(event);

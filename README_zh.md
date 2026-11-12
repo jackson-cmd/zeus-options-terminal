@@ -25,10 +25,11 @@
 
 ## 🆕 新功能
 
-<sub>最新版本 **0.2.0**（2026-11-12）。完整的更新历史见[更新记录](CHANGELOG_zh.md)。</sub>
+<sub>最新版本 **0.2.1**（2026-11-12）。完整的更新历史见[更新记录](CHANGELOG_zh.md)。</sub>
 
-| | 0.2.0 新加入 |
+| | 0.2.1 和 0.2.0 新加入 |
 |---|---|
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🟩 热力图**：选股页的热力图回来了，和 K 线墙一键切换。[怎么用 →](docs/USER_GUIDE_zh.md#69-热力图) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🧪 模拟盘**：在实时期权链上搭任何策略，期权腿和股票腿都能加，存成模拟单后跟踪盈亏。[怎么用 →](docs/USER_GUIDE_zh.md#8-模拟盘) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **📧 邮件提醒**：每条桌面提醒都能同时发到你的邮箱，macOS 和 Linux 都支持。[怎么配置 →](docs/USER_GUIDE_zh.md#123-邮件提醒) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🔄 行业轮动**：80 个细分行业按动量和趋势排名，**🎲 期权情绪** 也开箱即用。[怎么用 →](docs/USER_GUIDE_zh.md#66-行业轮动) |

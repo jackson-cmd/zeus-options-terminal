@@ -148,7 +148,7 @@ PRETRADE_CHECKUP_HTML = r"""<!DOCTYPE html>
     <h1>📛 开单前体检</h1>
     <a class="cli-ref" id="cliRef" onclick="copyCli()" title="点击复制到剪贴板">📖 CLI: python -m pre_trade_checkup.cli --ticker &lt;T&gt; --direction &lt;D&gt; --dte &lt;n&gt;</a>
   </div>
-  <div class="subtitle">数据: pre_trade_checkup/ · 每层不过 = verdict 别开单</div>
+  <div class="subtitle">四层体检(pre_trade_checkup/ 引擎) · 任一层不过 = 结论「别开单」</div>
 
   <div class="card">
     <div class="form-row">

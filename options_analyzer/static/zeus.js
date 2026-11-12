@@ -139,8 +139,12 @@
     pending.push(n);
     if (scheduled) return;
     scheduled = true;
-    if (document.visibilityState === 'visible' && window.requestAnimationFrame) requestAnimationFrame(flush);
-    else setTimeout(flush, 16);
+    // A frame callback translates before the text is painted, but frames stop in a window the
+    // browser is not drawing (covered or minimized) while it still counts as visible; the timer
+    // makes sure the text gets translated anyway.
+    var timer = setTimeout(flush, 50);
+    if (document.visibilityState === 'visible' && window.requestAnimationFrame)
+      requestAnimationFrame(function () { clearTimeout(timer); flush(); });
   }
   function startI18n() {
     if (LANG === 'zh') return;
@@ -259,10 +263,81 @@
     return fetch('/api/zeus/status').then(function (r) { return r.json(); }).then(function (s) {
       var prevMode = STATUS && STATUS.broker_mode, prevTrades = STATUS && STATUS.manual && STATUS.manual.trades;
       STATUS = s;
-      ensureButtons(); renderBadge(); manualHint();
+      ensureButtons(); renderBadge(); manualHint(); barchartButton();
       var changed = (prevMode && prevMode !== s.broker_mode) || (prevTrades != null && s.manual && prevTrades !== s.manual.trades);
       if (reloadData && changed) setTimeout(function () { if (typeof softRefresh === 'function') softRefresh(); else location.reload(); }, 1500);
     }).catch(function () {});
+  }
+
+  // Picker → 📊 Barchart lists need a Barchart login (Settings → Other data); without one the
+  // button only opened an empty menu, so it stays hidden.
+  function barchartButton() {
+    var w = document.getElementById('hmBcWrap');
+    if (w && STATUS) w.style.display = STATUS.barchart ? 'inline-flex' : 'none';
+  }
+
+  // ------------------------------------------------------------------ top bar: tabs scroll sideways
+  function initTabStrip() {
+    var strip = document.getElementById('topNavTabs');
+    if (!strip || strip.getAttribute('data-zs-strip')) return;
+    strip.setAttribute('data-zs-strip', '1');
+    var edges = function () {
+      var room = strip.scrollWidth - strip.clientWidth;
+      strip.classList.toggle('zs-more-l', room > 2 && strip.scrollLeft > 2);
+      strip.classList.toggle('zs-more-r', room > 2 && strip.scrollLeft < room - 2);
+    };
+    var showActive = function () {
+      var a = strip.querySelector('.top-nav-tab.active');
+      if (a) {
+        var s = strip.getBoundingClientRect(), r = a.getBoundingClientRect();
+        if (r.left < s.left) strip.scrollLeft -= (s.left - r.left) + 32;
+        else if (r.right > s.right) strip.scrollLeft += (r.right - s.right) + 32;
+      }
+      edges();
+    };
+    strip.addEventListener('scroll', edges, { passive: true });
+    window.addEventListener('resize', showActive);
+    // a mouse wheel moves the tabs sideways when they do not all fit
+    strip.addEventListener('wheel', function (e) {
+      if (strip.scrollWidth <= strip.clientWidth || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+      strip.scrollLeft += e.deltaY;
+      e.preventDefault();
+    }, { passive: false });
+    new MutationObserver(showActive).observe(strip, { subtree: true, attributes: true, attributeFilter: ['class', 'data-zs-en'] });
+    // the strip also narrows when the buttons on the right grow (bilingual labels, a longer badge)
+    if (window.ResizeObserver) new ResizeObserver(edges).observe(strip);
+    setTimeout(showActive, 0);
+  }
+
+  // ------------------------------------------------------------------ pop-ups
+  // Escape closes the open pop-up (risk radar, checkup, liquidity, alerts, chart) or leaves the
+  // open sub-view, the same way the browser's Back button does (appBack). Switching to another
+  // top tab closes the pop-ups too, so one opened on a page does not stay over the next page.
+  var OVERLAYS = { liquidityOverlay: 'closeLiquidity', checkupOverlay: 'closeCheckup', riskRadarOverlay: 'closeRiskRadar',
+    alertOverlay: 'closeAlertPanel', tvOverlay: 'closeTvChart' };
+  function closeOverlays() {
+    Object.keys(OVERLAYS).forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el || !el.style.display || el.style.display === 'none') return;
+      var fn = window[OVERLAYS[id]];
+      try { if (typeof fn === 'function') fn(); else el.style.display = 'none'; } catch (e) { el.style.display = 'none'; }
+    });
+  }
+  function initPopups() {
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape' || e.defaultPrevented) return;
+      var t = e.target;
+      if (t && (/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.isContentEditable)) return;
+      var ov = document.getElementById('zsSettingsOverlay');
+      if (ov && ov.style.display === 'flex') return;   // the settings overlay closes itself
+      if (typeof window.appBack === 'function') window.appBack();
+    }, true);   // capture: runs before the settings overlay's own Escape handler closes it
+    var orig = window.switchTopTab;
+    if (typeof orig === 'function' && !orig.__zs) {
+      var wrapped = function () { closeOverlays(); return orig.apply(this, arguments); };
+      wrapped.__zs = true;
+      window.switchTopTab = wrapped;
+    }
   }
 
   // English UI: Chinese headline translations hidden by default (one click to show)
@@ -290,6 +365,8 @@
     setLangClass();
     cnToggle();
     ensureButtons();
+    initTabStrip();
+    initPopups();
     refreshStatus(false);
     setInterval(function () { refreshStatus(true); }, 60000);
     startI18n();

@@ -2,7 +2,7 @@
 
 [中文 → FEATURES_zh.md](FEATURES_zh.md) · [User manual](USER_GUIDE.md) · [What's new](../CHANGELOG.md) · [Back to README](../README.md)
 
-ZEUS does far more than the screenshots in the README show. There are 7 pages in the top bar, about 30 jobs that run by themselves in the background, and more than 200 API endpoints. This page lists every feature you can reach from the interface today. Pull requests are welcome, and new features may be added over time ([Contributing](../CONTRIBUTING.md)). Features marked <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> arrived in version 0.2.0 ([changelog](../CHANGELOG.md)); how to use each one is in the [user manual](USER_GUIDE.md).
+ZEUS does far more than the screenshots in the README show. There are 7 pages in the top bar, about 30 jobs that run by themselves in the background, and more than 200 API endpoints. This page lists every feature you can reach from the interface today. Pull requests are welcome, and new features may be added over time ([Contributing](../CONTRIBUTING.md)). Features marked <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> arrived in version 0.2.0 or 0.2.1 ([changelog](../CHANGELOG.md)); how to use each one is in the [user manual](USER_GUIDE.md).
 
 **What each feature needs:**
 
@@ -30,7 +30,7 @@ ZEUS does far more than the screenshots in the README show. There are 7 pages in
 
 | ✓ | Feature | What it does | Needs |
 |---|---|---|---|
-| ✅ | Page tabs | Positions · 🎯 Picker · 📋 Digest · 📅 Events · Trade Journal · 🧪 Paper Trade | Free |
+| ✅ | Page tabs | Positions · 🎯 Picker · 📋 Digest · 📅 Events · Trade Journal · 🧪 Paper Trade; in a narrow window they scroll sideways instead of wrapping | Free |
 | ✅ | Mode badge | Shows tastytrade or ◐ manual mode, with the number of manual trades | Free |
 | ✅ | Language menu | 中文 · 双语 (bilingual) · English, switch any time | Free |
 | ✅ | ⚙ Settings | Opens the settings page; everything is configured in the browser | Free |
@@ -40,6 +40,7 @@ ZEUS does far more than the screenshots in the README show. There are 7 pages in
 | ✅ | 👁 Privacy blur | Blurs dollar amounts for screen sharing and recording | Free |
 | ✅ | LIVE indicator | Shows whether the live data connection is up | Free |
 | ✅ | Install as an app | The terminal is a PWA: install it from the browser and it opens in its own window | Free |
+| ✅ | Esc | Closes the open pop-up or leaves a detail view, like Back; switching tabs closes pop-ups too | Free |
 
 ## ⚔️ Positions
 
@@ -108,12 +109,13 @@ ZEUS does far more than the screenshots in the README show. There are 7 pages in
 | ✓ | Feature | What it does | Needs |
 |---|---|---|---|
 | ✅ | 📈 K-line chart wall | Daily candles for the whole universe with EMA 50/200, multi-timeframe support and resistance, gold zones and badges | Free |
+| ✅ | 🟩 Heatmap <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | The universe as tiles by sector and industry: area = market cap, color = today's change; one click switches between it and the chart wall | Free |
 | ✅ | Sorting and filters | By market cap, today's change or TA score; by earnings date and bullish / bearish setup | Free |
 | ✅ | 🚀 AI picks | Trend-following and dip-buying candidates with strikes, chance of profit and orders you can paste; AI re-ranks them with news and earnings | Free (AI re-rank needs AI) |
 | ✅ | 🧭 Market judgement | How bad the news is versus how much price has absorbed, crash probability against base rates, three layers of support, and what would prove the view wrong | AI |
 | ✅ | 🔄 Sector rotation <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | 80 industry groups (575 tickers) ranked by their moves over 5 days to a year, with each group's trend and the share above the 50- and 200-day averages | Free |
 | ✅ | 🎲 Options sentiment <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | IV percentile, 25-delta skew percentile and put/call percentiles by sector, against their own history | Free (needs a few weeks of after-close crawls) |
-| ✅ | 📊 Barchart lists | Intersect or union your saved Barchart screeners and signal pages | Barchart account |
+| ✅ | 📊 Barchart lists | Intersect or union your saved Barchart screeners and signal pages; the button appears once a Barchart login is saved | Barchart account |
 | ✅ | Ticker detail | Chart (1 week to 2 years), Finviz technicals and fundamentals, news, ⚖️ bull/bear narratives, 🏢 company profile written from the latest 10-Q, 📑 jump to SEC filings | Free (narratives and profile need AI) |
 | ✅ | ⚡ After-close crawl | Pull the day's closing data for the whole universe on demand | Free |
 
