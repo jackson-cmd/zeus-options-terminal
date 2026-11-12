@@ -1559,6 +1559,7 @@ input[type="range"]::-webkit-slider-thumb {
       <button class="back-btn" style="display:none" onclick="toggleDashCompact()" id="vizCompactBtn" title="Switch to a denser one-line layout — fits 20+ positions without scrolling.">&#8801; Compact</button>
       <button class="back-btn" style="display:none" onclick="toggleDashFreeze()" id="vizFreezeBtn" title="Freeze the spread visualization to analyze without it shifting on every quote update. Auto-thaws when you navigate away.">&#10052; Freeze</button>
       <button class="back-btn" style="display:flex" onclick="openRiskView()" id="riskBtn" title="Risk" data-tip="Risk — 压测(1σ/2σ/VaR)+ 到期阶梯/Theta + 情景网格">&#9888;</button>
+      <button class="back-btn" style="display:flex" onclick="openCheckup()" id="checkupBtn" title="Checkup" data-tip="体检 · 开单前 · 持仓止盈止损 · 流动性">&#129658;</button>
       <button class="back-btn" style="display:flex" onclick="refreshPositions()" id="refreshBtn" title="Refresh" data-tip="刷新持仓">&#8635;</button>
       <button class="back-btn" style="display:flex" onclick="openAlertPanel()" id="alertBtn" title="Alerts" data-tip="告警设置">&#128276;</button>
     </div>
