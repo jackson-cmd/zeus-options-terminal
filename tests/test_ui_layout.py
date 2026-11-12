@@ -151,3 +151,46 @@ def test_calendar_months_reflow_with_the_window():
     assert "grid-template-columns:repeat(auto-fit, minmax(min(100%, 560px), 1fr))" in _css_rule(SERVER, ".ev-cal-months")
     assert '<div class="ev-cal-months">' in SERVER
     assert ">⚡ ${_truncEvent(e.title)} <span" in SERVER   # the event name before its time
+
+
+# ------------------------------------------------------------------ mode in Settings, market brief, rotation chart
+SETTINGS = (ROOT / "options_analyzer" / "static" / "settings.html").read_text(encoding="utf-8")
+ZEUS_CSS = (ROOT / "options_analyzer" / "static" / "zeus.css").read_text(encoding="utf-8")
+
+
+def test_mode_moved_from_the_top_bar_to_settings():
+    assert "zsModeBadge" not in ZEUS_JS and "zs-badge" not in ZEUS_CSS
+    mode = ZEUS_JS.split("function renderMode()", 1)[1].split("\n  }", 1)[0]
+    assert "g.title = " in mode and "STATUS.manual" in mode
+    assert "renderMode();" in ZEUS_JS
+    cards = SETTINGS.split("function renderCards()", 1)[1].split("\nfunction ", 1)[0]
+    assert 'id="cardTrades"' in cards and "/api/zeus/status" in cards and "t('s_trades')" in cards
+
+
+def test_tabs_tighten_before_they_would_scroll():
+    assert re.search(r"@media \(max-width: 1240px\) \{\s*\.top-nav-tab \{ padding: 0 9px; \}", SERVER)
+    narrow = SERVER.split("@media (max-width: 1100px) {", 1)[1].split("\n}", 1)[0]
+    assert "#trStatusCur { display: none; }" in narrow and ".top-nav-tab { padding: 0 8px; }" in narrow
+
+
+def test_market_brief_header_and_subtabs_move_into_the_picker():
+    header = SERVER.split('<div id="mbHeader"', 1)[1].split('<div id="mbSubNav"', 1)[0]
+    assert 'id="mbRunBtn" onclick="mbRun(true)"' in header
+    reorg = SERVER.split("function reorgTabs()", 1)[1].split("\n}", 1)[0]
+    moved = re.search(r"\[([^\]]*)\]\.forEach\(id =>", reorg).group(1)
+    assert [m.strip(" '") for m in moved.split(",")] == ["mbHeader", "mbSubNav", "mbBody", "mbRotPane", "mbOptPane"]
+    assert "点右上角「🔄 重新分析」生成" in SERVER   # the empty brief points at that button
+
+
+def test_rotation_chart_labels_and_scale_stay_readable():
+    chart = SERVER.split("function igDrawChart(rows, k)", 1)[1].split("\n}\n", 1)[0]
+    assert "Math.ceil(13 / bw)" in chart and "i - lastLab >= stride" in chart
+    assert 'class="ig-lab"' in chart and "mbEsc(g.name) + '</text>'" in chart   # full name, fitted afterwards
+    assert "fitLabels(false);" in chart and "new MutationObserver" in chart
+    assert "bars + labels + gridText" in chart
+    assert "gridText += '<text x=\"' + (padL - 5)" in chart
+
+
+def test_movers_toast_lets_clicks_through():
+    toast = HEATMAP.split("function _hmPopupToast(slot)", 1)[1].split("\n  }", 1)[0]
+    assert "pointer-events:none" in toast

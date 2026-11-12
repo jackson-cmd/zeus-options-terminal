@@ -1975,7 +1975,15 @@ async def index():
 .top-nav-tab.active { color: #58a6ff; border-bottom-color: #1f6feb; }
 .top-nav-right { margin-left: 10px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 .top-nav-right > * { flex-shrink: 0; white-space: nowrap; }
-@media (max-width: 1100px) { .top-nav-brand > span, #trStatusCur { display: none; } }
+/* narrower windows: tighter tabs first, then the status text and the brand's subtitle go */
+@media (max-width: 1240px) {
+  .top-nav-tab { padding: 0 9px; }
+  .top-nav-right { margin-left: 6px; gap: 6px; }
+}
+@media (max-width: 1100px) {
+  .top-nav-brand > span, #trStatusCur { display: none; }
+  .top-nav-tab { padding: 0 8px; }
+}
 .top-tab-panel { display: none; flex: 1; min-height: 0; }
 .top-tab-panel.active { display: flex; flex-direction: column; }
 /* Benzinga Digest rendered markdown */
@@ -2459,7 +2467,7 @@ __HEATMAP_HTML__
 <!-- --- /heatmap --- -->
 <!-- 🧭 市场判断: 消息坏度 vs 价格已反映 + 大跌概率(带历史基准率) + 三层支撑 + 逐板块 -->
 <div id="tab-mbrief" class="top-tab-panel" style="overflow-y:auto;padding:14px 20px">
-  <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+  <div id="mbHeader" style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
     <strong style="color:#e6edf3;font-size:15px">🧭 市场判断</strong>
     <span style="color:#6e7681;font-size:11px">消息坏度 vs 价格已反映 · 不给方向标签, 给概率与证伪条件</span>
     <span style="flex:1"></span>
@@ -4660,7 +4668,10 @@ function igDrawChart(rows, k) {
   }
   igDrawChart._t = 0;
   var W = Math.max(host.clientWidth || 1200, 700);
-  var padL = 8, padR = 8, labelH = 88, chartH = 400;
+  // English group names run longer than the Chinese ones: give them a little more room
+  var enLabels = !!(window.zeusLang && window.zeusLang() === "en");
+  // the left margin holds the ±% scale and the start of the first rotated labels
+  var padL = 50, padR = 8, labelH = enLabels ? 100 : 88, chartH = 400;
   var innerW = W - padL - padR;
   var bw = innerW / data.length;
   var maxPos = Math.max(0, Math.max.apply(null, data.map(function (g) { return g[k]; })));
@@ -4669,16 +4680,20 @@ function igDrawChart(rows, k) {
   var zeroY = (maxPos / span) * chartH;          // 零线位置按正负幅度比例分配
   var H = chartH + labelH;
 
-  var bars = "", labels = "", grid = "";
+  var bars = "", labels = "", grid = "", gridText = "";
+  // Rotated labels need about 13px between neighbours or they overprint each other:
+  // on a narrow window label every 2nd (or 3rd) bar, keeping about 12 labels at each end.
+  var stride = Math.max(1, Math.ceil(13 / bw)), lastLab = -1e9;
   // 参考线: ±10% / ±20%
   [10, 20, 30, 50].forEach(function (v) {
     [v, -v].forEach(function (sv) {
       var y = zeroY - (sv / span) * chartH;
       if (y < 2 || y > chartH - 2) return;
       grid += '<line x1="' + padL + '" y1="' + y.toFixed(1) + '" x2="' + (W - padR)
-        + '" y2="' + y.toFixed(1) + '" stroke="#21262d" stroke-width="1" stroke-dasharray="2,3"/>'
-        + '<text x="' + (W - padR) + '" y="' + (y - 2).toFixed(1)
-        + '" text-anchor="end" fill="#484f58" font-size="9">' + (sv > 0 ? "+" : "") + sv + '%</text>';
+        + '" y2="' + y.toFixed(1) + '" stroke="#21262d" stroke-width="1" stroke-dasharray="2,3"/>';
+      // the value sits in the left margin, clear of the bars
+      gridText += '<text x="' + (padL - 5) + '" y="' + (y + 3).toFixed(1)
+        + '" text-anchor="end" fill="#6e7681" font-size="9">' + (sv > 0 ? "+" : "") + sv + '%</text>';
     });
   });
 
@@ -4696,10 +4711,14 @@ function igDrawChart(rows, k) {
     // 标签: 79 个中文标签全画会糊成一团(实测) —— 只标**两端显著的**那些。
     // 中间接近 0 的组本来就不是轮动关注点, 悬停仍能看到全名。
     var lx = x + bw / 2, ly = chartH + 6;
-    if ((data.length <= 40 || (i < 14) || (i >= data.length - 14)) && Math.abs(v) >= 1.5) {
-      labels += '<text x="' + lx.toFixed(1) + '" y="' + ly + '" fill="#8b949e" font-size="9.5" '
+    var nEnd = 12 * stride;
+    if ((data.length <= 40 || i < nEnd || i >= data.length - nEnd) && Math.abs(v) >= 1.5
+        && i - lastLab >= stride) {
+      lastLab = i;
+      // the full name goes in (so the interface language can translate it) and is fitted below
+      labels += '<text class="ig-lab" x="' + lx.toFixed(1) + '" y="' + ly + '" fill="#8b949e" font-size="9.5" '
         + 'text-anchor="end" transform="rotate(-55,' + lx.toFixed(1) + ',' + ly + ')">'
-        + mbEsc(g.name.length > 12 ? g.name.slice(0, 11) + "…" : g.name) + '</text>';
+        + mbEsc(g.name) + '</text>';
     }
   });
 
@@ -4718,7 +4737,7 @@ function igDrawChart(rows, k) {
     +   grid
     +   '<line x1="' + padL + '" y1="' + zeroY.toFixed(1) + '" x2="' + (W - padR)
     +     '" y2="' + zeroY.toFixed(1) + '" stroke="#484f58" stroke-width="1"/>'
-    +   bars + labels
+    +   bars + labels + gridText
     + '</svg></div>';
   host.innerHTML = _html;
   // 事件委托: 鼠标进柱子即时显示成分股(原生 title 要等 ~1s, 容易以为没有)
@@ -4730,6 +4749,31 @@ function igDrawChart(rows, k) {
       else _igTipHide();
     });
     svgEl.addEventListener("mouseleave", _igTipHide);
+    // Shorten each label to the room under the axis (a -55° label of length L drops 0.82·L),
+    // and again once the interface language has swapped in the English name. In English the
+    // Chinese name waits for its translation: cutting it first would break the lookup.
+    // A label also runs left by 0.57·L plus about 0.82 of a glyph's height, so the first
+    // few are capped by the room to their left.
+    var maxLab = (labelH - 12) / Math.sin(55 * Math.PI / 180), cos55 = Math.cos(55 * Math.PI / 180);
+    var fitLabels = function (force) {
+      svgEl.querySelectorAll("text.ig-lab").forEach(function (t) {
+        if (!force && enLabels && /[一-鿿]/.test(t.textContent)) return;
+        var lim = Math.min(maxLab, (parseFloat(t.getAttribute("x")) - 10) / cos55);
+        var len = t.getComputedTextLength();
+        if (!len || len <= lim) return;
+        var s = t.textContent.replace(/…$/, "");
+        while (s.length > 2) {
+          s = s.slice(0, -1);
+          t.textContent = s.replace(/[\\s\\/:·,(（-]+$/, "") + "…";
+          if (t.getComputedTextLength() <= lim) break;
+        }
+      });
+    };
+    fitLabels(false);
+    if (window.MutationObserver)
+      new MutationObserver(function () { fitLabels(false); })
+        .observe(svgEl, { subtree: true, childList: true, characterData: true });
+    setTimeout(function () { fitLabels(true); }, 1500);
   }
 }
 
@@ -5674,9 +5718,11 @@ function reorgTabs() {
   const me = document.getElementById('bzMarketEvents'), meHost = document.getElementById('evMarketEvents');
   if (me && meHost && me.parentNode !== meHost) { meHost.appendChild(me); me.style.display = 'block'; }
   // 2026-07-30: mbrief 3 sub → 🎯 选股 (顶栏 mbrief button 已隐藏)
+  // The header (🔄 Re-analyze, date) and the brief / rotation / options sub-tabs move too:
+  // left behind in the hidden tab, the button the empty state points to could not be clicked.
   const mbHost = document.getElementById('hmSubMbriefHost');
   if (mbHost) {
-    ['mbBody', 'mbRotPane', 'mbOptPane'].forEach(id => {
+    ['mbHeader', 'mbSubNav', 'mbBody', 'mbRotPane', 'mbOptPane'].forEach(id => {
       const e = document.getElementById(id);
       if (e && e.parentNode !== mbHost) mbHost.appendChild(e);
     });

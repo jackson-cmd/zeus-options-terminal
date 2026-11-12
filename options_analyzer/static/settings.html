@@ -167,12 +167,17 @@ function renderCards() {
   const s = VIEW.status || {};
   const ai = s.ai || {};
   let h = '';
-  h += card(t('broker'), s.broker_mode === 'tastytrade' ? '● ' + t('mode_tt') : '◐ ' + t('mode_manual'), s.broker_mode === 'tastytrade' ? 'ok' : 'warn');
+  h += card(t('broker'), s.broker_mode === 'tastytrade' ? '● ' + t('mode_tt') : '◐ ' + t('mode_manual') + '<span id="cardTrades" style="display:block;font-size:12px;font-weight:500;opacity:.8"></span>', s.broker_mode === 'tastytrade' ? 'ok' : 'warn');
   h += card(t('benzinga'), s.benzinga ? '● ' + t('connected') : '○ ' + t('notconnected'), s.benzinga ? 'ok' : '');
   h += card(t('ai'), ai.provider && ai.provider !== 'off' ? '● ' + esc(ai.provider) + ' · ' + esc(ai.fast || '') : '○ ' + t('off'), ai.provider && ai.provider !== 'off' ? 'ok' : '');
   h += card(t('news'), 'Finviz' + (s.finviz_elite ? ' Elite' : '') + ' · WSJ · MarketWatch', 'ok');
   h += card(t('agents_card'), s.mcp ? '● MCP /mcp' + (s.mcp_paper_trades ? ' · ' + t('paper_on') : '') : '○ ' + t('off'), s.mcp ? 'ok' : '');
   $('#cards').innerHTML = h;
+  // the number of manual trades (shown here since the top bar no longer carries a mode badge)
+  if (s.broker_mode !== 'tastytrade') api('/api/zeus/status').then(st => {
+    const n = st && st.manual && st.manual.trades, el = $('#cardTrades');
+    if (el && n) el.textContent = n + ' ' + t('s_trades');
+  }).catch(() => {});
 }
 function renderTabs() {
   const groups = VIEW.groups || [];

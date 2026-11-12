@@ -1,4 +1,4 @@
-/* ZEUS Terminal shell: mode badge, settings overlay, three interface languages
+/* ZEUS Terminal shell: settings button, settings overlay, three interface languages
  * (中文 / 双语 bilingual / English), manual-mode onboarding.
  * Loaded after the original app scripts; touches nothing unless needed. */
 (function () {
@@ -196,15 +196,14 @@
     if (e.key === 'Escape') { var ov = document.getElementById('zsSettingsOverlay'); if (ov && ov.style.display === 'flex') closeSettings(); }
   });
 
-  // ------------------------------------------------------------------ nav: mode badge, language, settings
+  // ------------------------------------------------------------------ nav: language, settings
+  // The broker mode (tastytrade live, or manual with the number of trades) is shown in Settings
+  // and in the ⚙ tooltip; a badge for it in the top bar crowded out the tabs.
   var STATUS = null;
   function navRight() { return document.querySelector('#topNav .top-nav-right'); }
   function ensureButtons() {
     var right = navRight();
-    if (!right || document.getElementById('zsModeBadge')) return;
-    var badge = document.createElement('button');
-    badge.id = 'zsModeBadge'; badge.className = 'privacy-btn zs-badge'; badge.setAttribute('data-no-i18n', '');
-    badge.onclick = function () { openSettings('broker'); };
+    if (!right || document.getElementById('zsGearBtn')) return;
     var sel = document.createElement('select');
     sel.id = 'zsLangSel'; sel.className = 'zs-lang-sel'; sel.setAttribute('data-no-i18n', '');
     sel.title = '界面语言 · Interface language';
@@ -219,22 +218,19 @@
     gear.onclick = function () { openSettings(); };
     right.insertBefore(gear, right.firstChild);
     right.insertBefore(sel, right.firstChild);
-    right.insertBefore(badge, right.firstChild);
   }
-  function renderBadge() {
-    var b = document.getElementById('zsModeBadge');
-    if (!b || !STATUS) return;
+  function renderMode() {
+    var g = document.getElementById('zsGearBtn');
+    if (!g || !STATUS) return;
+    var mode;
     if (STATUS.broker_mode === 'tastytrade') {
-      b.textContent = '● tastytrade';
-      b.className = 'privacy-btn zs-badge zs-live';
-      b.title = L('已连接 tastytrade API:实时持仓与 DXLink 报价推送', 'tastytrade API connected: live positions and DXLink streaming');
+      mode = L('● tastytrade 实时:实时持仓与 DXLink 报价推送', '● tastytrade live: live positions and DXLink streaming');
     } else {
       var n = (STATUS.manual && STATUS.manual.trades) || 0;
-      b.textContent = (LANG === 'en' ? '◐ Manual' : (LANG === 'bi' ? '◐ 手动 Manual' : '◐ 手动模式')) + (n ? ' · ' + n : '');
-      b.className = 'privacy-btn zs-badge zs-manual';
-      b.title = L('手动上传模式:期权报价来自 Cboe、股票来自 Yahoo Finance(约延迟 15 分钟)。连接 tastytrade 体验更顺滑。点此设置。',
-        'Manual upload mode: option quotes from Cboe, stocks from Yahoo Finance (~15 min delayed). Connect tastytrade for the smoothest experience. Click to set up.');
+      mode = L('◐ 手动上传模式' + (n ? ',' + n + ' 笔交易' : '') + ':期权报价来自 Cboe、股票来自 Yahoo Finance(约延迟 15 分钟)',
+        '◐ Manual upload mode' + (n ? ', ' + n + ' trades' : '') + ': option quotes from Cboe, stocks from Yahoo Finance (~15 min delayed)');
     }
+    g.title = L('设置:账号、AI、新闻源、手动交易', 'Settings: accounts, AI, news sources, manual trades') + '\n' + mode;
   }
   function manualHint() {
     var old = document.getElementById('zsManualHint');
@@ -263,7 +259,9 @@
     return fetch('/api/zeus/status').then(function (r) { return r.json(); }).then(function (s) {
       var prevMode = STATUS && STATUS.broker_mode, prevTrades = STATUS && STATUS.manual && STATUS.manual.trades;
       STATUS = s;
-      ensureButtons(); renderBadge(); manualHint(); barchartButton();
+      ensureButtons(); renderMode(); manualHint(); barchartButton();
+      var strip = document.getElementById('topNavTabs');
+      if (strip) strip.dispatchEvent(new Event('scroll'));   // the right-hand buttons may have changed width
       var changed = (prevMode && prevMode !== s.broker_mode) || (prevTrades != null && s.manual && prevTrades !== s.manual.trades);
       if (reloadData && changed) setTimeout(function () { if (typeof softRefresh === 'function') softRefresh(); else location.reload(); }, 1500);
     }).catch(function () {});

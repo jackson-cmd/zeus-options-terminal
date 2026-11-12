@@ -74,8 +74,9 @@ HEATMAP_HTML = r"""
     .hm-pk-progress { position:relative; height:6px; background:#161b22; border-radius:3px; overflow:hidden; }
     .hm-pk-progress > div { position:absolute; top:0; bottom:0; width:35%; background:linear-gradient(90deg,#1f6feb,#58a6ff); border-radius:3px; animation:hmPkPulse 1.4s ease-in-out infinite; }
   </style>
-  <!-- 🎯 选股 sub-nav: K线图墙 + 大盘判断
-       2026-07-30 用户: 行业轮动/期权情绪只作为 AI context (后台仍算), 不显示给用户 -->
+  <!-- 🎯 选股 sub-nav: K线图墙 + 热力图 + 大盘判断
+       大盘判断 has its own header (🔄 Re-analyze) and three sub-tabs (brief / sector rotation /
+       options sentiment); reorgTabs moves them into #hmSubMbriefHost below. -->
   <div id="hmSubNav" style="display:flex;gap:6px;padding:6px 14px;border-bottom:1px solid #30363d;background:#0d1117;flex-shrink:0">
     <button data-name="kline" onclick="hmSubView('kline')" class="hm-sub-pill active">📈 K线图墙</button>
     <button data-name="heatmap" onclick="hmSubView('heatmap')" class="hm-sub-pill" title="热力图：按板块 → 行业排列，面积 = 市值，颜色 = 今日涨跌；点格子看单票详情">🟩 热力图</button>
@@ -5658,8 +5659,9 @@ HEATMAP_JS = r"""
       const lbl = M[slot] || '异动新闻';
       let t = document.getElementById('hmPopupToast');
       if (!t) {
+        // pointer-events:none: for its 4.5 s on screen it must not swallow clicks on the buttons under it
         t = document.createElement('div'); t.id = 'hmPopupToast';
-        t.style.cssText = 'position:fixed;top:54px;right:16px;z-index:99999;background:#1f6feb;color:#fff;padding:10px 14px;border-radius:8px;font-size:13px;font-weight:600;box-shadow:0 6px 22px rgba(0,0,0,.55);max-width:300px;cursor:default';
+        t.style.cssText = 'position:fixed;top:54px;right:16px;z-index:99999;background:#1f6feb;color:#fff;padding:10px 14px;border-radius:8px;font-size:13px;font-weight:600;box-shadow:0 6px 22px rgba(0,0,0,.55);max-width:300px;pointer-events:none';
         document.body.appendChild(t);
       }
       t.textContent = '📰 ' + lbl + ' — 今日 ±1% 异动票新闻已为你打开';

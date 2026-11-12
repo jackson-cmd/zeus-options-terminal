@@ -4,6 +4,15 @@
 
 What changed in each version of ZEUS Terminal. New features carry the <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> badge. Numbers in parentheses are the pull requests.
 
+## 0.3.1 — 2026-11-12
+
+### Fixed
+
+- Top bar: the ◐ Manual badge covered 🧪 Paper Trade in narrower windows. It is gone from the top bar; the mode and the number of manual trades are on the first card in ⚙ Settings and in the ⚙ tooltip. Below 1240 px the tabs sit closer together, so all six fit from 1024 px up in every language. (#26)
+- Picker → 🧭 Market Brief: the empty brief pointed to a 🔄 Re-analyze button that was not there. The brief's header (🔄 Re-analyze and the date) and its sub-tabs 🧭 Market brief · 🔄 Sector rotation · 🎲 Options sentiment now show in the Picker, as the [manual](docs/USER_GUIDE.md#65-market-brief) describes. (#26)
+- Sector rotation chart: labels no longer print over each other in a narrow window (every second or third bar is labelled instead), English group names are shortened to fit instead of running off the chart, the first labels stay inside it, and the ±% scale moved to the left margin, where the bars cannot cover it. (#26)
+- The movers notice in the top right corner no longer blocks clicks on the buttons under it while it is on screen. (#26)
+
 ## 0.3.0 — 2026-11-12
 
 ### New features
