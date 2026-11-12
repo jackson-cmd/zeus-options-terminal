@@ -1140,6 +1140,15 @@ def narratives(trades: list[dict], stats: dict) -> list[dict]:
                 f"{_money(bad.get('net_pnl',0))}；只有 {good.get('share',0)*100:.0f}% 是「好决策好结果」。"
                 f"靠均盈 {_money(kpi.get('avg_winner',0))} / 均亏 {_money(kpi.get('avg_loser',0))} 的不对称撑着。",
         "evidence": "象限来自你自评的 quadrant 字段。",
+        # the same card in English, for the interface in English
+        "title_en": "Checkup summary",
+        "headline_en": f"{n} closed trades, win rate {wr*100:.0f}%, expectancy "
+                       f"{_money(kpi.get('expectancy_dollar',0))} per trade, profit factor {pf_str}.",
+        "body_en": f"{bad.get('share',0)*100:.0f}% ({bad.get('n',0)} trades) landed in \"bad decision → bad result\", "
+                   f"{_money(bad.get('net_pnl',0))} in all; only {good.get('share',0)*100:.0f}% are \"good decision, good "
+                   f"result\". The gap between the average win {_money(kpi.get('avg_winner',0))} and the average loss "
+                   f"{_money(kpi.get('avg_loser',0))} is what carries you.",
+        "evidence_en": "The quadrants come from the quadrant field you fill in yourself.",
     })
 
     mistakes = [m for m in (stats.get("mistakes") or []) if m["net_pnl"] < 0][:5]
@@ -1153,19 +1162,28 @@ def narratives(trades: list[dict], stats: dict) -> list[dict]:
             "body": "、".join(f"{m['mistake']} {m['n']}笔 {_money(m['net_pnl'])}" for m in mistakes),
             "evidence": "按累计亏损排序，标签已中英规范化。",
             "items": mistakes,
+            "title_en": "The most expensive repeated mistakes",
+            "headline_en": f"The most expensive mistake is \"{top['mistake']}\": {top['n']} trades lost "
+                           f"{_money(abs(top['net_pnl']))} ({_money(abs(top['avg_pnl']))} on average).",
+            "body_en": ", ".join(f"{m['mistake']} {m['n']} trades {_money(m['net_pnl'])}" for m in mistakes),
+            "evidence_en": "Sorted by total loss; labels are merged across Chinese and English.",
         })
 
     ef = stats.get("edge_finder") or {}
     bleeders = [r for r in ef.get("bleeders", []) if r["n"] >= 8 and r["expectancy"] < -30][:3]
     edges = [r for r in ef.get("top_edges", []) if r["n"] >= 8 and r["expectancy"] > 50][:3]
     if bleeders or edges:
-        parts = []
+        parts, parts_en = [], []
         if edges:
             parts.append("继续做：" + "；".join(
                 f"{r['label']}（{r['n']}笔 {r['win_rate']*100:.0f}%胜 {_money(r['net_pnl'])}）" for r in edges))
+            parts_en.append("Keep doing: " + "; ".join(
+                f"{r['label']} ({r['n']} trades, {r['win_rate']*100:.0f}% wins, {_money(r['net_pnl'])})" for r in edges))
         if bleeders:
             parts.append("立刻停：" + "；".join(
                 f"{r['label']}（{r['n']}笔 {r['win_rate']*100:.0f}%胜 {_money(r['net_pnl'])}）" for r in bleeders))
+            parts_en.append("Stop now: " + "; ".join(
+                f"{r['label']} ({r['n']} trades, {r['win_rate']*100:.0f}% wins, {_money(r['net_pnl'])})" for r in bleeders))
         out.append({
             "key": "edge_audit", "title": "你的 edge 与反 edge",
             "tone": "warn" if bleeders else "good",
@@ -1173,6 +1191,13 @@ def narratives(trades: list[dict], stats: dict) -> list[dict]:
                          if bleeders else f"最强 edge 是 {edges[0]['label']}：均盈 {_money(edges[0]['expectancy'])}/笔。"),
             "body": "。".join(parts) + "。",
             "evidence": "仅统计样本 ≥8 笔的维度。",
+            "title_en": "Your edges and anti-edges",
+            "headline_en": (f"Stop {bleeders[0]['label']} first: it loses {_money(abs(bleeders[0]['expectancy']))} "
+                            "per trade on average." if bleeders else
+                            f"Your strongest edge is {edges[0]['label']}: it makes {_money(edges[0]['expectancy'])} "
+                            "per trade on average."),
+            "body_en": ". ".join(parts_en) + ".",
+            "evidence_en": "Only dimensions with at least 8 trades count.",
         })
 
     cc = stats.get("confidence_calibration") or []
@@ -1188,6 +1213,13 @@ def narratives(trades: list[dict], stats: dict) -> list[dict]:
             "body": (f"问题在 Low 单开太多：{lo['n']} 笔累计 {_money(lo['net_pnl'])}。"
                      f"少开 Low 单是最省事的提升。" if lo["net_pnl"] < 0 else ""),
             "evidence": "对比自评 confidence 与实际胜率。",
+            "title_en": "Confidence calibration",
+            "headline_en": f"High confidence wins {hi['win_rate']*100:.0f}% / Low {lo['win_rate']*100:.0f}%: "
+                           + ("you can tell good trades from bad." if tone == "good"
+                              else "your self-rating and the results disagree."),
+            "body_en": (f"The problem is too many Low-confidence trades: {lo['n']} trades, {_money(lo['net_pnl'])} in all. "
+                        "Opening fewer of them is the easiest improvement." if lo["net_pnl"] < 0 else ""),
+            "evidence_en": "Compares your self-rated confidence with the actual win rate.",
         })
 
     return out

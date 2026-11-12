@@ -141,11 +141,12 @@ def _digest_news(ticker: str, days: int = 6, limit: int = 30) -> list:
 
 # The interface-language switch (中文 / 双语 / English) and its bilingual-label styles.
 ZEUS_SHELL = '<link rel="stylesheet" href="/static/zeus.css"><script src="/static/zeus.js"></script>'
+ZEUS_HEAD = '<head><script src="/static/zeus_lang.js"></script>'   # zt / ztt before the page's own scripts
 
 
 @router.get("/ta/")
 def ta_page():
-    return HTMLResponse(page.PAGE_HTML.replace("</body>", ZEUS_SHELL + "</body>", 1))
+    return HTMLResponse(page.PAGE_HTML.replace("<head>", ZEUS_HEAD, 1).replace("</body>", ZEUS_SHELL + "</body>", 1))
 
 
 @router.get("/api/ta/results")
@@ -444,11 +445,14 @@ def _eod_status() -> dict:
         today_done = latest == today_str
         if not is_td:
             state, label = "closed", f"今日休市 · 最新已爬 {latest or '—'}"
+            label_en = f"Market closed today · latest crawl {latest or '—'}"
         elif today_done:
             state, label = "done", f"今日 {today_str} EOD 已爬"
+            label_en = f"Today's EOD ({today_str}) crawled"
         else:
             state, label = "pending", f"今日 {today_str} 待爬(收盘后自动)· 最新 {latest or '—'}"
-        return {"ok": True, "state": state, "label": label, "latest_date": latest,
+            label_en = f"Today ({today_str}) not crawled yet (runs after the close) · latest {latest or '—'}"
+        return {"ok": True, "state": state, "label": label, "label_en": label_en, "latest_date": latest,
                 "today": today_str, "is_trading_day": is_td, "today_done": today_done,
                 "before_close": bool(is_td and before_close),
                 "summary": summary, "file_mtime": mtime}

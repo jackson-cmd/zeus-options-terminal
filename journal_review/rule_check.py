@@ -50,7 +50,7 @@ def check_daily_open_cap(opens: list[dict], start_date: str, end_date: str,
         trades = by_day[day]
         if len(trades) > cap:
             out.append({
-                "rule": f"单日新开 ≤{cap} 单",
+                "rule": f"单日新开 ≤{cap} 单", "rule_en": f"≤{cap} new trades a day",
                 "date": day,
                 "actual": len(trades),
                 "trades": [f"{t.get('ticker')} {t.get('spread_label')}" for t in trades],
@@ -72,6 +72,7 @@ def check_daily_close_cap(closes: list[dict], start_date: str, end_date: str,
             pnl_sum = sum(float(t.get("net_pnl") or 0) for t in trades)
             out.append({
                 "rule": "单日集中平仓(疑似恐慌,非字面铁律)",
+                "rule_en": "Many closes in one day (possible panic; not a written rule)",
                 "date": day,
                 "actual": len(trades),
                 "net_pnl_sum": round(pnl_sum, 2),
@@ -95,7 +96,7 @@ def check_position_size(opens: list[dict], start_date: str, end_date: str,
         pct = 100.0 * debit / nlv
         if pct > max_pct:
             out.append({
-                "rule": f"单笔 debit ≤{max_pct:.0f}% NLV",
+                "rule": f"单笔 debit ≤{max_pct:.0f}% NLV", "rule_en": f"Debit per trade ≤{max_pct:.0f}% of NLV",
                 "date": od,
                 "trade": f"{o.get('ticker')} {o.get('spread_label')} ${debit:,.0f}",
                 "pct_of_nlv": round(pct, 1),
@@ -112,7 +113,7 @@ def check_concurrent_positions(opens: list[dict], closes: list[dict],
         held = _kpi.positions_on_day(opens, closes, day)
         if len(held) > cap:
             out.append({
-                "rule": f"同时 ≤{cap} 仓",
+                "rule": f"同时 ≤{cap} 仓", "rule_en": f"≤{cap} positions at once",
                 "date": day,
                 "actual": len(held),
                 "trades": [f"{h.get('ticker')} {h.get('spread_label')}" for h in held],
@@ -134,7 +135,7 @@ def check_cash_floor(opens: list[dict], closes: list[dict], start_date: str, end
         cash_pct = 100.0 * (1 - deployed / nlv)
         if cash_pct < floor_pct:
             out.append({
-                "rule": f"现金 ≥{floor_pct:.0f}%",
+                "rule": f"现金 ≥{floor_pct:.0f}%", "rule_en": f"Cash ≥{floor_pct:.0f}%",
                 "date": day,
                 "actual_cash_pct": round(cash_pct, 1),
                 "positions_count": len(held),
@@ -167,7 +168,7 @@ def check_deep_loss_cuts(closes: list[dict], start_date: str, end_date: str,
         pnl_pct = net_pnl / debit
         if pnl_pct <= deep_pct:
             out.append({
-                "rule": "深亏时不止损",
+                "rule": "深亏时不止损", "rule_en": "No stop-loss on a deep loss",
                 "date": cd,
                 "trade": f"{c.get('ticker')} {c.get('spread_label')} {net_pnl:+.2f}",
                 "net_pnl": round(net_pnl, 2),

@@ -70,16 +70,21 @@ def build(open_positions: list[dict], today: dt.date, calendar: dict,
             pnl_pct = pnl_dollar / debit
 
         attention: list[str] = []
+        attention_en: list[str] = []      # the same chips, for the interface in English
         if pnl_pct is not None and pnl_pct <= DEEP_LOSS_PCT:
             attention.append("深亏")
+            attention_en.append("Deep loss")
         if (pnl_dollar is not None and max_profit_total and max_profit_total > 0
                 and pnl_dollar / max_profit_total >= TP_NEAR_PCT):
             attention.append(f"TP接近(≥{int(TP_NEAR_PCT * 100)}%最大盈利)")
+            attention_en.append(f"Near TP (≥{int(TP_NEAR_PCT * 100)}% of max profit)")
         if dte is not None and dte <= NEAR_EXPIRY_DAYS:
             attention.append(f"近到期(≤{NEAR_EXPIRY_DAYS}d)")
+            attention_en.append(f"Near expiration (≤{NEAR_EXPIRY_DAYS}d)")
         ed = _earnings_within(ticker, today, calendar)
         if ed is not None:
             attention.append("财报今天" if ed == 0 else f"财报{ed}天内")
+            attention_en.append("Earnings today" if ed == 0 else f"Earnings within {ed} days")
 
         out.append({
             "ticker": ticker,
@@ -88,6 +93,7 @@ def build(open_positions: list[dict], today: dt.date, calendar: dict,
             "days_to_expiry": dte,
             "current_pnl_pct": round(pnl_pct * 100, 1) if pnl_pct is not None else None,
             "attention": attention,
+            "attention_en": attention_en,
         })
 
     out.sort(key=lambda r: (0 if r["attention"] else 1,

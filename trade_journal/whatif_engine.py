@@ -414,6 +414,9 @@ def whatif_narratives(summary: dict) -> list[dict]:
     tp = summary.get("optimal_tp_premium") or {}
     cov = summary.get("coverage", {})
     ev = f"基于 {cov.get('covered','?')} 笔有盘中数据的交易；理论 mark，未含滑点。"
+    ev_en = f"Based on {cov.get('covered','?')} trades with intraday data; theoretical marks, no slippage."
+    # every card also carries its English (title_en, headline_en, body_en, evidence_en) for the
+    # interface in English
 
     # 1) 止盈时机(峰值兑现率) — 据实,通常是好消息
     if mc is not None:
@@ -431,6 +434,17 @@ def whatif_narratives(summary: dict) -> list[dict]:
                         f"比实际多 {_money(abs(delta))} —— 可以考虑挂这条止盈线。")
                      ) if tp.get("best_k") is not None else "",
             "evidence": ev,
+            "title_en": "Take-profit timing",
+            "headline_en": f"Winners kept {mc*100:.0f}% of their peak unrealized profit on average"
+                           + (f" ({u50*100:.0f}% of winners gave back more than half from the peak)." if u50 else "."),
+            "body_en": (f"Backtest of one take-profit level for every trade: the best is premium +{int(tp.get('best_k',0)*100)}%, "
+                        f"for a simulated total of {_money(tp.get('best_total',0))}, "
+                        + (f"{_money(abs(delta))} less than you actually made: your own calls on winners already beat any "
+                           "fixed take-profit line, so don't make it mechanical."
+                           if beats else
+                           f"{_money(abs(delta))} more than you actually made: consider placing this take-profit order.")
+                        ) if tp.get("best_k") is not None else "",
+            "evidence_en": ev_en,
         })
 
     # 2) 相对理论最大利润(参考口径)
@@ -442,6 +456,11 @@ def whatif_narratives(summary: dict) -> list[dict]:
             "body": "这是另一把尺：垂直价差要到期且方向走满才到 max，"
                     "平时兑现 30-40% 很正常，不必苛求——真正该看的是上面的峰值兑现率。",
             "evidence": ev,
+            "title_en": "How far from the theoretical max profit",
+            "headline_en": f"Measured against the theoretical max profit, winners captured only {mcmp*100:.0f}%.",
+            "body_en": "This is a different yardstick: a vertical spread reaches its max only at expiration with the full "
+                       "move, so capturing 30–40% is normal and nothing to chase. The peak capture rate above is what counts.",
+            "evidence_en": ev_en,
         })
 
     # 3) 止损纪律 — 真正的红旗
@@ -456,6 +475,13 @@ def whatif_narratives(summary: dict) -> list[dict]:
             "body": "这才是你真正的漏洞：止盈时机没问题，但亏损单经常放任浮亏越过净权利金的一半。"
                     "给亏损单挂硬止损（尤其借方价差），是当前最高杠杆的改进。",
             "evidence": ev,
+            "title_en": "Stop discipline",
+            "headline_en": f"{br*100:.0f}% of losing trades went past the 50% stop line during the day "
+                           f"({sd.get('breached_50pct')}/{sd.get('n_losers')} trades).",
+            "body_en": "This is your real leak: the take-profit timing is fine, but losing trades are often allowed to lose "
+                       "more than half the net premium. A hard stop on losers (debit spreads above all) is the "
+                       "highest-leverage improvement right now.",
+            "evidence_en": ev_en,
         })
 
     # 4) 平仓后表现 —— 关了之后价差怎么走(你最想看的)
@@ -471,14 +497,26 @@ def whatif_narratives(summary: dict) -> list[dict]:
                 + (f"多 {_money(abs(hd))} —— 你整体平早了，利润留在了桌上。"
                    if hd > 0 else
                    f"少 {_money(abs(hd))} —— 你早平整体是对的（持到到期更差，theta/IV 吃掉了）。"))
+        body_en = ("Holding every trade to expiration would have made "
+                   + (f"{_money(abs(hd))} more than you did: overall you closed too early and left profit on the table."
+                      if hd > 0 else
+                      f"{_money(abs(hd))} less than you did: closing early was right overall "
+                      "(holding to expiration was worse; theta and IV ate it)."))
         if losers:
             body += f" 亏损单 {losers} 笔里，{reb} 笔平仓后还反弹过（可能砍早了 / 没拿住）。"
+            body_en += f" Of {losers} losing trades, {reb} bounced back after you closed them (cut too early, or not held)."
         out.append({
             "key": "post_close", "title": "平仓后表现（关了之后怎么样）",
             "tone": "warn" if (hd > 0 or ln > cov * 0.5) else "good",
             "headline": f"{cov} 笔有平仓后数据：{ln} 笔平仓后价差还更高（平早了，上限合计本可多 {_money(ls)}）。",
             "body": body,
             "evidence": f"基于 {cov} 笔有平仓后快照/EOD 的交易；理论 mark，与「持有到到期」的对照口径。",
+            "title_en": "After the close (what happened next)",
+            "headline_en": f"{cov} trades have data after the close: {ln} were worth more after you closed them "
+                           f"(closed too early; up to {_money(ls)} more in all).",
+            "body_en": body_en,
+            "evidence_en": f"Based on {cov} trades with snapshots or EOD data after the close; theoretical marks, "
+                           "compared with holding to expiration.",
         })
 
     # 5) 最优出场策略 —— 给你定个规矩(提前平 vs 持到期 vs 吃到 X% 最大利润再开下单)
@@ -495,6 +533,12 @@ def whatif_narratives(summary: dict) -> list[dict]:
                 f"② 一律持到到期 {_money(hold)} / {ha:.0f}%；③ 吃到 {q}% 最大利润就平、腾资金开下单 "
                 f"{_money(mb['total'])} / {ann:.0f}%。提前平=白忙（资金年化最低，平得太小）；死等到期=慢"
                 f"（最后一点利润磨太久）；③ 两个口径都最优。并且 **不要止损**——借方价差本就限损，砍掉的亏损单多半反弹。")
+        body_en = (f"Three choices compared (total P/L / annualized return on capital): ① closing early (what you do now) "
+                   f"{_money(act)} / {aa:.0f}%; ② always holding to expiration {_money(hold)} / {ha:.0f}%; ③ closing at "
+                   f"{q}% of max profit and opening the next trade {_money(mb['total'])} / {ann:.0f}%. Closing early is "
+                   "busywork (the lowest annualized return; the wins are too small); waiting for expiration is slow (the "
+                   "last bit of profit takes too long); ③ is best on both measures. And **no stop-loss**: a debit "
+                   "spread's loss is already capped, and most of the losers that were cut came back.")
         out.append({
             "key": "exit_policy", "title": "最优出场策略（给你定规矩）",
             "tone": "good",
@@ -503,6 +547,13 @@ def whatif_narratives(summary: dict) -> list[dict]:
             "body": body,
             "evidence": f"对 {ep.get('mp_n', ep['n'])} 笔有完整 open→到期 EOD 路径的交易做网格回测（按最大利润 %）；"
                         f"EOD 粒度、理论 mark；资金年化=盈亏/Σ(权利金×持有交易日)×252。",
+            "title_en": "Best exit policy (your rule)",
+            "headline_en": f"Backtested on {ep['n']} trades, the rule is: close at ~{q}% of max profit, no stop-loss, then "
+                           f"open the next trade (annualized return on capital {ann:.0f}%, against your {aa:.0f}% now).",
+            "body_en": body_en,
+            "evidence_en": f"Grid backtest over {ep.get('mp_n', ep['n'])} trades with a full open → expiration EOD path "
+                           "(by % of max profit); EOD granularity, theoretical marks; annualized return = "
+                           "P/L / Σ(premium × trading days held) × 252.",
         })
 
     return out

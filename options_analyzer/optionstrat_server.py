@@ -2370,6 +2370,8 @@ html, body { overscroll-behavior-x: none; }
     <!-- Browser-tab favicon: inline SVG with money emoji so it renders sharp
          at any size, no extra request, and works without a static image. -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Ctext%20y%3D%22.9em%22%20font-size%3D%2290%22%3E%F0%9F%92%B0%3C%2Ftext%3E%3C%2Fsvg%3E">
+    <!-- Interface language (zt / ztt) for the page scripts below; zeus.js translates the rest -->
+    <script src="/static/zeus_lang.js"></script>
     <!-- Timestamp formatter: must load before inline JS that calls _dlFmt.
          Single source of truth for "always-local-time" formatting. -->
     <script src="/static/dl_time_fmt.js"></script>
@@ -4907,8 +4909,10 @@ function igRender() {
   box.innerHTML = h;
   igDrawChart(chartRows, k);
   var meta = document.getElementById("igMeta");
-  if (meta) meta.textContent = "截至 " + (d.as_of || "?") + " · " + (d.n_groups || 0) + " 组 / "
-    + (d.n_tickers || 0) + " 只" + ((d.stale && d.stale.length) ? " · 剔除陈旧 " + d.stale.length : "");
+  if (meta) meta.textContent = zt("截至 " + (d.as_of || "?") + " · " + (d.n_groups || 0) + " 组 / "
+    + (d.n_tickers || 0) + " 只" + ((d.stale && d.stale.length) ? " · 剔除陈旧 " + d.stale.length : ""),
+    "As of " + (d.as_of || "?") + " · " + (d.n_groups || 0) + " groups / "
+    + (d.n_tickers || 0) + " tickers" + ((d.stale && d.stale.length) ? " · " + d.stale.length + " stale left out" : ""));
 }
 // 容器尺寸变了就重画(切 tab、拖窗口、开合侧栏都会触发)
 var _igRO = null;
@@ -5185,10 +5189,13 @@ function digestTodayLoad(force) {
       _digestActive.totalYest = yestItems.length;
       _digestActive.yestDate = yStr;
       _digestActive.generatedAt = d.generated_at || '';
-      if (st) st.textContent = todayDate + ' · '
-        + todayItems.length + ' 今' + (yestItems.length ? (' + ' + yestItems.length + ' 昨未读') : '')
-        + (blItems.length ? (' + ' + blItems.length + ' 免费源双语') : '')
-        + (bzMissing ? ' · Benzinga 未连接(设置 ⚙ 里粘贴 cookie)' : (' · 更新于 ' + (d.generated_at || '?')));
+      if (st) st.textContent = todayDate + ' · ' + zt(
+          todayItems.length + ' 今' + (yestItems.length ? (' + ' + yestItems.length + ' 昨未读') : '')
+          + (blItems.length ? (' + ' + blItems.length + ' 免费源双语') : '')
+          + (bzMissing ? ' · Benzinga 未连接(设置 ⚙ 里粘贴 cookie)' : (' · 更新于 ' + (d.generated_at || '?'))),
+          todayItems.length + ' today' + (yestItems.length ? (' + ' + yestItems.length + ' unread from yesterday') : '')
+          + (blItems.length ? (' + ' + blItems.length + ' bilingual from free sources') : '')
+          + (bzMissing ? ' · Benzinga not connected (paste a cookie in Settings ⚙)' : (' · updated ' + (d.generated_at || '?'))));
       if (!merged.length && host) host.innerHTML = '<div style="color:#8b949e;padding:40px;text-align:center">📭 暂无新闻 · 免费源每 5 分钟更新一次</div>';
     });
   }).catch(function(e) { host.innerHTML = '<div style="color:#f85149;padding:40px">加载失败：' + e + '</div>'; });
@@ -5613,9 +5620,12 @@ function digestLoad(date, force) {
         content.innerHTML = '<div style="color:#8b949e;padding:40px;text-align:center">📭 该日无 benzinga 也无双语</div>';
         if (meta) meta.textContent = dateKey; return;
       }
-      if (meta) meta.textContent = merged.length + ' 条 · ' + dateKey
+      if (meta) meta.textContent = zt(merged.length + ' 条 · ' + dateKey
         + (blItems.length ? (' (含 ' + blItems.length + ' 双语' + (noBnz ? ',benzinga 无' : '') + ')') : '')
-        + (_digestDates.length > 1 ? ('  ·  共 ' + _digestDates.length + ' 天') : '');
+        + (_digestDates.length > 1 ? ('  ·  共 ' + _digestDates.length + ' 天') : ''),
+        merged.length + ' stories · ' + dateKey
+        + (blItems.length ? (' (' + blItems.length + ' bilingual' + (noBnz ? ', none from Benzinga' : '') + ')') : '')
+        + (_digestDates.length > 1 ? ('  ·  ' + _digestDates.length + ' days in all') : ''));
       _digestDayItems = merged;
       _digestDayDate = dateKey;
       _digestActive = { items: _digestDayItems, host: 'digestContent', date: dateKey, showDate: false };
@@ -12445,13 +12455,14 @@ async def api_pre_trade_checkup_override(request: Request):
 
 # The interface-language switch (中文 / 双语 / English) for standalone pages.
 _ZEUS_SHELL = '<link rel="stylesheet" href="/static/zeus.css"><script src="/static/zeus.js"></script>'
+_ZEUS_HEAD = '<head><script src="/static/zeus_lang.js"></script>'   # zt / ztt before the page's own scripts
 
 
 @app.get("/pretrade-checkup", response_class=HTMLResponse)
 async def pretrade_checkup_page():
     """开单前体检独立页面 —— 不进主 dashboard tab,直接开 URL 用
     (?ticker=&direction=&dte= 可预填 + 自动跑一次)。"""
-    return HTMLResponse(content=PRETRADE_CHECKUP_HTML.replace("</body>", _ZEUS_SHELL + "</body>", 1))
+    return HTMLResponse(content=PRETRADE_CHECKUP_HTML.replace("</body>", _ZEUS_SHELL + "</body>", 1).replace("<head>", _ZEUS_HEAD, 1))
 
 
 # ════════════════════════════════════════════════════════════════════
@@ -12566,7 +12577,7 @@ async def api_journal_review(today: Optional[str] = Query(None)):
 @app.get("/journal-review", response_class=HTMLResponse)
 async def journal_review_page():
     """Journal Review 独立页面 —— 不进 Trade Journal 的 tab 结构,直接开 URL 用。"""
-    return HTMLResponse(content=JOURNAL_REVIEW_HTML.replace("</body>", _ZEUS_SHELL + "</body>", 1))
+    return HTMLResponse(content=JOURNAL_REVIEW_HTML.replace("</body>", _ZEUS_SHELL + "</body>", 1).replace("<head>", _ZEUS_HEAD, 1))
 
 
 # ── Live prices (老 /api/screener/data 的替代, 数据源=heatmap live_prices) ──
@@ -13093,7 +13104,7 @@ window.addEventListener('message', e => {
 });
 </script>
 """
-    html = html.replace("</head>", privacy_inject + "</head>")
+    html = html.replace("</head>", privacy_inject + '<script src="/static/zeus_lang.js"></script></head>')
     # Remove the redundant Reload button — refresh is handled by the top bar
     html = html.replace(
         """<button class="reload-btn" onclick="triggerFilePick()">⟳ Reload</button>""",

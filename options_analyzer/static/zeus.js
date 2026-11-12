@@ -36,18 +36,66 @@
   var ATTRS = ['title', 'placeholder', 'aria-label', 'data-tip'];
   var BI_SEL = 'button, .top-nav-tab, th, h1, h2, h3, h4, h5, label, legend, summary, .ic-title, .summary-label, .sidebar-title, [role=tab], [onclick]:not(tr):not(td):not(div), .df-chip, .df-pill';
   var BI_MARK = '\n— ';
+  // A dictionary key is a whole sentence. On the page it may carry line breaks from the HTML
+  // source, or an emoji, bullet or colon around it ("📭 还没扫描过 — …", "近期≥2%跌: "): the
+  // sentence is looked up without them and they are put back around the English.
+  var EDGE_L = /^[^A-Za-z0-9一-鿿(（「『【《"“$]+/;
+  var EDGE_R = /[^A-Za-z0-9一-鿿)）」』】》"”%]+$/;
+  var EDGE_EN = { '：': ':', '，': ',', '。': '.', '；': ';', '！': '!', '？': '?', '、': ',', '——': '—' };
+  // Parts of one line that the pages join with these separators are separate sentences.
+  var SEG_RE = /( · | —{1,2} | \| |\n\s*)/;
 
   function runEn(run) {
     if (DICT[run]) return DICT[run];
     var t = run.replace(/[\s　]+$/, '');
     return DICT[t] ? DICT[t] + run.slice(t.length) : null;
   }
+  function edgeEn(e) { return e.replace(/——|[：，。；！？、]/g, function (c) { return EDGE_EN[c]; }); }
+  function lookup(key) {
+    var en = lookupKey(key);
+    // a Chinese colon or comma at the end carries its own space; the English one needs a real one
+    // before the next element ("手动盯的慢变量：<span>…" → "…by hand: Treasury…")
+    if (en && /[：，；]$/.test(key) && /[:,;]$/.test(en)) en += ' ';
+    return en;
+  }
+  function lookupKey(key) {
+    if (DICT[key]) return DICT[key];
+    var k = key.replace(/\s+/g, ' ');
+    if (k !== key && DICT[k]) return DICT[k];
+    var l = k.match(EDGE_L), core = l ? k.slice(l[0].length) : k;
+    var r = core.match(EDGE_R);
+    if (r) core = core.slice(0, core.length - r[0].length);
+    if (core === k || !HAS_CJK.test(core) || !DICT[core]) return null;
+    return (l ? edgeEn(l[0]) : '') + DICT[core] + (r ? edgeEn(r[0]) : '');
+  }
+  function trWhole(s) {
+    var key = s.trim(), en = key ? lookup(key) : null;
+    return en == null ? null : s.replace(key, function () { return en; });
+  }
+  // Word by word, the last resort. A space goes in where an English word meets a letter, digit or
+  // colon of the page ("SPY跌" → "SPY down", "行业:全部" → "Industry: all"), never inside the
+  // page's own Latin text.
+  function trRuns(s) {
+    return s.replace(RUN_RE, function (run, at) {
+      var r = runEn(run);
+      if (r == null) return run;
+      if (/[A-Za-z0-9%)\]:,;]/.test(s.charAt(at - 1)) && /^[A-Za-z]{2}/.test(r)) r = ' ' + r;
+      if (/[A-Za-z0-9(]/.test(s.charAt(at + run.length)) && /[A-Za-z]$/.test(r)) r += ' ';
+      return r;
+    });
+  }
   function trString(s) {
     if (!s || !HAS_CJK.test(s)) return s;
-    var key = s.trim();
-    if (DICT[key]) return s.replace(key, DICT[key]);
-    return s.replace(RUN_RE, function (run) { var r = runEn(run); return r == null ? run : r; })
-      .replace(/([A-Za-z0-9%)\]])([A-Z][a-z])/g, '$1 $2');
+    var w = trWhole(s);
+    if (w != null) return w;
+    var parts = s.split(SEG_RE);
+    if (parts.length < 2) return trRuns(s);
+    for (var i = 0; i < parts.length; i += 2) {
+      if (!HAS_CJK.test(parts[i])) continue;
+      var p = trWhole(parts[i]);
+      parts[i] = p != null ? p : trRuns(parts[i]);
+    }
+    return parts.join('');
   }
   function skip(el) {
     for (var n = el; n && n.nodeType === 1; n = n.parentNode) {
@@ -90,11 +138,25 @@
     var txt = (el.textContent || '').trim();
     var en = '';
     if (txt && HAS_CJK.test(txt) && txt.length <= 26) {
+      // a count badge after the label ("👀 今日重点关注(在仓) (10)") is not part of its key, and the
+      // Chinese label already shows it
+      var cnt = txt.match(/^(.*?)\s*\(\d+\)$/);
+      var whole = lookup(txt) || (cnt ? lookup(cnt[1]) : null);
+      if (!whole && SEG_RE.test(txt)) { whole = trString(txt); if (HAS_CJK.test(whole)) whole = null; }
       var runs = txt.match(RUN_RE) || [];
-      if (runs.length && runs.length <= 3) {
-        var parts = runs.map(runEn);
-        if (parts.every(function (x) { return x; })) en = parts.join(' ').replace(/\s+/g, ' ').trim();
+      if (whole) en = whole;
+      else if (runs.length && runs.length <= 3) {
+        // numbers or Latin words around the Chinese words stay in place ("7天", "近期≥2%跌",
+        // "隐藏 ETF 组"); a label of Chinese words only, or one made of several elements (a
+        // table header with the date over "0d·周"), is glossed word by word
+        if (/[A-Za-z0-9]/.test(txt.replace(RUN_RE, '')) && !(el.children && el.children.length)) en = trRuns(txt);
+        else {
+          var parts = runs.map(runEn);
+          if (parts.every(function (x) { return x; })) en = parts.join(' ');
+        }
       }
+      // the gloss repeats no emoji, bullet or arrow the Chinese label already shows
+      en = en.replace(/\s+/g, ' ').replace(EDGE_L, '').replace(/[^A-Za-z0-9)%"”]+$/, '').trim();
     }
     if (en && !HAS_CJK.test(en)) { if (el.getAttribute('data-zs-en') !== en) el.setAttribute('data-zs-en', en); }
     else if (el.hasAttribute('data-zs-en')) el.removeAttribute('data-zs-en');
