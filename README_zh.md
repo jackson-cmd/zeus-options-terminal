@@ -8,7 +8,7 @@
 
 **实时持仓与希腊值 · 盈亏与风险 · 出场纪律 · 期权和股票都能下的模拟盘 · 四路新闻台（Benzinga · Finviz · 华尔街日报 · MarketWatch）· 选股 · 财报与 SEC 文件 · 不说假话的交易日记 —— 接 tastytrade API 或者一份 CSV 就能用，完全跑在你自己的电脑上，界面支持 中文 / 双语 / English。**
 
-[English → README.md](README.md) · [许可证](#-许可证禁止商业使用) · [快速开始](#-快速开始)
+[English → README.md](README.md) · [全部功能](docs/FEATURES_zh.md) · [使用说明](docs/USER_GUIDE_zh.md) · [快速开始](#-快速开始) · [参与贡献](#-参与贡献) · [许可证](#-许可证禁止商业使用)
 
 ![Python](https://img.shields.io/badge/python-3.10%2B-3776ab) ![本地部署](https://img.shields.io/badge/100%25-本地部署-2ea043) ![界面语言](https://img.shields.io/badge/界面-中文%20%7C%20双语%20%7C%20English-e3b341) ![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial-b31b1b)
 
@@ -59,6 +59,8 @@ ZEUS Terminal（宙斯期权终端）是我给自己做的网站。前前后后�
 ---
 
 ## 🗺️ 功能全景
+
+这里只挑重点讲。ZEUS 的功能远不止这一页写得下的：**[功能清单](docs/FEATURES_zh.md)** 列出了每个页面、按钮、提醒和后台任务，**[使用说明](docs/USER_GUIDE_zh.md)** 从安装设置一直讲到怎么过一个完整的交易日。
 
 ### ⚔️ 持仓 —— 指挥中心
 - **自动识别所有策略**：垂直价差、日历、对角、铁鹰、蝶式、裸腿和备兑、股票。按开仓那一单把各条腿归到一起，分批建仓、移仓也不会拆散。
@@ -188,7 +190,6 @@ my.tastytrade.com → **Manage → API Access → OAuth Applications** → 新�
 | Finviz Elite token | 通过官方导出接口拿 Finviz 新闻（不填则用免费页面） | 可选 |
 | AI 提供方 | AI 总结、市场判断、AI 选股、AI 复盘、持仓点评 | 用你自己的 |
 | Barchart 账号 | Barchart 筛选器和信号榜单 | 需要 Barchart 账户 |
-| 邮件（SMTP） | 邮件提醒 | ✅ |
 
 ---
 
@@ -260,6 +261,12 @@ FastAPI 服务 ── options_analyzer/optionstrat_server.py
 **我的设置存在哪？** `~/.zeus-terminal/config.json`。删掉这个文件夹就什么都忘了。
 
 **收盘后第一次打开，选股页显示 0 只报价？** 点一下选股页的 **Refresh**，几秒钟就会补上最近一个交易日的收盘价。
+
+---
+
+## 🤝 参与贡献
+
+ZEUS 的功能远比这一页能写下的多，而且还在长，以后也可能加新功能。**欢迎提 PR**：修 bug、接新的数据源或券商、改翻译、补文档，或者把[还没接上的部分](docs/FEATURES_zh.md#还没接上的部分欢迎-pr)接起来都可以。动手前先看 [CONTRIBUTING.md](CONTRIBUTING.md)。每个 PR 都会在 Linux、macOS、Windows 上跑一遍测试，`main` 只接受测试全部通过的 PR。
 
 ---
 
