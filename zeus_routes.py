@@ -134,6 +134,12 @@ async def test_connection(what: str, request: Request):
             names = {c.get("name") for c in data if isinstance(c, dict)}
             hc.benzinga_cookies_path()
             return {"ok": bool(names), "cookies": len(names)}
+        if what == "email":
+            import zeus_mail
+            if not hc.email_configured():
+                return {"ok": False, "error": "fill in sender, recipient, app password and SMTP server, then save"}
+            zeus_mail.send("Test e-mail", "If you can read this, ZEUS e-mail alerts work.")
+            return {"ok": True, "sent_to": f"{len(zeus_mail.recipients())} address(es)"}
         return {"ok": False, "error": "unknown test"}
 
     try:

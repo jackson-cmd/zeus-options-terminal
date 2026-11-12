@@ -143,11 +143,18 @@ SCHEMA: dict[str, tuple] = {
                        "SEC asks for a contact e-mail in the User-Agent. Put your own.",
                        "SEC 要求 User-Agent 里带联系邮箱，填你自己的。"),
     # ---- e-mail alerts ----
-    "email_from": ("", True, "email", "Alert e-mail: from", "邮件提醒：发件人", "", ""),
-    "email_to": ("", True, "email", "Alert e-mail: to", "邮件提醒：收件人", "", ""),
-    "email_app_password": ("", True, "email", "SMTP app password", "SMTP 应用密码", "", ""),
+    "email_from": ("", True, "email", "Alert e-mail: from", "邮件提醒：发件人",
+                   "The account that sends the alerts; it also logs in to the SMTP server.",
+                   "用来发提醒的邮箱，也用它登录 SMTP 服务器。"),
+    "email_to": ("", True, "email", "Alert e-mail: to", "邮件提醒：收件人",
+                 "Where alerts go. Several addresses: separate them with commas.",
+                 "提醒发到哪里。多个地址用逗号隔开。"),
+    "email_app_password": ("", True, "email", "SMTP app password", "SMTP 应用密码",
+                           "Gmail: create an app password under Google Account → Security. Not your normal password.",
+                           "Gmail：在 Google 账号 → 安全性 里生成应用专用密码，不是平时登录的密码。"),
     "email_smtp_server": ("smtp.gmail.com", False, "email", "SMTP server", "SMTP 服务器", "", ""),
-    "email_smtp_port": ("587", False, "email", "SMTP port", "SMTP 端口", "", ""),
+    "email_smtp_port": ("587", False, "email", "SMTP port", "SMTP 端口",
+                        "587 (STARTTLS) or 465 (SSL).", "587（STARTTLS）或 465（SSL）。"),
 }
 
 GROUPS = [
@@ -270,6 +277,12 @@ def notifications_enabled() -> bool:
     return sys.platform == "darwin" and get_bool("desktop_notifications")
 
 
+def email_configured() -> bool:
+    """Sender, a recipient, app password and SMTP server are all filled in."""
+    return bool(get("email_from") and "@" in str(get("email_to") or "")
+                and get("email_app_password") and get("email_smtp_server"))
+
+
 def ai_schedules_enabled() -> bool:
     try:
         import zeus_ai
@@ -349,12 +362,28 @@ def barchart_credentials_file() -> Path:
 
 
 def apply_notification_shims() -> None:
-    """Desktop alerts go out through `osascript` / `terminal-notifier`. When
-    notifications are off (or the OS is not macOS) we put no-op stand-ins first
-    on PATH, so every alert in every module goes quiet without touching them."""
+    """Desktop alerts go out through `osascript` / `terminal-notifier`, so stand-ins
+    with those names first on PATH steer every alert in every module:
+
+    - e-mail set up: relay stand-ins mail each alert (zeus_mail) and pass it on
+      to the real notifier when desktop notifications are on;
+    - otherwise, desktop notifications off (or not macOS): no-op stand-ins;
+    - otherwise: the real programs."""
+    import shlex
     import sys
     noop = home() / "bin" / "quiet"
-    parts = [x for x in os.environ.get("PATH", "").split(os.pathsep) if x and x != str(noop)]
+    relay = home() / "bin" / "relay"
+    parts = [x for x in os.environ.get("PATH", "").split(os.pathsep) if x and x not in (str(noop), str(relay))]
+    if email_configured() and os.name != "nt":
+        relay.mkdir(parents=True, exist_ok=True)
+        for name in ("osascript", "terminal-notifier"):
+            f = relay / name
+            f.write_text("#!/bin/sh\n"
+                         f"PYTHONPATH={shlex.quote(str(REPO_ROOT))}${{PYTHONPATH:+:$PYTHONPATH}} "
+                         f"exec {shlex.quote(sys.executable)} -m zeus_mail shim {name} \"$@\"\n", encoding="utf-8")
+            f.chmod(0o755)
+        os.environ["PATH"] = os.pathsep.join([str(relay)] + parts)
+        return
     if notifications_enabled():
         os.environ["PATH"] = os.pathsep.join(parts)
         return
