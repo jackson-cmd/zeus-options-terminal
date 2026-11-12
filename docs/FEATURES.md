@@ -87,7 +87,8 @@ ZEUS does far more than the screenshots in the README show. There are 7 pages in
 
 | ✓ | Feature | What it does | Needs |
 |---|---|---|---|
-| ✅ | Pre-trade checkup | Four gates before you open a trade: trend → touch of support / resistance → IV and earnings → macro calendar | Free |
+| ✅ | Four-gate pre-trade page | `/pretrade-checkup`: one ticker and direction through four gates (trend → touch of support / resistance → IV and earnings → macro calendar) to a verdict; trading against it is recorded with your reason | Free |
+| ✅ | 🩺 Checkup panel | From the Positions toolbar: each candidate's trend, beta, correlation with what you hold, concentration, and a mirror of the mistakes your own journal shows | Free |
 | ✅ | Spread check | Enter the spread you plan to open (or load the chain): price, direction, how far out of the money, reward to risk | Free |
 | ✅ | Spread suggestions | Ranked bull call spreads by fill quality, liquidity and reward to risk, adapted to the market regime | Free |
 | ✅ | Position exits | The same checks for positions you already hold: take profit or stop now? | Free |

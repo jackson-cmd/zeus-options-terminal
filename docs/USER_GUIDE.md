@@ -16,7 +16,7 @@ This manual explains every page, button and setting of ZEUS Terminal: what it do
 4. [Positions](#4-positions)
    - [4.1 The board](#41-the-board) · [4.2 Status lights and filters](#42-status-lights-and-filters) · [4.3 Board tools](#43-board-tools) · [4.4 Strategy detail](#44-strategy-detail) · [4.5 Risk view](#45-risk-view) · [4.6 AI position review](#46-ai-position-review) · [4.7 How positions are grouped and priced](#47-how-positions-are-grouped-and-priced)
 5. [Discipline tools](#5-discipline-tools)
-   - [5.1 Exit advisor](#51-exit-advisor) · [5.2 Pre-trade checkup](#52-pre-trade-checkup) · [5.3 Liquidity scan](#53-liquidity-scan) · [5.4 Risk radar](#54-risk-radar)
+   - [5.1 Exit advisor](#51-exit-advisor) · [5.2 Checkup panel](#52-checkup-panel) · [5.3 Liquidity scan](#53-liquidity-scan) · [5.4 Risk radar](#54-risk-radar) · [5.5 Four-gate pre-trade page](#55-four-gate-pre-trade-page)
 6. [Picker](#6-picker)
    - [6.1 K-line chart wall](#61-k-line-chart-wall) · [6.2 AI picks](#62-ai-picks) · [6.3 Barchart lists](#63-barchart-lists) · [6.4 Ticker detail](#64-ticker-detail) · [6.5 Market brief](#65-market-brief) · [6.6 Sector rotation](#66-sector-rotation) · [6.7 Options sentiment](#67-options-sentiment) · [6.8 After-close crawl](#68-after-close-crawl)
 7. [TA screener](#7-ta-screener)
@@ -268,7 +268,7 @@ Each position gets a light from the exit advisor ([5.1](#51-exit-advisor)): 🔴
 | ⚠ | Risk view ([4.5](#45-risk-view)) |
 | ↻ | Refresh positions now |
 | 🔔 | Alert panel: recent alerts and **Enable Notifications** |
-| 🩺 | Pre-trade checkup ([5.2](#52-pre-trade-checkup)) |
+| 🩺 | Checkup panel ([5.2](#52-checkup-panel)) |
 
 ### 4.4 Strategy detail
 
@@ -322,11 +322,11 @@ The exit advisor gives every position its light and a one-line reason:
 
 Take-profit alerts fire when a position enters the band ([section 12](#12-alerts-and-notifications)).
 
-### 5.2 Pre-trade checkup
+### 5.2 Checkup panel
 
-Open with **🩺** on the Positions board. Two tabs:
+Open it with **🩺** in the Positions toolbar, or by clicking the red alert bar at the top of the terminal when it appears (a position without a take-profit order, or one that expires today). Two tabs:
 
-- **Before opening:** type the tickers you want to buy, or an alias (MAG7, MAGNIFICENT7, FAANG, FAAMG, SEMIS, BANKS), and press **Check**. Four gates run for each: trend, a touch of support or resistance, IV and earnings, and the macro calendar. Correlation inside the list is flagged (buying all of MAG7 is one bet). Spread suggestions follow: bull call spreads ranked by fill quality, liquidity and reward to risk, adapted to the regime.
+- **Before opening:** type the tickers you want to buy, or an alias (MAG7, MAGNIFICENT7, FAANG, FAAMG, SEMIS, BANKS), and press **Check**. For each candidate you see its trend, its beta to SPY, how closely it moves with what you already hold (ordinary and downside correlation, weighted by position size), how concentrated the book would become, and a *mistake mirror*: warnings, backed by your own journal, about mistakes you tend to repeat. Correlation inside the list is flagged too (buying all of MAG7 is one bet). Spread suggestions follow: bull call spreads ranked by fill quality, liquidity and reward to risk, adapted to the regime.
 - **▸ The spread I want to open** (optional): enter your planned spread, or press **Load chain** to pick strikes. The checkup then adds price, direction, how far out of the money and reward-to-risk checks.
 - **Position exits:** the same checks for what you already hold: take profit, stop, or keep.
 
@@ -337,6 +337,16 @@ Press **🌊 Liquidity** in the checkup, then **Scan**. You get a grid of strike
 ### 5.4 Risk radar
 
 Open it from Events, or with the risk-radar button on any page. **📡 Live radar** shows today's news risk and the event density of the next 30 days as a landmine calendar. **📊 Why it moved** explains recent big moves. A risk-radar alert fires when risk jumps.
+
+### 5.5 Four-gate pre-trade page
+
+Open **http://localhost:8765/pretrade-checkup**; the [daily review](#117-weekly-and-daily-review) links to it as "Run today's checkup".
+
+1. Enter a ticker, the direction (bull or bear) and the days to expiration (40 by default), then press **🩺 Run checkup**. **🔄** runs it again.
+2. Four gates, each passed or failed with its reason: trend, a touch of support or resistance, IV and earnings, and the macro calendar. A verdict follows.
+3. If the verdict says no and you still want the trade, write at least 20 characters on what you are betting on and press **🔓 Override the verdict and record it**. Overrides are kept, so you can look back at them later.
+
+A link such as `/pretrade-checkup?ticker=NVDA&direction=bull&dte=40` fills in the form and runs the check at once.
 
 ---
 
@@ -624,7 +634,7 @@ The decision log records why you opened or closed each trade.
 ### 11.7 Weekly and daily review
 
 - **Weekly review:** a review of the week's closed trades, saved by week; a reminder fires when the week ends.
-- **Daily review:** `/journal-review` shows yesterday's opened and closed trades, rule checks and today's watchlist.
+- **Daily review:** `/journal-review` shows yesterday's opened and closed trades, rule checks and today's watchlist, with a link to [today's pre-trade checkup](#55-four-gate-pre-trade-page).
 
 ---
 

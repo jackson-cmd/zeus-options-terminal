@@ -23,6 +23,8 @@ What changed in each version of ZEUS Terminal. New features carry the <img src="
 - Manual mode: the previous close came from a Yahoo field that can be days old, so the day change and today's P/L could be wrong. (#5)
 - With tastytrade connected, the signal backtest job downloaded 264 option chains every weekday for a page that does not exist. It is no longer started. (#12)
 - The trade journal iframe now shows bilingual labels. (#13)
+- Positions: a 🩺 button opens the checkup panel, which used to open only from the red alert bar. (#18)
+- The four-gate pre-trade checkup page and the daily review page now follow the interface language. (#18)
 
 ### Project
 

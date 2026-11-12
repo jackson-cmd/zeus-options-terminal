@@ -90,7 +90,7 @@ This tour covers the highlights. ZEUS does far more than fits on one page: the *
 - **Exit advisor** with a regime-adaptive take-profit: take ~70–80 % of max profit in a bull regime, ~50–60 % when the market is choppy, never sit on a winner until expiry.
 - **Missing take-profit order alarm** *(tastytrade)*: a red bar the moment a position has no working GTC exit.
 - **Credit-spread mistake detector**, **concentration**, **correlation** and **liquidity** checks, position sizing as % of NLV, cash-reserve guard.
-- **Pre-trade checkup** — a four-layer gate you run *before* opening: trend → touch of support/resistance → IV & earnings → macro calendar. It exists to create friction on purpose.
+- **Pre-trade checkup** — a four-layer gate you run *before* opening (`/pretrade-checkup`): trend → touch of support/resistance → IV & earnings → macro calendar. It exists to create friction on purpose. The 🩺 button on Positions adds a checkup panel: correlation with what you hold, concentration, a mirror of your past mistakes, spread suggestions and a liquidity scan.
 - **Risk radar**: today's news risk, event density for the next 30 days and a landmine calendar.
 - **Desktop and e-mail alerts** for take-profit hits, support/resistance touches, risk-radar spikes and big movers. Desktop notifications (macOS) fire even when the browser is closed, and with e-mail set up every alert also arrives in your inbox (macOS and Linux).
 
