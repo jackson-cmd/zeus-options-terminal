@@ -322,7 +322,7 @@ const HELP = {
     <p><b>列含义:</b><b>腿型</b> = 变体;<b>到期</b>(<code>d</code> = 剩余天数,<code>·月</code> = 标准月期权);<b>strikes</b> = 买腿 / 卖腿行权价;<b>借记</b> = 净付出权利金(每股);<b>最大亏</b> = 借记×100(=最坏全亏的钱);<b>最大盈</b> =(价差宽度−借记)×100;<b>R/R</b> = 赔率(最大盈 ÷ 最大亏,越高越好);<b>POP</b> = <b>盈利概率</b>(到期价越过盈亏平衡点的概率,用 long 腿隐波按 lognormal 估,绿≥50%);<b>BE vs今价</b> = 盈亏平衡点相对现价 %,<b>绿 = 平衡点在现价下方(更稳)</b>。</p>
     <p class="muted">注:R/R 高的 POP 通常低(赔率与概率反向),自己权衡 —— 高 POP 稳但赚得少,高 R/R 博但概率低。</p>
     <p><b>✓推荐:</b>看多 = 盈亏平衡 ≤ 今价里 R/R 最高那个(赌不跌破今价);看空 = R/R 最高。</p>
-    <p><span class="k">⚡Builder</span> = 一键把价差载入 Strategy Builder 看 / 下单(快捷键 <b>B</b>);<span class="k">📋</span> = 复制订单票;<span class="k">⚠️财报</span> = 到期前有财报。</p>
+    <p><span class="k">⚡模拟盘</span> = 一键把价差载入 模拟盘 看盈亏 / 模拟下单(快捷键 <b>B</b>);<span class="k">📋</span> = 复制订单票;<span class="k">⚠️财报</span> = 到期前有财报。</p>
     <div class="ex">止损按你的规矩:<b>整个价差净权利金的 50%</b>(看整体、不看单腿)。</div>` },
 
   finviz: { t: 'Finviz — 技术 / 表现 / 基本面', h: `
@@ -772,7 +772,7 @@ function recDetail(r) {
       '<td class="num">' + (c.pop != null ? '<b style="color:' + (c.pop >= 50 ? 'var(--green)' : c.pop >= 35 ? 'var(--gold)' : 'var(--red)') + '">' + c.pop + '%</b>' : '—') + '</td>' +
       '<td class="num" style="color:' + (beOk ? 'var(--green)' : 'var(--red)') + '">' + (c.be_vs_spot_pct > 0 ? '+' : '') + c.be_vs_spot_pct + '%</td>' +
       '<td>' + (c.earnings_warn ? '<span style="color:var(--red)">⚠️财报</span>' : '<span class="muted">—</span>') +
-      ' <button onclick="openInBuilder(\'' + r.ticker + '\',\'' + c.expiration + '\',\'' + rec.dir + '\',' + c.long_strike + ',' + c.short_strike + ')" style="font-size:9px;background:#1f6feb;color:#fff;border:none;border-radius:3px;padding:2px 6px;cursor:pointer;margin-right:3px" title="一键载入 Strategy Builder 查看/下单">⚡Builder</button>' +
+      ' <button onclick="openInBuilder(\'' + r.ticker + '\',\'' + c.expiration + '\',\'' + rec.dir + '\',' + c.long_strike + ',' + c.short_strike + ')" style="font-size:9px;background:#1f6feb;color:#fff;border:none;border-radius:3px;padding:2px 6px;cursor:pointer;margin-right:3px" title="载入模拟盘">⚡模拟盘</button>' +
       ' <code style="font-size:9px;background:var(--bg3);padding:1px 4px;border-radius:3px;cursor:pointer" title="' + c.ticket + '(点击复制)" onclick="navigator.clipboard&&navigator.clipboard.writeText(this.title.split(\'(\')[0].trim())">📋</code></td></tr>';
   }).join('');
   return '<div style="min-width:430px"><h4>期权推荐 · ' + (isBull ? '📈 Bull Call(ATM/+10%·+5% · 35-45 DTE)' : '📉 看空(不推荐开单)') + ' · ' + rec.n + ' 个候选 ' + hIcon('rec') + '</h4>' +
@@ -1102,23 +1102,22 @@ async function eodCrawlPoll() {
 }
 
 // ═══════════════ 单票详情页(TA + Digest 新闻 + Finviz)═══════════════
-// 一键把一个推荐价差载入主页面的 Strategy Builder(本页是 /ta/ iframe,SB 在 parent)。
+// 一键把一个推荐价差载入主页面的 🧪 模拟盘(本页是 /ta/ iframe,模拟盘 PT 在 parent),按实时 mid 模拟下单。
 function openInBuilder(ticker, exp, dir, longK, shortK, entryNet) {
   const type = (dir === 'bear') ? 'P' : 'C';
   const legs = [{ type: type, strike: +longK, qty: 1 }, { type: type, strike: +shortK, qty: -1 }];
   const spec = { ticker: ticker, expiration: exp, legs: legs };
-  if (entryNet != null && !isNaN(+entryNet)) spec.entryNet = +entryNet;   // paper 入场借记 → 实时 PnL 基准
+  if (entryNet != null && !isNaN(+entryNet)) spec.entryNet = +entryNet;
   try {
     const P = window.parent;
-    if (P && P.SB && typeof P.SB.loadSpec === 'function') {
-      if (typeof P.switchTopTab === 'function') P.switchTopTab('builder');
-      P.SB.loadSpec(spec);
+    if (P && P.PT && typeof P.PT.loadSpec === 'function') {
+      P.PT.loadSpec(spec);
     } else {
-      alert('Strategy Builder 不可用(请在 PWA 主页面内的 TA tab 打开,而非单独开 /ta/)');
+      alert('模拟盘不可用:请在主页面里打开 TA 详情。Paper Trade is only available when the TA page is opened from the main window.');
     }
-  } catch (e) { alert('打开 Builder 失败: ' + e); }
+  } catch (e) { alert('打开模拟盘失败: ' + e); }
 }
-// 详情页快捷键:B = 把主推荐价差一键加入 Strategy Builder
+// 详情页快捷键:B = 把主推荐价差一键载入模拟盘
 if (!window._taKeyBound) {
   window._taKeyBound = true;
   document.addEventListener('keydown', function (e) {
@@ -1190,7 +1189,7 @@ function renderTaDetail(sym, data, fv) {
   let h = tdHeader(sym, data, r);
   if (window._tdPrimary) {
     const p = window._tdPrimary;
-    h += '<div style="margin-top:6px"><button onclick="openInBuilder(\'' + p.ticker + '\',\'' + p.exp + '\',\'' + p.dir + '\',' + p.longK + ',' + p.shortK + ')" style="background:#1f6feb;color:#fff;border:none;border-radius:6px;padding:6px 12px;cursor:pointer;font-weight:700">⚡ 加入 Strategy Builder</button> <span class="muted" style="font-size:11px">主推荐 ' + (p.dir === 'bull' ? '📈BCS' : '📉BPS') + ' ' + p.longK + '/' + p.shortK + ' · exp ' + p.exp + ' · 快捷键 <b>B</b></span></div>';
+    h += '<div style="margin-top:6px"><button onclick="openInBuilder(\'' + p.ticker + '\',\'' + p.exp + '\',\'' + p.dir + '\',' + p.longK + ',' + p.shortK + ')" style="background:#1f6feb;color:#fff;border:none;border-radius:6px;padding:6px 12px;cursor:pointer;font-weight:700">⚡ 载入模拟盘</button> <span class="muted" style="font-size:11px">主推荐 ' + (p.dir === 'bull' ? '📈BCS' : '📉BPS') + ' ' + p.longK + '/' + p.shortK + ' · exp ' + p.exp + ' · 快捷键 <b>B</b></span></div>';
   }
   h += '<div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start;margin-top:10px">';
   h += '<div style="flex:2;min-width:520px">' + (r ? detailHtml(r)
