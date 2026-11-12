@@ -83,7 +83,7 @@ const T = {
   save: ['保存', 'Save'], saved: ['已保存', 'Saved'], saving: ['保存中…', 'Saving…'],
   set: ['已设置', 'set'], unset: ['未设置', 'not set'], clear: ['清除', 'Clear'],
   keep: ['留空 = 保持不变', 'leave empty to keep'],
-  test: ['测试连接', 'Test connection'], testing: ['测试中…', 'Testing…'],
+  test: ['测试连接', 'Test connection'], testing: ['测试中…', 'Testing…'], testmail: ['发一封测试邮件', 'Send a test e-mail'],
   broker: ['券商', 'Broker'], benzinga: ['Benzinga', 'Benzinga'], ai: ['AI', 'AI'], news: ['免费新闻源', 'Free news'],
   mode_tt: ['tastytrade 实时', 'tastytrade live'], mode_manual: ['手动上传模式', 'Manual upload mode'],
   connected: ['已连接', 'connected'], notconnected: ['未连接', 'not connected'], off: ['关闭', 'off'],
@@ -183,7 +183,7 @@ function field(key, s) {
   }
   return '<div class="row"><label>' + esc(label) + labelEn + (help ? '<div class="help">' + esc(help) + '</div>' : '') + '</label><div>' + input + '</div></div>';
 }
-const TESTS = { broker: 'tastytrade', news: 'news', ai: 'ai' };
+const TESTS = { broker: 'tastytrade', news: 'news', ai: 'ai', email: 'email' };
 function renderSection() {
   const g = (VIEW.groups || []).find(x => x[0] === ACTIVE) || VIEW.groups[0];
   const keys = Object.keys(VIEW.settings).filter(k => VIEW.settings[k].group === g[0]);
@@ -191,9 +191,10 @@ function renderSection() {
   if (g[0] === 'news') h += '<p class="intro">' + pickBlock('Benzinga Pro 负责实时 Digest、盘前、市场事件和信号。不填也能用:Digest 自动切到免费双语新闻源 Finviz + WSJ + MarketWatch。', 'Benzinga Pro powers the live digest, pre-market, market events and signals. Without it, the Digest runs on the free bilingual wire: Finviz + WSJ + MarketWatch.') + '</p>';
   if (g[0] === 'ai') h += '<p class="intro">' + pickBlock('自带模型。什么都不配,AI 按钮会提示去设置;其余功能不依赖 AI。', 'Bring your own model. With nothing configured every AI button simply says so; the rest of ZEUS works without AI.') + '</p>';
   if (g[0] === 'broker') h += '<p class="intro">' + pickBlock('连接 tastytrade 得到实时持仓、实时报价推送和自动交易日记;留空则使用下方的手动上传模式。', 'Connect tastytrade for live positions, streaming quotes and automatic journal sync. Leave it empty to use manual upload mode below.') + '</p>';
+  if (g[0] === 'email') h += '<p class="intro">' + pickBlock('填好并保存后，每个桌面提醒（止盈、漏挂 GTC、风险雷达、支撑阻力、AI 选股……）都会同时发一封邮件。同一条提醒 30 分钟内只发一次，每小时最多 20 封。Linux 没有桌面通知，也能靠邮件收到提醒；Windows 暂不支持。', 'Once this is filled in and saved, every desktop alert (take-profit, missing GTC, risk radar, support / resistance, AI picks…) is also sent by e-mail. The same alert goes out at most once per 30 minutes, and at most 20 alerts per hour. On Linux, which has no desktop notifications here, this is how alerts reach you; not available on Windows yet.') + '</p>';
   h += keys.map(k => field(k, VIEW.settings[k])).join('');
   h += '<div class="actions"><button class="primary" id="saveBtn">' + t('save') + '</button>';
-  if (TESTS[g[0]]) h += '<button id="testBtn">' + t('test') + '</button>';
+  if (TESTS[g[0]]) h += '<button id="testBtn">' + t(g[0] === 'email' ? 'testmail' : 'test') + '</button>';
   if (g[0] === 'news') h += '<button id="testBz">' + t('test') + ' · Benzinga</button>';
   h += '<span class="msg" id="msg"></span></div>';
   if (g[0] === 'general') h += '<div class="note">' + tb('restart') + '</div>';
