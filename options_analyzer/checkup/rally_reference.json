@@ -1,0 +1,451 @@
+{
+ "_note": "大涨规律(research/rally_events 的 WIIM 实证蒸馏)。改结论同步这里 + 重跑 build_rally_reference.py。",
+ "meta": {
+  "source": "Benzinga WIIM「Why Is It Moving」~2019→今",
+  "universe_n": 25650,
+  "bigup_def": "当日收→收 ≥ +5%",
+  "bigup_base": 0.1933,
+  "kw_base": 0.1703,
+  "market_range": [
+   "2011-01-04",
+   "2026-06-12"
+  ],
+  "market_base_up1": 0.1272
+ },
+ "composition": [
+  {
+   "cause": "财报",
+   "key": "earnings",
+   "share": 0.2872,
+   "n": 1424,
+   "day": 9.8,
+   "next_win": 0.485,
+   "fwd5": 0.22,
+   "nonfund": false
+  },
+  {
+   "cause": "分析师升级",
+   "key": "analyst",
+   "share": 0.123,
+   "n": 610,
+   "day": 8.5,
+   "next_win": 0.474,
+   "fwd5": 0.69,
+   "nonfund": false
+  },
+  {
+   "cause": "板块抱团",
+   "key": "sector_sympathy",
+   "share": 0.1013,
+   "n": 502,
+   "day": 8.2,
+   "next_win": 0.476,
+   "fwd5": 0.16,
+   "nonfund": true
+  },
+  {
+   "cause": "FDA/药",
+   "key": "fda_drug",
+   "share": 0.0672,
+   "n": 333,
+   "day": 11.9,
+   "next_win": 0.462,
+   "fwd5": 2.4,
+   "nonfund": false
+  },
+  {
+   "cause": "无新闻·纯动量",
+   "key": "no_news_momentum",
+   "share": 0.0613,
+   "n": 304,
+   "day": 9.8,
+   "next_win": 0.434,
+   "fwd5": 1.68,
+   "nonfund": true
+  },
+  {
+   "cause": "订单/合同/中标",
+   "key": "deal_contract",
+   "share": 0.0585,
+   "n": 290,
+   "day": 11.1,
+   "next_win": 0.51,
+   "fwd5": 1.47,
+   "nonfund": false
+  },
+  {
+   "cause": "产品/AI",
+   "key": "product_ai",
+   "share": 0.0565,
+   "n": 280,
+   "day": 13.1,
+   "next_win": 0.461,
+   "fwd5": 2.41,
+   "nonfund": false
+  },
+  {
+   "cause": "宏观驱动",
+   "key": "macro_driven",
+   "share": 0.0555,
+   "n": 275,
+   "day": 8.1,
+   "next_win": 0.447,
+   "fwd5": 0.13,
+   "nonfund": true
+  },
+  {
+   "cause": "纯随大盘",
+   "key": "market_beta",
+   "share": 0.0369,
+   "n": 183,
+   "day": 7.7,
+   "next_win": 0.443,
+   "fwd5": -0.84,
+   "nonfund": true
+  },
+  {
+   "cause": "并购/被收购",
+   "key": "ma_buyout",
+   "share": 0.0333,
+   "n": 165,
+   "day": 10.5,
+   "next_win": 0.564,
+   "fwd5": 1.35,
+   "nonfund": false
+  },
+  {
+   "cause": "加密/囤币",
+   "key": "crypto",
+   "share": 0.0311,
+   "n": 154,
+   "day": 14.5,
+   "next_win": 0.422,
+   "fwd5": 5.79,
+   "nonfund": false
+  },
+  {
+   "cause": "维权/内部增持",
+   "key": "activist_insider",
+   "share": 0.0143,
+   "n": 71,
+   "day": 10.7,
+   "next_win": 0.535,
+   "fwd5": 0.26,
+   "nonfund": false
+  },
+  {
+   "cause": "增发/融资",
+   "key": "offering",
+   "share": 0.0137,
+   "n": 68,
+   "day": 15.1,
+   "next_win": 0.279,
+   "fwd5": -6.02,
+   "nonfund": false
+  },
+  {
+   "cause": "分拆/纳指/拆股",
+   "key": "corp_action",
+   "share": 0.0117,
+   "n": 58,
+   "day": 10.8,
+   "next_win": 0.466,
+   "fwd5": 0.05,
+   "nonfund": false
+  },
+  {
+   "cause": "散户/meme",
+   "key": "retail_meme",
+   "share": 0.0117,
+   "n": 58,
+   "day": 18.3,
+   "next_win": 0.448,
+   "fwd5": 6.74,
+   "nonfund": false
+  },
+  {
+   "cause": "高管喊话",
+   "key": "exec_comment",
+   "share": 0.0095,
+   "n": 47,
+   "day": 8.1,
+   "next_win": 0.617,
+   "fwd5": 0.58,
+   "nonfund": false
+  },
+  {
+   "cause": "法律/监管",
+   "key": "legal_reg",
+   "share": 0.0089,
+   "n": 44,
+   "day": 10.4,
+   "next_win": 0.318,
+   "fwd5": -0.03,
+   "nonfund": false
+  },
+  {
+   "cause": "指引上调",
+   "key": "guidance",
+   "share": 0.0087,
+   "n": 43,
+   "day": 8.7,
+   "next_win": 0.628,
+   "fwd5": 3.94,
+   "nonfund": false
+  }
+ ],
+ "catalyst_lift": [
+  {
+   "cause": "加密/囤币",
+   "key": "crypto",
+   "lift": 2.38,
+   "p_bigup": 0.3974,
+   "n": 385,
+   "p": 0.0
+  },
+  {
+   "cause": "散户/meme",
+   "key": "retail_meme",
+   "lift": 2.27,
+   "p_bigup": 0.3835,
+   "n": 133,
+   "p": 0.0
+  },
+  {
+   "cause": "订单/合同/中标",
+   "key": "deal_contract",
+   "lift": 1.98,
+   "p_bigup": 0.3275,
+   "n": 690,
+   "p": 0.0
+  },
+  {
+   "cause": "维权/内部增持",
+   "key": "activist_insider",
+   "lift": 1.96,
+   "p_bigup": 0.3333,
+   "n": 51,
+   "p": 0.0019
+  },
+  {
+   "cause": "分拆/纳指/拆股",
+   "key": "corp_action",
+   "lift": 1.81,
+   "p_bigup": 0.3077,
+   "n": 104,
+   "p": 0.0002
+  },
+  {
+   "cause": "分析师升级",
+   "key": "analyst",
+   "lift": 1.67,
+   "p_bigup": 0.269,
+   "n": 2208,
+   "p": 0.0
+  },
+  {
+   "cause": "并购/被收购",
+   "key": "ma_buyout",
+   "lift": 1.62,
+   "p_bigup": 0.2727,
+   "n": 550,
+   "p": 0.0
+  },
+  {
+   "cause": "产品/AI",
+   "key": "product_ai",
+   "lift": 1.54,
+   "p_bigup": 0.2571,
+   "n": 805,
+   "p": 0.0
+  },
+  {
+   "cause": "FDA/药",
+   "key": "fda_drug",
+   "lift": 1.33,
+   "p_bigup": 0.2218,
+   "n": 1474,
+   "p": 0.0
+  },
+  {
+   "cause": "无新闻·纯动量",
+   "key": "no_news_momentum",
+   "lift": 1.27,
+   "p_bigup": 0.2132,
+   "n": 1304,
+   "p": 0.0
+  },
+  {
+   "cause": "增发/融资",
+   "key": "offering",
+   "lift": 1.22,
+   "p_bigup": 0.2071,
+   "n": 309,
+   "p": 0.0831
+  },
+  {
+   "cause": "纯随大盘",
+   "key": "market_beta",
+   "lift": 1.15,
+   "p_bigup": 0.1946,
+   "n": 663,
+   "p": 0.0919
+  },
+  {
+   "cause": "板块抱团",
+   "key": "sector_sympathy",
+   "lift": 1.11,
+   "p_bigup": 0.1867,
+   "n": 2121,
+   "p": 0.0356
+  },
+  {
+   "cause": "法律/监管",
+   "key": "legal_reg",
+   "lift": 0.96,
+   "p_bigup": 0.1636,
+   "n": 165,
+   "p": 0.8194
+  },
+  {
+   "cause": "财报",
+   "key": "earnings",
+   "lift": 0.86,
+   "p_bigup": 0.1548,
+   "n": 9171,
+   "p": 0.0
+  },
+  {
+   "cause": "宏观驱动",
+   "key": "macro_driven",
+   "lift": 0.67,
+   "p_bigup": 0.1156,
+   "n": 1159,
+   "p": 0.0
+  },
+  {
+   "cause": "指引上调",
+   "key": "guidance",
+   "lift": 0.57,
+   "p_bigup": 0.0973,
+   "n": 226,
+   "p": 0.0034
+  }
+ ],
+ "follow_through": {
+  "best": [
+   {
+    "cause": "指引上调",
+    "next_win": 0.628,
+    "fwd5": 3.94
+   },
+   {
+    "cause": "高管喊话",
+    "next_win": 0.617,
+    "fwd5": 0.58
+   },
+   {
+    "cause": "并购/被收购",
+    "next_win": 0.564,
+    "fwd5": 1.35
+   },
+   {
+    "cause": "维权/内部增持",
+    "next_win": 0.535,
+    "fwd5": 0.26
+   },
+   {
+    "cause": "订单/合同/中标",
+    "next_win": 0.51,
+    "fwd5": 1.47
+   }
+  ],
+  "worst": [
+   {
+    "cause": "增发/融资",
+    "next_win": 0.279,
+    "fwd5": -6.02
+   },
+   {
+    "cause": "纯随大盘",
+    "next_win": 0.443,
+    "fwd5": -0.84
+   },
+   {
+    "cause": "法律/监管",
+    "next_win": 0.318,
+    "fwd5": -0.03
+   },
+   {
+    "cause": "分拆/纳指/拆股",
+    "next_win": 0.466,
+    "fwd5": 0.05
+   }
+  ]
+ },
+ "market_drivers": {
+  "base_up1": 0.1272,
+  "base_up2": 0.0232,
+  "real_bull": [
+   {
+    "event": "降息/鸽派",
+    "lift": 1.24,
+    "p_up": 0.152,
+    "mean": 0.127,
+    "n": 638
+   },
+   {
+    "event": "财报季普涨",
+    "lift": 1.39,
+    "p_up": 0.1661,
+    "mean": 0.108,
+    "n": 632
+   },
+   {
+    "event": "通胀降温",
+    "lift": 1.32,
+    "p_up": 0.1647,
+    "mean": 0.096,
+    "n": 249
+   },
+   {
+    "event": "刺激/流动性",
+    "lift": 1.26,
+    "p_up": 0.1553,
+    "mean": 0.057,
+    "n": 470
+   }
+  ],
+  "vol_regime": [
+   {
+    "event": "疫情",
+    "lift": 2.01,
+    "p_up": 0.2346,
+    "mean": 0.063,
+    "n": 341
+   },
+   {
+    "event": "VIX飙升",
+    "lift": 1.72,
+    "p_up": 0.2167,
+    "mean": -0.108,
+    "n": 60
+   },
+   {
+    "event": "美债收益率",
+    "lift": 1.56,
+    "p_up": 0.1927,
+    "mean": -0.237,
+    "n": 218
+   }
+  ]
+ },
+ "key_rules": [
+  "① 约1/4的单票大涨【没有公司催化剂】(板块抱团10%+无新闻动量6%+宏观5.5%+纯随大盘3.7%=25%)。这类'假大涨'续涨最差(纯随大盘5日 -0.8%)——别当真催化剂去追。",
+  "② 含金量(单条WIIM触发≥5%的概率 / 基准17%)排序:加密2.4× · meme 2.3× · 订单合同2.0× · 维权2.0× · 分析师升级1.7× · 并购1.6× · 产品AI 1.5× · FDA 1.3×。财报占大涨构成最高(28.7%)纯属基数大,单条只15.5%(0.86×,低于均值)。",
+  "③ 大涨后能不能追(次日续涨胜率):能追=指引上调63% · CEO喊话62% · 并购56% · 维权54% · 订单51%;掷硬币=财报48% · 分析师47% · FDA46%;别追=增发28%(5日-6%崩) · 法律32% · 纯随大盘44%。多数大涨次日轻微回吐。",
+  "④ 大盘:UP-lift最高的疫情2.0×/VIX1.7×/美债1.6×其实是【高波动天】(大涨大跌都扎堆,均值≈0),不是看涨信号别误读。",
+  "⑤ 真·利多宏观(lift>1且均值为正):降息/鸽派(+0.13%/天最干净) · 通胀降温(+0.10%) · 财报季普涨(+0.11%) · 刺激流动性。盯这4个=大盘顺风。",
+  "⑥ 对价差交易者:大涨多是一次性脉冲、次日就回吐 → 追高开 bull call 容易接盘。可持续的只有并购(锁定价)/指引上调/维权/订单这类真基本面改善;crypto·meme 5日还能漂(+6~7%)但波动太大,不适合限损价差。"
+ ]
+}

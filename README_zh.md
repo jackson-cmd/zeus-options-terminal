@@ -1,0 +1,264 @@
+<div align="center">
+
+# ⚡ ZEUS Terminal · 宙斯期权终端
+
+### 本地部署的全方位期权交易终端 · The self-hosted, all-in-one options trading terminal
+
+*驾驭希腊值。· Rule the Greeks.*
+
+**实时持仓与希腊值 · 盈亏与风险 · 出场纪律 · 四路新闻台（Benzinga · Finviz · 华尔街日报 · MarketWatch）· 选股 · 财报与 SEC 文件 · 不说假话的交易日记 —— 接 tastytrade API 或者一份 CSV 就能用，完全跑在你自己的电脑上，界面支持 中文 / 双语 / English。**
+
+[English → README.md](README.md) · [许可证](#-许可证禁止商业使用) · [快速开始](#-快速开始)
+
+![Python](https://img.shields.io/badge/python-3.10%2B-3776ab) ![本地部署](https://img.shields.io/badge/100%25-本地部署-2ea043) ![界面语言](https://img.shields.io/badge/界面-中文%20%7C%20双语%20%7C%20English-e3b341) ![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial-b31b1b)
+
+</div>
+
+---
+
+## 写在前面
+
+ZEUS Terminal（宙斯期权终端）是我给自己做的网站。前前后后做了半年，到现在天天用它交易已经一年多了。
+
+一开始它只是给我在 tastytrade 上的价差算盈亏。后来每遇到一个真实的交易问题，我就补一块功能，慢慢长成了一个部署在我自己电脑上的全方位期权交易终端：每个仓位实时定价、带希腊值和概率；出场规则会在我重犯同一个错之前把我拦下；新闻台同时读 Benzinga、Finviz、华尔街日报和 MarketWatch，中英双语；选股页是我真正每天看的 K 线墙；财报和 SEC 文件放在一处；交易日记会把我自己的交易真相摆在面前。
+
+它陪我经历过大涨、大跌和一个又一个财报季，我遇到的 bug 几乎都修掉了。现在把它交出来。**里面没有任何我的信息**：没有账号、没有交易、没有密钥。你用你自己的，全部只存在你自己的电脑上。
+
+**能免费的都免费。** 平时要花钱买的东西，比如期权报价、新闻终端、选股器、交易日记软件，在这里基本都能本地免费用：期权行情走 Cboe 的延迟数据，新闻走 Finviz、华尔街日报和 MarketWatch，交易用一份 CSV 就能导进来。有 tastytrade、Benzinga 账户接上会更顺，但都不是必需的。
+
+**自动化之外，自己也下场玩一玩。** 交易智能体（trading agents）正在把越来越多的交易自动化。与此同时，你完全可以自己下场玩一玩博弈：想清楚对手在做什么、价格里已经算进了什么，再做自己的决定。我用了一年多最大的体会是，决策的纪律和风险控制比找到好机会更重要：什么时候止盈、什么时候认错、一笔仓位最多亏多少。ZEUS 里很多功能就是为这个做的，比如出场规则、开单前体检、压力测试和交易日记。
+
+*为什么叫宙斯？* 期权靠希腊值定价 —— Delta、Gamma、Theta、Vega，而宙斯是希腊众神之王。这个终端，就是让你驾驭它们的地方。
+
+<table>
+<tr><td><img src="docs/screenshots/positions_zh.png" alt="持仓"><br><sub><b>持仓</b> —— 每个策略的实时盈亏、最大盈亏、获利概率、剩余天数</sub></td>
+<td><img src="docs/screenshots/detail_zh.png" alt="策略详情"><br><sub><b>策略详情</b> —— 按价格和日期的盈亏表、希腊值、获利概率</sub></td></tr>
+<tr><td><img src="docs/screenshots/picker_zh.png" alt="选股"><br><sub><b>选股</b> —— K 线墙，带支撑阻力和 EMA50/200</sub></td>
+<td><img src="docs/screenshots/digest_zh.png" alt="Digest"><br><sub><b>Digest</b> —— Finviz、华尔街日报、MarketWatch，每条标题配中文翻译</sub></td></tr>
+</table>
+
+<sub>截图里的交易和持仓全部是编造的演示数据（免费手动模式）；行情、新闻和 SEC 文件是截图当天的公开数据。全部场景见 <a href="#-截图一览">📸 截图一览</a>。</sub>
+
+---
+
+## 两种玩法
+
+| | **tastytrade API** —— *推荐，最顺滑* | **免费模式** —— *不需要券商账户* |
+|---|---|---|
+| 持仓 | 从你的账户实时拉取 | 上传 CSV 或手动录入（**股票和期权都支持**） |
+| 报价 | DXLink 实时推送，亚秒级 | 期权用 Cboe 延迟行情（免费，约延迟 15 分钟；收盘后仍保留收盘买卖价、隐波和希腊值），股票用 Yahoo Finance，Yahoo 限流时自动改用 Finviz |
+| 成交、到期、行权 | 自动入账 | 按你的成交 FIFO 回放；过期期权按内在价值自动结算 |
+| 交易日记 | 每小时自动同步 | 上传后立刻重算 |
+| 购买力、在途订单、漏挂止盈单提醒 | ✅ | — |
+| 其他所有功能（选股、Digest、事件、日记分析、AI……） | ✅ | ✅ |
+
+> 有 tastytrade 账户就连上它。整个终端就是围绕这条数据流设计的：盈亏随每一笔成交跳动，成交真实，什么都不用维护。免费模式是为了让任何券商的用户都能用上它。
+
+**Benzinga 也是可选的。** 有 Benzinga Pro 登录，就有 Benzinga 实时新闻、盘前点评、市场事件和实时信号。没有的话，Digest 自动跑在**免费双语新闻源：Finviz + 华尔街日报 + MarketWatch** 上。
+
+---
+
+## 🗺️ 功能全景
+
+### ⚔️ 持仓 —— 指挥中心
+- **自动识别所有策略**：垂直价差、日历、对角、铁鹰、蝶式、裸腿和备兑、股票。按开仓那一单把各条腿归到一起，分批建仓、移仓也不会拆散。
+- **和券商对得上的实时盈亏**：每条腿按市价估值，今日盈亏以官方昨收为基准，总回报同时显示金额和百分比。
+- **一眼看清风险**：最大盈利、最大亏损、盈亏平衡点和距离、获利概率、剩余天数、离满利的进度条，所有仓位一张表、随意排序。
+- **状态灯**：🔴 深亏 · 🔵 该止盈 · 🟡 接近目标 · 🟢 持有，点一下就筛。
+- **单个策略详情**：不同价格和日期的完整盈亏表、盈亏曲线、隐波可调、中间价/对手价切换、TradingView 图表，以及每条腿的希腊值（Δ Γ Θ Vega）和考虑偏斜、按 vega 加权的价差隐波。
+- **压力测试**：1σ / 2σ 波动、VaR 95%、CVaR 95%、最坏情况、到期日历、情景滑杆、整个账户的盈亏概率。
+- 一键**隐私模糊**（录屏、分享屏幕用），**紧凑**和**冻结**视图，可以像应用一样装到电脑上（**PWA**）。
+
+### 🩺 纪律引擎 —— 真正帮你省钱的部分
+- **出场顾问**，止盈线随市场状态自适应：牛市吃到最大利润的 70–80% 就走，震荡市 50–60%，绝不把赚钱的单子死扛到到期。
+- **漏挂止盈单警报**（tastytrade）：某个仓位没有挂 GTC 止盈单，顶部立刻出现红条。
+- **卖方价差错误检测**、**集中度**、**相关性**、**流动性**体检，单笔仓位占净值比例、现金底线守卫。
+- **开单前体检**：开仓之前跑的四层闸门 —— 趋势 → 是否触及支撑阻力 → 隐波和财报 → 宏观日历。它存在的唯一目的就是故意制造摩擦。
+- **风险雷达**：今日新闻风险、未来 30 天事件密度、地雷日历。
+- **桌面提醒**（macOS）：触及止盈、碰到支撑阻力、风险雷达报警、大幅异动，浏览器关着也会弹。
+
+### 🎯 选股 —— 找下一笔
+- **K 线墙**：一整面日线蜡烛图墙，带 EMA50/200、多周期支撑阻力、黄金区间和标记；可按市值、今日涨跌、TA 评分排序，按财报日期和多空形态筛选。
+- **技术扫描**：交易日定时扫描整个票池（MACD、RSI、量能、均线突破，带滚动前向胜率），完整表格在 `/ta/` 页。
+- **AI 选股**：趋势跟踪和回踩抄底两套候选，附行权价、获利概率和可直接复制的挂单；配了 AI 之后，再由 AI 结合新闻和财报复核排序。
+- **Barchart 榜单**（可选，用你自己的 Barchart 账户）：对保存的筛选器和信号页取交集或并集。
+- **单票深挖**：图表、基本面、根据近期新闻生成的多空叙事、公司简介、历次财报反应。
+
+### 🧭 市场判断 —— 大局观，不带情绪
+- **AI 市场判断**：坏消息有多坏、价格已经反映了多少；对照历史基准率的大跌概率；三层支撑；以及什么情况会证明这个判断是错的。不贴「看多 / 看空」标签，只给概率和证伪条件。
+- **期权情绪**：按板块看 IV 百分位、25Δ 偏斜百分位、Put/Call 成交量和持仓量百分位，都是和自己的历史比。数据来自每日期权链归档（在 `/ta/` 页运行），要攒几周历史，百分位才有意义。
+
+### 📋 Digest —— 四路新闻，两种语言
+- **Benzinga**（Pro 登录）：实时推送的新闻流、盘前点评和期权流报告、Benzinga 自带的分类。
+- **免费双语新闻源**：**Finviz**（免费页面，或者填你的 Elite token）、**华尔街日报**（市场、商业、科技、国际）、**MarketWatch**，每 5 分钟更新，每条标题都配中文翻译。
+- **来源开关**自由组合几路新闻；**必读**只看强催化剂和大宏观；**去噪**过滤标题党模板；**只看清单**；按情绪、分类、代码筛选。
+- **AI 总结**：把当天（或任意筛选结果）的新闻合并去重，两分钟读完；有新消息时增量更新。
+- **按代码排行**：1/3/7/30 天每只票的新闻数，带实时价格；**持仓新闻**：只看和你持仓有关的。
+- **日历 / 历史**搜索所有存过的日子；**❤️ 收藏**跨天保留。
+- **大盘图**：SPY/QQQ 全历史蜡烛图，每个大转折都有标记 —— 点一下，AI 告诉你是哪条消息推动的。
+
+### 📅 事件
+- **财报日历**：你的票池和持仓，盘前 / 盘后时间，加上高影响宏观日期。
+- **企业事件**（Benzinga）：IPO、并购、增发、拆股、异动期权。
+- **SEC 文件阅读器**：10-K / 10-Q / 8-K 直接取自 EDGAR，中英对照；还有**财报电话会文字稿**（来自公开的电话会录音，需要 `yt-dlp`）。
+- 任何页面都能打开**风险雷达**。
+
+### 📓 交易日记 —— 照妖镜
+- **总览**：胜率、盈亏比、平均每笔、最大回撤、已平仓与持仓盈亏、费用、月度目标、资金曲线。
+- **日历**、**全部交易**（每条腿、每次成交）、**分析**（按代码、持有时间、开仓理由的盈亏，分布图，累计曲线）。
+- **假设引擎**：在你自己的交易上算，早点止盈、晚点止盈、或者扛到到期，结果会怎样。
+- **AI 复盘**：AI 教练读你的交易和笔记，告诉你哪些错一直在犯。
+- **决策日志**：每次开仓平仓记下理由、信心、情绪、信号来源，可以贴截图，事后看价格怎么走；漏写的会提醒你补。
+
+### 🌐 三种界面语言：中文 · 双语 · English
+- **中文** —— 原汁原味的界面：说明、提示和新闻翻译是中文；持仓表、策略详情、交易日记这类页面沿用交易软件里常见的英文标签（Max Profit、Win Rate……）。
+- **双语** —— 在中文界面上，中文的标签页、按钮、表头和字段旁边挂上对应的英文，鼠标悬停的提示里也附英文。适合边用边熟悉中英两套交易术语。
+- **English** —— 界面换成英文；单票详情页和少数标签仍是中文。
+- 顶栏随时切换。新闻以英文原文为主，每条标题下面配中文翻译（英文模式默认隐藏，点一下就显示）。AI 的回答跟着你的语言走。
+
+### 🤖 自带 AI
+你有哪个就用哪个：**Claude Code CLI**（用你自己的 Claude 订阅）、**Anthropic API key**，或者**任何 OpenAI 兼容接口**（OpenAI、DeepSeek、OpenRouter、本地 Ollama……）。什么都不配也能用，只是没有 AI 按钮。
+
+---
+
+## 📸 截图一览
+
+<sub>编造的演示交易（免费手动模式）；行情、新闻和 SEC 文件是公开数据。</sub>
+
+<table>
+<tr><td width="50%"><img src="docs/screenshots/positions_zh.png" alt="持仓"><br><sub><b>持仓</b> —— 实时盈亏、盈亏平衡距离、最大盈亏、获利概率、进度</sub></td>
+<td width="50%"><img src="docs/screenshots/detail_zh.png" alt="策略详情"><br><sub><b>策略详情</b> —— 按价格和日期的盈亏表、希腊值</sub></td></tr>
+<tr><td width="50%"><img src="docs/screenshots/risk_zh.png" alt="风险分析"><br><sub><b>风险分析</b> —— 压力测试、VaR / CVaR、整个账户按 Beta 加权的希腊值</sub></td>
+<td width="50%"><img src="docs/screenshots/checkup_zh.png" alt="开单前体检"><br><sub><b>开单前体检</b> —— 按流动性和赔率排好的价差推荐</sub></td></tr>
+<tr><td width="50%"><img src="docs/screenshots/picker_zh.png" alt="选股"><br><sub><b>选股</b> —— K 线墙，带支撑阻力和 EMA50/200</sub></td>
+<td width="50%"><img src="docs/screenshots/selector_zh.png" alt="AI 选股"><br><sub><b>AI 选股</b> —— 趋势和回踩候选，附行权价和可直接复制的挂单，不配 AI 也能用</sub></td></tr>
+<tr><td width="50%"><img src="docs/screenshots/ticker_zh.png" alt="单票详情"><br><sub><b>单票详情</b> —— K 线、Finviz 技术面和基本面、新闻</sub></td>
+<td width="50%"><img src="docs/screenshots/digest_zh.png" alt="Digest"><br><sub><b>Digest</b> —— Finviz、华尔街日报、MarketWatch，登录 Benzinga 后再加一路</sub></td></tr>
+<tr><td width="50%"><img src="docs/screenshots/chart_zh.png" alt="大盘图"><br><sub><b>大盘图</b> —— SPY / QQQ 全历史蜡烛图</sub></td>
+<td width="50%"><img src="docs/screenshots/calendar_zh.png" alt="日历"><br><sub><b>日历</b> —— 财报和高影响宏观日期</sub></td></tr>
+<tr><td width="50%"><img src="docs/screenshots/sec_zh.png" alt="SEC 文件阅读器"><br><sub><b>SEC 文件阅读器</b> —— 10-K / 10-Q / 8-K 直接取自 EDGAR</sub></td>
+<td width="50%"><img src="docs/screenshots/radar_zh.png" alt="风险雷达"><br><sub><b>风险雷达</b> —— 今日新闻风险和未来 30 天地雷日历</sub></td></tr>
+<tr><td width="50%"><img src="docs/screenshots/journal_zh.png" alt="交易日记"><br><sub><b>交易日记</b> —— 胜率、盈亏比、月度目标、资金曲线</sub></td>
+<td width="50%"><img src="docs/screenshots/analysis_zh.png" alt="日记分析"><br><sub><b>日记分析</b> —— 从你自己的交易里看出什么有效、什么无效</sub></td></tr>
+<tr><td width="50%"><img src="docs/screenshots/settings_zh.png" alt="设置"><br><sub><b>设置</b> —— 所有信息都在网页里填，保存的密钥只写不读</sub></td>
+<td width="50%"></td></tr>
+</table>
+
+---
+
+## 🚀 快速开始
+
+```bash
+git clone https://github.com/jackson-cmd/zeus-options-terminal
+cd zeus-options-terminal
+./start.sh          # macOS / Linux（Windows 双击 start.bat）
+```
+
+第一次运行会自动建虚拟环境、装好依赖（需要 Python 3.10+）。然后打开 **http://localhost:8765**，点右上角 **⚙ 设置**：
+
+1. **券商与交易** —— 粘贴 tastytrade OAuth 的 *client secret* 和 *refresh token*，**或者**上传你的交易 CSV。
+2. **新闻源** —— 粘贴 Benzinga Pro 的 cookie（可选）、Finviz Elite token（可选）。
+3. **AI** —— 选一个提供方（可选）。
+
+就这样，不用手改任何文件。8765 端口被占用？用 `PORT=8790 ./start.sh` 启动，或者在设置里改端口。
+
+### tastytrade 凭证在哪拿
+my.tastytrade.com → **Manage → API Access → OAuth Applications** → 新建一个应用（记下 *client secret*）→ **Manage → Create Grant**（勾选全部 scope）→ 复制 *refresh token*。两样粘进设置页，点 **测试连接**。
+
+---
+
+## 🔑 每一项设置能解锁什么
+
+| 设置 | 解锁 | 是否免费 |
+|---|---|---|
+| tastytrade OAuth（client secret + refresh token） | 实时持仓、实时报价推送、自动交易日记、购买力、在途订单 | 有 tastytrade 账户即免费 |
+| 手动交易（CSV / 表单） | 不连任何券商也有持仓、盈亏、日记和分析 | ✅ |
+| Benzinga Pro cookie | Benzinga 实时 Digest、盘前、市场事件、历史 | 需要 Benzinga Pro 订阅 |
+| Benzinga data API key | 实时信号流、扫描器 | 来自你的 Benzinga Pro 会话 |
+| Finviz Elite token | 通过官方导出接口拿 Finviz 新闻（不填则用免费页面） | 可选 |
+| AI 提供方 | AI 总结、市场判断、AI 选股、AI 复盘、持仓点评 | 用你自己的 |
+| Barchart 账号 | Barchart 筛选器和信号榜单 | 需要 Barchart 账户 |
+| 邮件（SMTP） | 邮件提醒 | ✅ |
+
+---
+
+## 📄 手动交易：CSV 格式
+
+在设置页下载模板（或者直接用 [`examples/trades_template.csv`](examples/trades_template.csv)）：
+
+```csv
+date,symbol,asset,side,effect,qty,price,fees,option_type,strike,expiration,multiplier,order_id,note
+2026-03-02 10:15,AAPL,stock,buy,open,50,231.40,0,,,,,,long stock
+2026-03-03 11:02,NVDA,option,buy,open,1,12.50,1.10,C,180,2026-04-17,100,nvda-bcs-1,bull call spread long leg
+2026-03-03 11:02,NVDA,option,sell,open,1,6.20,1.10,C,190,2026-04-17,100,nvda-bcs-1,bull call spread short leg
+```
+
+- `side`：buy / sell，也认券商简写 **BTO、STO、BTC、STC**，以及 "Buy to Open"、"Sell to Close" 这种写法。
+- `effect`：open / close，留空就自动判断。
+- 期权也可以只写一个代码：OCC（`AAPL  260618C00200000`）、紧凑写法（`AAPL260618C200`）或券商描述（`AAPL 06/18/2026 200.00 C`）。
+- `order_id` 相同（或者同一分钟成交）的几条腿会显示成一个策略。
+- **tastytrade 导出的 CSV**，以及大多数带 日期 / 代码 / 买卖 / 数量 / 价格 列的券商导出，都能直接认。
+- 初始现金默认推算成「刚好能撑起你这些交易的最小账户」，在设置里填上你的真实数字更准。
+
+---
+
+## 🔒 隐私与安全
+
+- **一切都只在你的电脑上。** token、cookie、密码和上传的交易都存在 `~/.zeus-terminal/`（权限 600），从不放进代码仓库 —— `git push` 不可能把它们推出去。
+- **代码文件夹里只有代码。** 终端运行时写的所有东西 —— 持仓快照、交易日记和截图、新闻存档、缓存、下载、日志 —— 都写到 `~/.zeus-terminal/runtime/`。代码里的那些运行目录只是指向那里的链接，git 会忽略它们。
+- **安全地分享。** 用 `git push` 发布，或者用 `tools/export_clean_zip.sh` 打一个 zip，两种方式都只包含代码。不要把整个文件夹直接拖进网页、也不要自己手动打包。`tools/install_git_hook.sh` 会装一个本地的提交前检查：链接、数据文件、任何像密钥或 token 的字符串、你自己的主目录路径、登录名和 git 身份，一律拒绝提交。
+- 保存过的密钥对浏览器**只写不读**：设置接口只告诉你「已设置 / 未设置」，从不把密钥回传。
+- 服务默认只监听 **127.0.0.1**，拒绝陌生的 `Host` 头（防 DNS 重绑定），跨域请求只接受本机来源，写操作需要一个其他网站发不出来的请求头。
+- 没有任何遥测。应用只连接你自己接入的服务，以及公开行情数据（Cboe 延迟行情、Yahoo Finance、SEC EDGAR、Finviz、道琼斯 RSS）。
+- 免费数据会避开限流：公司资料（行业、细分行业、市值）从 Finviz 每次批量查 20 只；Yahoo Finance 一旦限流，股票报价自动改用 Finviz；一整条期权链只向 Cboe 请求一次，不再按到期日逐个请求 Yahoo。
+
+---
+
+## 🏗️ 架构
+
+```
+浏览器（PWA，中文 / 双语 / English）
+   │  WebSocket + REST
+   ▼
+FastAPI 服务 ── options_analyzer/optionstrat_server.py
+   ├─ 券商 ......... tastytrade REST + DXLink 推送      │  local_broker.py（手动模式，Cboe + Yahoo）
+   ├─ 新闻 ......... Benzinga（cookie / WS）            │  zeus_news.py（Finviz · WSJ · MarketWatch）
+   ├─ 选股 ......... heatmap/ · ta_screener/ · ai_picks/ · stock_selector/ · barchart/
+   ├─ 市场判断 ..... market_brief/ · narratives/
+   ├─ 事件 ......... sec_filings/ · benzinga_market_events/ · trade_journal/calendar_events.py
+   ├─ 日记 ......... trade_journal/ · journal_review/ · journal_expiry_whatif/
+   ├─ 纪律 ......... options_analyzer/checkup/ · pre_trade_checkup/ · sr_alert/
+   ├─ AI ........... zeus_ai.py（Claude CLI · Anthropic · OpenAI 兼容）
+   └─ 设置 ......... zeus_config.py → ~/.zeus-terminal/config.json
+```
+
+运行时数据（K 线、缓存、新闻存档）写在 `~/.zeus-terminal/runtime/`，代码里 `data/` 这类目录只是指向那里的链接。配置也可以用环境变量给（`ZEUS_<KEY>`，比如 `ZEUS_TT_REFRESH_TOKEN`），设置文件夹可以用 `ZEUS_HOME` 换位置。
+
+---
+
+## ❓ 常见问题
+
+**一定要 tastytrade 吗？** 不用。免费模式通过 CSV 支持任何券商的股票和期权。tastytrade 只是最顺。
+
+**一定要 Benzinga 吗？** 不用。Digest 免费跑在 Finviz + 华尔街日报 + MarketWatch 上。
+
+**它会帮我下单吗？** 不会。ZEUS 只读取、分析和提醒，交易在你自己的券商里做。
+
+**Windows / Linux 能用吗？** 核心功能都能用，桌面通知只支持 macOS。
+
+**我的设置存在哪？** `~/.zeus-terminal/config.json`。删掉这个文件夹就什么都忘了。
+
+**收盘后第一次打开，选股页显示 0 只报价？** 点一下选股页的 **Refresh**，几秒钟就会补上最近一个交易日的收盘价。
+
+---
+
+## 📜 许可证：禁止商业使用
+
+ZEUS Terminal（宙斯期权终端）以 **[PolyForm Noncommercial License 1.0.0](LICENSE)** 发布。
+
+- ✅ 个人使用、学习、研究、业余交易、非营利用途。
+- ❌ **禁止商业使用** —— 不能拿去卖，不能基于它做收费服务，不能在公司业务里使用。
+
+**权利人请注意：** 如果你认为本仓库的任何内容侵犯了你的权利（商标、数据、服务条款或其他），**直接提 Issue**，相关内容会尽快移除。
+
+**免责声明。** 这是一个按原样分享的个人工具，不提供任何担保，**不构成任何投资建议**。期权交易有很大亏损风险，你要为自己的交易负责，也要遵守你接入的每个数据源和券商的服务条款。ZEUS Terminal 与 tastytrade、Benzinga、Cboe、Finviz、道琼斯 / 华尔街日报 / MarketWatch、Barchart、Yahoo、Anthropic 均无关联，也未获其认可；所有名称归各自所有者。

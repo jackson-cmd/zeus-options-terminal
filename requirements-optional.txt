@@ -1,0 +1,7 @@
+# Optional extras
+# Barchart screener / signal lists (needs a Barchart account) and Benzinga cookie export:
+playwright>=1.44          # then run:  python -m playwright install chromium
+# Offline (local) headline translation instead of Google/Bing:
+argostranslate>=1.9
+ctranslate2>=4
+sentencepiece>=0.2

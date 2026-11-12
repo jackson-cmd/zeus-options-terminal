@@ -1,0 +1,6 @@
+date,symbol,asset,side,effect,qty,price,fees,option_type,strike,expiration,multiplier,order_id,note
+2026-03-02 10:15,AAPL,stock,buy,open,50,231.40,0,,,,,,long stock
+2026-03-03 11:02,NVDA,option,buy,open,1,12.50,1.10,C,180,2026-04-17,100,nvda-bcs-1,bull call spread long leg
+2026-03-03 11:02,NVDA,option,sell,open,1,6.20,1.10,C,190,2026-04-17,100,nvda-bcs-1,bull call spread short leg
+2026-03-20 15:40,NVDA,option,sell,close,1,15.80,1.10,C,180,2026-04-17,100,nvda-bcs-2,take profit
+2026-03-20 15:40,NVDA,option,buy,close,1,8.05,1.10,C,190,2026-04-17,100,nvda-bcs-2,take profit

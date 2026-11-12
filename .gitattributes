@@ -1,0 +1,5 @@
+# keep line endings right on every OS
+*.bat     text eol=crlf
+*.sh      text eol=lf
+*.command text eol=lf
+*.png     binary

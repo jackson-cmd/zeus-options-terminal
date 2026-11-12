@@ -1,0 +1,64 @@
+# ── ZEUS Terminal: nothing personal ever goes into git ─────────────────────────
+# Settings, tokens, cookies, passwords and uploaded trades live in ~/.zeus-terminal/
+# and all runtime data lives in ~/.zeus-terminal/runtime/ — both outside this folder.
+# The runtime directories below are links to that place (or plain folders where links
+# are not allowed). Patterns have NO trailing slash so links are ignored too.
+data
+options_analyzer/data
+trade_journal/data
+pre_trade_checkup/data
+stock_picker/data
+eod_crawler/data_eod
+eod_crawler/logs
+barchart/downloads
+barchart/snapshots
+benzinga_digest/digests
+benzinga_digest/ai_summary
+benzinga_digest/pivot_summary
+trading_assistant/data
+trading_assistant/reports
+winrate_scanner/data
+benzinga/data
+
+# any trade / journal dumps that end up here by habit
+trades_raw.json
+*.parquet
+*.zst
+*.jsonl
+*.sqlite
+*.db
+*.log
+logs/
+
+# credentials, in case someone drops a file here
+.env
+.env.*
+*.env
+keys.env
+*credentials*
+*cookies*.json
+*cookie*.txt
+*token*.json
+*token*.txt
+*secret*
+password*
+client_id.txt
+client_secret.txt
+refresh_token.txt
+data_apikey.txt
+*.pem
+*.key
+*.p12
+
+# python / node / editors / OS
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+node_modules/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+.ruff_cache/

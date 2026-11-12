@@ -1,0 +1,22 @@
+# ZEUS · core (Python 3.10+)
+fastapi>=0.110
+uvicorn>=0.29
+websockets>=12
+requests>=2.31
+httpx>=0.27
+pandas>=2.0
+numpy>=1.26
+scipy>=1.11
+pyarrow>=14
+zstandard>=0.22
+pydantic>=2.5
+yfinance>=0.2.54
+beautifulsoup4>=4.12
+lxml>=5
+finviz>=1.4
+pandas_market_calendars>=4.4
+pypdf>=4
+pytz>=2024.1
+tzdata>=2024.1
+duckdb>=1.0
+schedule>=1.2

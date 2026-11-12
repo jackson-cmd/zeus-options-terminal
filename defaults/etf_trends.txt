@@ -1,0 +1,52 @@
+# Heatmap ETF 趋势清单(非实时, 算 3天/7天/1月/3月/1年 收益强度 → leader/laggard)
+# 两类: ###SECTOR(板块 + 主题/资产) | ###GLOBAL(国家/全球指数)
+# 格式: TICKER|显示名  (期货不放这里)。可手动增删, 后端按文件 mtime 重读。
+###SECTOR
+XLF|Financials 金融
+XLE|Energy 能源
+XLI|Industrials 工业
+XLB|Materials 材料
+XLP|Cons Staples 必需消费
+XLY|Cons Disc 可选消费
+XLC|Communication 通信
+XLK|Technology 科技
+XLV|Healthcare 医疗
+XLU|Utilities 公用
+XLRE|Real Estate 地产
+SMH|Semiconductors 半导体
+SOXX|Semis 半导体
+XBI|Biotech 生物科技
+XHB|Homebuilders 房建
+XOP|Oil&Gas E&P 油气勘探
+XRT|Retail 零售
+GDX|Gold Miners 金矿
+TLT|20Y Treasury 长债
+HYG|High Yield 高收益债
+USO|Oil 原油
+GLD|Gold 黄金
+SLV|Silver 白银
+ARKK|ARK Innovation 创新
+IBIT|Bitcoin 比特币
+###GLOBAL
+SPY|S&P 500 标普
+QQQ|Nasdaq 100 纳指
+ONEQ|Nasdaq Composite 纳指综合
+DIA|Dow 道指
+IWM|Russell 2000 小盘
+RSP|S&P Equal-Weight 等权
+EFA|EAFE 发达市场
+VGK|Europe 欧洲
+EWG|Germany 德国
+EWU|UK 英国
+EPP|Pacific exJapan 亚太
+EWJ|Japan 日本
+EWY|South Korea 韩国
+EWT|Taiwan 台湾
+EWA|Australia 澳洲
+EWC|Canada 加拿大
+EEM|Emerging Mkts 新兴
+FXI|China Large 中国大盘
+EWZ|Brazil 巴西
+INDA|India 印度
+ASHR|China A 中国A股
+BKF|BRIC 金砖

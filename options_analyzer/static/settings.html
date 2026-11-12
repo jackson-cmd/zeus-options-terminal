@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ZEUS Terminal · Settings</title>
+<style>
+:root{--bg:#0d1117;--bg2:#161b22;--bg3:#1c2333;--border:#30363d;--text:#e6edf3;--text2:#8b949e;--muted:#6e7681;
+--green:#3fb950;--red:#f85149;--blue:#58a6ff;--yellow:#d29922;--accent:#1f6feb;--gold:#e3b341}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif}
+a{color:var(--blue)}
+header{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:12px;padding:12px 20px;background:var(--bg2);border-bottom:1px solid var(--border)}
+.brand{font-weight:800;letter-spacing:2px;font-size:16px}
+.brand span{color:var(--gold);margin-left:6px;letter-spacing:1px}
+.tag{color:var(--text2);font-size:12px}
+.sp{flex:1}
+button{font:inherit;cursor:pointer;border-radius:6px;border:1px solid var(--border);background:#21262d;color:var(--text);padding:6px 12px}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+button.ghost{background:transparent}
+button.danger{color:var(--red)}
+button:disabled{opacity:.5;cursor:default}
+main{max-width:1060px;margin:0 auto;padding:18px 16px 80px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin-bottom:18px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.card .k{color:var(--text2);font-size:11px;text-transform:uppercase;letter-spacing:.6px}
+.card .v{font-size:15px;font-weight:700;margin-top:4px}
+.ok{color:var(--green)}.warn{color:var(--yellow)}.bad{color:var(--red)}
+nav.tabs{display:flex;gap:4px;flex-wrap:wrap;margin:6px 0 14px}
+nav.tabs button{background:transparent;color:var(--text2)}
+nav.tabs button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+section{display:none;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:16px}
+section.on{display:block}
+h2{font-size:16px;margin:0 0 4px}
+.intro{color:var(--text2);font-size:12.5px;margin:0 0 14px}
+.row{display:grid;grid-template-columns:260px 1fr;gap:14px;padding:10px 0;border-top:1px solid #21262d}
+.row:first-of-type{border-top:none}
+.row label{font-weight:600;font-size:13px}
+.row .help{color:var(--muted);font-size:11.5px;margin-top:2px;font-weight:400}
+input,select,textarea{font:inherit;width:100%;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:7px 9px}
+textarea{min-height:84px;font-family:ui-monospace,Menlo,monospace;font-size:12px}
+.secret{display:flex;gap:6px;align-items:center}
+.pill{font-size:11px;padding:1px 8px;border-radius:10px;border:1px solid var(--border);white-space:nowrap}
+.pill.set{color:var(--green);border-color:#2ea04366}
+.pill.unset{color:var(--muted)}
+.actions{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap}
+.msg{font-size:12px;color:var(--text2)}
+.grid-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.grid-form label{font-size:11px;color:var(--text2);display:block;margin-bottom:2px}
+table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px}
+th,td{padding:6px 8px;border-bottom:1px solid #21262d;text-align:left;white-space:nowrap}
+th{color:var(--text2);font-weight:600;position:sticky;top:0;background:var(--bg2)}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+.tablewrap{max-height:420px;overflow:auto;border:1px solid #21262d;border-radius:8px}
+.drop{border:1px dashed var(--border);border-radius:10px;padding:16px;text-align:center;color:var(--text2)}
+.drop.hover{border-color:var(--blue);color:var(--blue)}
+.note{background:#0d1117;border:1px solid #21262d;border-radius:8px;padding:10px 12px;color:var(--text2);font-size:12px;margin:10px 0}
+.note b{color:var(--text)}
+.en{color:var(--text2);font-size:.92em;margin-top:3px}
+.lab-en{color:var(--text2);font-weight:500;font-size:11.5px}
+@media (max-width:720px){.row{grid-template-columns:1fr}header .tag{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">ZEUS Terminal<span>宙斯期权终端</span></div>
+  <div class="tag" data-i="tagline"></div>
+  <div class="sp"></div>
+  <select id="langBtn" title="界面语言 · Interface language" style="width:auto"><option value="zh">中文</option><option value="bi">双语 · Bilingual</option><option value="en">English</option></select>
+  <a href="/" id="backLink" style="text-decoration:none"><button class="primary" data-i="back"></button></a>
+</header>
+<main>
+  <div class="cards" id="cards"></div>
+  <nav class="tabs" id="tabs"></nav>
+  <div id="sections"></div>
+</main>
+<script>
+(function () {
+'use strict';
+const T = {
+  tagline: ['本地部署的全方位期权交易终端 · 账号只存在本机', 'Self-hosted options trading terminal · credentials stay on this computer'],
+  back: ['返回终端', 'Back to the terminal'],
+  save: ['保存', 'Save'], saved: ['已保存', 'Saved'], saving: ['保存中…', 'Saving…'],
+  set: ['已设置', 'set'], unset: ['未设置', 'not set'], clear: ['清除', 'Clear'],
+  keep: ['留空 = 保持不变', 'leave empty to keep'],
+  test: ['测试连接', 'Test connection'], testing: ['测试中…', 'Testing…'],
+  broker: ['券商', 'Broker'], benzinga: ['Benzinga', 'Benzinga'], ai: ['AI', 'AI'], news: ['免费新闻源', 'Free news'],
+  mode_tt: ['tastytrade 实时', 'tastytrade live'], mode_manual: ['手动上传模式', 'Manual upload mode'],
+  connected: ['已连接', 'connected'], notconnected: ['未连接', 'not connected'], off: ['关闭', 'off'],
+  restart: ['监听地址 / 端口改动需要重启服务后生效。', 'Restart the server for host/port changes to apply.'],
+  trades_title: ['手动交易(免费模式)', 'Manual trades (free mode)'],
+  trades_intro: ['没有 tastytrade 也能用:上传或录入你自己的股票和期权成交,系统按时间回放、FIFO 算出持仓、盈亏、现金和交易日记。期权报价来自 Cboe 延迟行情(免费,约延迟 15 分钟,收盘后保留收盘买卖价和隐波),股票报价来自 Yahoo Finance,限流时改用 Finviz。<b>最顺滑的体验仍然是连接 tastytrade API</b>:实时 DXLink 推送、真实成交、到期与行权自动入账。',
+                 'No tastytrade account? Upload or type in your own stock and option fills. ZEUS replays them in time order (FIFO) into positions, P/L, cash and the trade journal. Option quotes come from Cboe delayed quotes (free, ~15 min delayed; closing bid/ask and IV kept after the bell), stock quotes from Yahoo Finance with Finviz as backup. <b>The smoothest experience is still the tastytrade API</b>: live DXLink streaming, real fills, expirations and assignments booked automatically.'],
+  upload: ['上传 CSV', 'Upload CSV'], drop: ['把 CSV 拖到这里,或点击选择文件。支持 ZEUS 模板、tastytrade 导出 CSV,以及大多数带 日期/代码/买卖/数量/价格 列的券商导出。',
+        'Drop a CSV here or click to choose. Works with the ZEUS template, tastytrade CSV exports and most broker exports with date / symbol / side / quantity / price columns.'],
+  replace: ['替换全部已有交易', 'Replace all existing trades'],
+  template: ['下载模板', 'Download template'], export: ['导出我的交易', 'Export my trades'], clearall: ['清空全部', 'Delete all'],
+  addone: ['录入一笔', 'Add one trade'], add: ['添加', 'Add'],
+  f_date: ['成交时间', 'Date/time'], f_asset: ['品种', 'Asset'], f_symbol: ['代码', 'Symbol'], f_side: ['方向', 'Side'],
+  f_effect: ['开/平', 'Open/close'], f_qty: ['数量', 'Quantity'], f_price: ['成交价', 'Price'], f_fees: ['费用', 'Fees'],
+  f_type: ['看涨/看跌', 'Call/Put'], f_strike: ['行权价', 'Strike'], f_exp: ['到期日', 'Expiration'], f_group: ['组合编号(可选)', 'Group id (optional)'],
+  f_note: ['备注', 'Note'],
+  stock: ['股票/ETF', 'Stock/ETF'], option: ['期权', 'Option'], buy: ['买', 'Buy'], sell: ['卖', 'Sell'],
+  auto: ['自动判断', 'Auto'], open: ['开仓', 'Open'], close: ['平仓', 'Close'],
+  s_trades: ['笔交易', 'trades'], s_pos: ['个持仓', 'open positions'], s_cash: ['现金', 'Cash'], s_real: ['已实现盈亏', 'Realized P/L'],
+  s_start: ['初始现金', 'Starting cash'],
+  del: ['删除', 'Delete'], confirm_clear: ['确定删除全部手动交易?不可恢复。', 'Delete ALL manual trades? This cannot be undone.'],
+  imported: ['导入完成', 'Imported'], dup: ['重复跳过', 'duplicates skipped'], errs: ['行无法识别', 'rows not understood'],
+  privacy: ['隐私:所有 token、密码、交易都只保存在本机 ~/.zeus-terminal/(权限 600),不在代码仓库里,也不会上传到任何地方;浏览器端读不回已保存的密钥。',
+            'Privacy: every token, password and trade is stored only on this computer in ~/.zeus-terminal/ (mode 600), never inside the code repository, never uploaded anywhere; saved secrets cannot be read back by the browser.'],
+};
+let LANG = (function () {
+  try { const s = localStorage.getItem('zeusLang'); if (s === 'zh' || s === 'en' || s === 'bi') return s; } catch (e) {}
+  return (navigator.language || '').toLowerCase().startsWith('zh') ? 'zh' : 'en';
+})();
+// zh / en: one language. bi (双语): Chinese first, English beside it (short) or under it (long).
+const t = k => {
+  if (!T[k]) return k;
+  if (LANG === 'en') return T[k][1];
+  if (LANG === 'bi') return T[k][0] + ' · ' + T[k][1];
+  return T[k][0];
+};
+const tb = k => {
+  if (!T[k]) return k;
+  if (LANG === 'bi') return T[k][0] + '<div class="en">' + T[k][1] + '</div>';
+  return LANG === 'en' ? T[k][1] : T[k][0];
+};
+const pick = (zh, en) => (LANG === 'en' ? en : (LANG === 'bi' ? zh + ' · ' + en : zh));
+const pickBlock = (zh, en) => (LANG === 'bi' ? zh + '<div class="en">' + en + '</div>' : (LANG === 'en' ? en : zh));
+const $ = (s, r) => (r || document).querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const H = { 'Content-Type': 'application/json', 'X-Zeus-Client': '1' };
+let VIEW = null, ACTIVE = 'broker';
+try { const a = new URL(location.href).searchParams.get('tab'); if (a) ACTIVE = a; } catch (e) {}
+
+function api(path, opts) {
+  return fetch(path, opts).then(r => r.json().catch(() => ({})).then(j => (r.ok ? j : Promise.reject(j.detail || j.error || r.status))));
+}
+function applyStatic() {
+  document.documentElement.lang = LANG === 'en' ? 'en' : 'zh';
+  document.querySelectorAll('[data-i]').forEach(el => { el.innerHTML = t(el.getAttribute('data-i')); });
+  $('#langBtn').value = LANG;
+}
+function load() {
+  return api('/api/settings').then(v => { VIEW = v; render(); });
+}
+function card(k, v, cls) { return '<div class="card"><div class="k">' + esc(k) + '</div><div class="v ' + (cls || '') + '">' + v + '</div></div>'; }
+function renderCards() {
+  const s = VIEW.status || {};
+  const ai = s.ai || {};
+  let h = '';
+  h += card(t('broker'), s.broker_mode === 'tastytrade' ? '● ' + t('mode_tt') : '◐ ' + t('mode_manual'), s.broker_mode === 'tastytrade' ? 'ok' : 'warn');
+  h += card(t('benzinga'), s.benzinga ? '● ' + t('connected') : '○ ' + t('notconnected'), s.benzinga ? 'ok' : '');
+  h += card(t('ai'), ai.provider && ai.provider !== 'off' ? '● ' + esc(ai.provider) + ' · ' + esc(ai.fast || '') : '○ ' + t('off'), ai.provider && ai.provider !== 'off' ? 'ok' : '');
+  h += card(t('news'), 'Finviz' + (s.finviz_elite ? ' Elite' : '') + ' · WSJ · MarketWatch', 'ok');
+  $('#cards').innerHTML = h;
+}
+function renderTabs() {
+  const groups = VIEW.groups || [];
+  $('#tabs').innerHTML = groups.map(g => '<button data-g="' + g[0] + '" class="' + (g[0] === ACTIVE ? 'on' : '') + '">' + esc(pick(g[2], g[1])) + '</button>').join('');
+  $('#tabs').querySelectorAll('button').forEach(b => b.onclick = () => { ACTIVE = b.dataset.g; render(); });
+}
+function field(key, s) {
+  const label = LANG === 'en' ? s.label_en : s.label_zh;
+  const help = LANG === 'en' ? s.help_en : (LANG === 'bi' ? [s.help_zh, s.help_en].filter(Boolean).join(' / ') : s.help_zh);
+  const labelEn = LANG === 'bi' && s.label_en !== s.label_zh ? '<div class="lab-en">' + esc(s.label_en) + '</div>' : '';
+  let input;
+  if (s.secret) {
+    const big = /cookies_json/.test(key);
+    input = '<div class="secret">' + (big ? '<textarea data-k="' + key + '" placeholder="' + esc(t('keep')) + '"></textarea>'
+      : '<input type="password" autocomplete="off" data-k="' + key + '" placeholder="' + esc(t('keep')) + '">')
+      + '<span class="pill ' + (s.is_set ? 'set' : 'unset') + '">' + (s.is_set ? t('set') : t('unset')) + '</span>'
+      + (s.is_set ? '<button class="ghost danger" data-clear="' + key + '">' + t('clear') + '</button>' : '') + '</div>';
+  } else {
+    const enums = { language: ['auto', 'zh', 'bi', 'en'], ai_provider: ['auto', 'claude_cli', 'anthropic', 'openai', 'off'],
+      ai_language: ['auto', 'zh', 'en'], news_translate: ['google', 'bing', 'ai', 'off'], desktop_notifications: ['on', 'off'],
+      ai_schedules: ['on', 'off'], finviz_ai_crawl: ['on', 'off'] };
+    if (enums[key]) {
+      input = '<select data-k="' + key + '">' + enums[key].map(o => '<option' + (String(s.value) === o ? ' selected' : '') + '>' + o + '</option>').join('') + '</select>';
+    } else {
+      input = '<input data-k="' + key + '" value="' + esc(s.value) + '">';
+    }
+  }
+  return '<div class="row"><label>' + esc(label) + labelEn + (help ? '<div class="help">' + esc(help) + '</div>' : '') + '</label><div>' + input + '</div></div>';
+}
+const TESTS = { broker: 'tastytrade', news: 'news', ai: 'ai' };
+function renderSection() {
+  const g = (VIEW.groups || []).find(x => x[0] === ACTIVE) || VIEW.groups[0];
+  const keys = Object.keys(VIEW.settings).filter(k => VIEW.settings[k].group === g[0]);
+  let h = '<section class="on"><h2>' + esc(pick(g[2], g[1])) + '</h2>';
+  if (g[0] === 'news') h += '<p class="intro">' + pickBlock('Benzinga Pro 负责实时 Digest、盘前、市场事件和信号。不填也能用:Digest 自动切到免费双语新闻源 Finviz + WSJ + MarketWatch。', 'Benzinga Pro powers the live digest, pre-market, market events and signals. Without it, the Digest runs on the free bilingual wire: Finviz + WSJ + MarketWatch.') + '</p>';
+  if (g[0] === 'ai') h += '<p class="intro">' + pickBlock('自带模型。什么都不配,AI 按钮会提示去设置;其余功能不依赖 AI。', 'Bring your own model. With nothing configured every AI button simply says so; the rest of ZEUS works without AI.') + '</p>';
+  if (g[0] === 'broker') h += '<p class="intro">' + pickBlock('连接 tastytrade 得到实时持仓、实时报价推送和自动交易日记;留空则使用下方的手动上传模式。', 'Connect tastytrade for live positions, streaming quotes and automatic journal sync. Leave it empty to use manual upload mode below.') + '</p>';
+  h += keys.map(k => field(k, VIEW.settings[k])).join('');
+  h += '<div class="actions"><button class="primary" id="saveBtn">' + t('save') + '</button>';
+  if (TESTS[g[0]]) h += '<button id="testBtn">' + t('test') + '</button>';
+  if (g[0] === 'news') h += '<button id="testBz">' + t('test') + ' · Benzinga</button>';
+  h += '<span class="msg" id="msg"></span></div>';
+  if (g[0] === 'general') h += '<div class="note">' + tb('restart') + '</div>';
+  h += '<div class="note">' + tb('privacy') + '</div></section>';
+  if (g[0] === 'broker') h += tradesHtml();
+  $('#sections').innerHTML = h;
+  $('#saveBtn').onclick = save;
+  document.querySelectorAll('[data-clear]').forEach(b => b.onclick = () => saveValues({ [b.dataset.clear]: '' }));
+  if ($('#testBtn')) $('#testBtn').onclick = () => runTest(TESTS[g[0]], $('#testBtn'));
+  if ($('#testBz')) $('#testBz').onclick = () => runTest('benzinga', $('#testBz'));
+  if (g[0] === 'broker') bindTrades();
+}
+function render() { applyStatic(); renderCards(); renderTabs(); renderSection(); }
+function collect() {
+  const vals = {};
+  document.querySelectorAll('#sections [data-k]').forEach(el => {
+    const k = el.dataset.k, s = VIEW.settings[k];
+    const v = el.value;
+    if (s.secret) { if (v.trim()) vals[k] = v.trim(); }
+    else if (String(v) !== String(s.value)) vals[k] = v;
+  });
+  return vals;
+}
+function saveValues(vals) {
+  const m = $('#msg'); if (m) m.textContent = t('saving');
+  return api('/api/settings', { method: 'POST', headers: H, body: JSON.stringify({ values: vals }) })
+    .then(v => {
+      VIEW = v; render();
+      const m2 = $('#msg'); if (m2) m2.innerHTML = '<span class="ok">✓ ' + t('saved') + '</span>' + (v.restart_needed ? ' · ' + esc(t('restart')) : '');
+      if (LANG && vals.language && vals.language !== 'auto') { try { localStorage.setItem('zeusLang', vals.language); } catch (e) {} }
+    }).catch(e => { const m3 = $('#msg'); if (m3) m3.innerHTML = '<span class="bad">✗ ' + esc(e) + '</span>'; });
+}
+function save() { saveValues(collect()); }
+function runTest(what, btn) {
+  const old = btn.textContent; btn.disabled = true; btn.textContent = t('testing');
+  api('/api/zeus/test/' + what, { method: 'POST', headers: H }).then(r => {
+    const m = $('#msg');
+    const detail = Object.entries(r).filter(([k]) => k !== 'ok').map(([k, v]) => k + ': ' + (typeof v === 'object' ? JSON.stringify(v) : v)).join(' · ');
+    if (m) m.innerHTML = (r.ok ? '<span class="ok">✓ OK</span> ' : '<span class="bad">✗</span> ') + esc(detail);
+  }).catch(e => { const m = $('#msg'); if (m) m.innerHTML = '<span class="bad">✗ ' + esc(e) + '</span>'; })
+    .finally(() => { btn.disabled = false; btn.textContent = old; });
+}
+// ---------------------------------------------------------------- trades
+function tradesHtml() {
+  const opt = (v, k) => '<option value="' + v + '">' + t(k) + '</option>';
+  return '<section class="on" id="tradesSec"><h2>' + t('trades_title') + '</h2><p class="intro">' + tb('trades_intro') + '</p>'
+    + '<div id="tradeSummary" class="cards" style="margin-bottom:10px"></div>'
+    + '<div class="drop" id="drop">' + tb('drop') + '<input type="file" id="file" accept=".csv,text/csv" style="display:none"></div>'
+    + '<div class="actions"><label style="display:flex;gap:6px;align-items:center;font-size:12px;color:var(--text2)"><input type="checkbox" id="replace" style="width:auto"> ' + t('replace') + '</label>'
+    + '<a href="/api/trades/template.csv"><button class="ghost">' + t('template') + '</button></a>'
+    + '<a href="/api/trades/export.csv"><button class="ghost">' + t('export') + '</button></a>'
+    + '<button class="ghost danger" id="clearAll">' + t('clearall') + '</button><span class="msg" id="tmsg"></span></div>'
+    + '<h2 style="margin-top:18px;font-size:14px">' + t('addone') + '</h2>'
+    + '<div class="grid-form" id="addForm">'
+    + '<div><label>' + t('f_date') + '</label><input type="datetime-local" name="date"></div>'
+    + '<div><label>' + t('f_asset') + '</label><select name="asset">' + opt('stock', 'stock') + opt('option', 'option') + '</select></div>'
+    + '<div><label>' + t('f_symbol') + '</label><input name="symbol" placeholder="AAPL"></div>'
+    + '<div><label>' + t('f_side') + '</label><select name="side">' + opt('buy', 'buy') + opt('sell', 'sell') + '</select></div>'
+    + '<div><label>' + t('f_effect') + '</label><select name="effect">' + opt('auto', 'auto') + opt('open', 'open') + opt('close', 'close') + '</select></div>'
+    + '<div><label>' + t('f_qty') + '</label><input name="qty" type="number" step="any" min="0"></div>'
+    + '<div><label>' + t('f_price') + '</label><input name="price" type="number" step="any" min="0"></div>'
+    + '<div><label>' + t('f_fees') + '</label><input name="fees" type="number" step="any" min="0" value="0"></div>'
+    + '<div class="opt"><label>' + t('f_type') + '</label><select name="option_type"><option value="C">Call</option><option value="P">Put</option></select></div>'
+    + '<div class="opt"><label>' + t('f_strike') + '</label><input name="strike" type="number" step="any" min="0"></div>'
+    + '<div class="opt"><label>' + t('f_exp') + '</label><input name="expiration" type="date"></div>'
+    + '<div><label>' + t('f_group') + '</label><input name="order_id" placeholder="spread-1"></div>'
+    + '<div><label>' + t('f_note') + '</label><input name="note"></div>'
+    + '</div><div class="actions"><button class="primary" id="addBtn">' + t('add') + '</button><span class="msg" id="amsg"></span></div>'
+    + '<div class="tablewrap" id="tradeTable"></div></section>';
+}
+function bindTrades() {
+  const drop = $('#drop'), file = $('#file');
+  drop.onclick = () => file.click();
+  drop.ondragover = e => { e.preventDefault(); drop.classList.add('hover'); };
+  drop.ondragleave = () => drop.classList.remove('hover');
+  drop.ondrop = e => { e.preventDefault(); drop.classList.remove('hover'); if (e.dataTransfer.files[0]) importFile(e.dataTransfer.files[0]); };
+  file.onchange = () => { if (file.files[0]) importFile(file.files[0]); };
+  $('#clearAll').onclick = () => { if (confirm(t('confirm_clear'))) api('/api/trades/clear', { method: 'POST', headers: H }).then(loadTrades); };
+  const f = $('#addForm');
+  const syncOpt = () => f.querySelectorAll('.opt').forEach(d => d.style.display = f.asset.value === 'option' ? '' : 'none');
+  f.asset = f.querySelector('[name=asset]'); f.asset.onchange = syncOpt; syncOpt();
+  const now = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  f.querySelector('[name=date]').value = now;
+  $('#addBtn').onclick = () => {
+    const body = {};
+    f.querySelectorAll('[name]').forEach(el => { if (el.closest('.opt') && f.asset.value !== 'option') return; body[el.name] = el.value; });
+    api('/api/trades', { method: 'POST', headers: H, body: JSON.stringify(body) })
+      .then(r => { $('#amsg').innerHTML = '<span class="ok">✓ ' + esc(r.trade.symbol) + '</span>'; loadTrades(); })
+      .catch(e => { $('#amsg').innerHTML = '<span class="bad">✗ ' + esc(e) + '</span>'; });
+  };
+  loadTrades();
+}
+function importFile(fileObj) {
+  const r = new FileReader();
+  r.onload = () => {
+    $('#tmsg').textContent = '…';
+    api('/api/trades/import', { method: 'POST', headers: H, body: JSON.stringify({ csv: r.result, replace: $('#replace').checked }) })
+      .then(res => {
+        let s = '<span class="ok">✓ ' + t('imported') + ': +' + res.added + '</span>';
+        if (res.duplicates) s += ' · ' + res.duplicates + ' ' + t('dup');
+        if (res.error_count) s += ' · <span class="warn">' + res.error_count + ' ' + t('errs') + '</span><br><span style="font-size:11px">' + esc((res.errors || []).slice(0, 5).join(' | ')) + '</span>';
+        $('#tmsg').innerHTML = s; loadTrades();
+      }).catch(e => { $('#tmsg').innerHTML = '<span class="bad">✗ ' + esc(e) + '</span>'; });
+  };
+  r.readAsText(fileObj);
+}
+function money(x) { const n = Number(x || 0); return (n < 0 ? '-$' : '$') + Math.abs(n).toLocaleString(undefined, { maximumFractionDigits: 2 }); }
+function loadTrades() {
+  api('/api/trades').then(d => {
+    const s = d.summary || {};
+    $('#tradeSummary').innerHTML = card(t('s_trades'), String(s.trades || 0)) + card(t('s_pos'), String(s.open_positions || 0))
+      + card(t('s_cash'), money(s.cash)) + card(t('s_real'), money(s.realized), (s.realized || 0) >= 0 ? 'ok' : 'bad') + card(t('s_start'), money(s.starting_cash));
+    const rows = (d.trades || []).slice().reverse();
+    if (!rows.length) { $('#tradeTable').innerHTML = ''; return; }
+    let h = '<table><tr><th>' + t('f_date') + '</th><th>' + t('f_symbol') + '</th><th>' + t('f_asset') + '</th><th>' + t('f_side') + '</th><th>' + t('f_effect')
+      + '</th><th>' + t('f_qty') + '</th><th>' + t('f_price') + '</th><th>' + t('f_fees') + '</th><th>' + t('f_type') + '</th><th>' + t('f_strike') + '</th><th>' + t('f_exp') + '</th><th>' + t('f_group') + '</th><th></th></tr>';
+    for (const r of rows) {
+      h += '<tr><td>' + esc(r.date.replace('T', ' ').slice(0, 16)) + '</td><td><b>' + esc(r.symbol) + '</b></td><td>' + t(r.asset) + '</td><td>' + t(r.side) + '</td><td>' + t(r.effect)
+        + '</td><td class="num">' + esc(r.qty) + '</td><td class="num">' + esc(r.price) + '</td><td class="num">' + esc(r.fees) + '</td><td>' + esc(r.option_type || '') + '</td><td class="num">' + esc(r.strike || '')
+        + '</td><td>' + esc(r.expiration || '') + '</td><td>' + esc(r.order_id || '') + '</td><td><button class="ghost danger" data-del="' + esc(r.id) + '">' + t('del') + '</button></td></tr>';
+    }
+    $('#tradeTable').innerHTML = h + '</table>';
+    $('#tradeTable').querySelectorAll('[data-del]').forEach(b => b.onclick = () => api('/api/trades/' + encodeURIComponent(b.dataset.del), { method: 'DELETE', headers: H }).then(loadTrades));
+  });
+}
+$('#langBtn').onchange = () => { LANG = $('#langBtn').value; try { localStorage.setItem('zeusLang', LANG); } catch (e) {} render(); };
+if (window.parent && window.parent !== window) { $('#backLink').onclick = e => { e.preventDefault(); window.parent.postMessage({ zeus: 'close-settings' }, location.origin); }; }
+load().catch(e => { document.body.insertAdjacentHTML('beforeend', '<p class="bad" style="padding:20px">' + esc(e) + '</p>'); });
+})();
+</script>
+</body>
+</html>

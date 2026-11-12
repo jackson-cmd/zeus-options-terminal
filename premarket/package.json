@@ -1,0 +1,17 @@
+{
+  "name": "premarket",
+  "version": "1.0.0",
+  "description": "Benzinga Options School chat scraper (Chris Market Commentary + Options Flow Report)",
+  "type": "module",
+  "scripts": {
+    "login": "node login.mjs",
+    "scrape": "node scrape.mjs",
+    "run": "node login.mjs && node scrape.mjs"
+  },
+  "dependencies": {
+    "csv-parse": "^5.5.0",
+    "puppeteer": "^21.0.0",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2"
+  }
+}
