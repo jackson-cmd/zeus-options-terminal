@@ -2,7 +2,7 @@
 
 [English → FEATURES.md](FEATURES.md) · [使用手册](USER_GUIDE_zh.md) · [新功能](../CHANGELOG_zh.md) · [回到 README](../README_zh.md)
 
-ZEUS 的功能远不止 README 截图里那些。顶栏有 7 个页面，后台有 30 来个自动运行的任务，API 接口超过 200 个。这一页把现在能从界面里用到的功能全部列出来。欢迎提 PR，以后也可能继续加新功能（见[参与贡献](../CONTRIBUTING.md)）。标着 <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> 的是 0.2.0 或 0.2.1 版新加入的（见[更新记录](../CHANGELOG_zh.md)）；每一项怎么用，见[使用手册](USER_GUIDE_zh.md)。
+ZEUS 的功能远不止 README 截图里那些。顶栏有 7 个页面，后台有 30 来个自动运行的任务，API 接口超过 200 个。这一页把现在能从界面里用到的功能全部列出来。欢迎提 PR，以后也可能继续加新功能（见[参与贡献](../CONTRIBUTING.md)）。标着 <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> 的是 0.2.0 到 0.3.0 版新加入的（见[更新记录](../CHANGELOG_zh.md)）；每一项怎么用，见[使用手册](USER_GUIDE_zh.md)。
 
 **每项功能需要什么：**
 
@@ -22,7 +22,7 @@ ZEUS 的功能远不止 README 截图里那些。顶栏有 7 个页面，后台�
 - [顶栏](#顶栏每个页面都有) · [⚔️ 持仓](#️-持仓positions) · [🔍 策略详情](#-策略详情点任意仓位) · [⚠ 风险视图](#-风险视图)
 - [🩺 纪律和提醒](#-纪律和提醒) · [🩺 开单前体检和流动性](#-开单前体检和流动性)
 - [🎯 选股](#-选股) · [🔎 TA 扫描](#-ta-扫描ta) · [🧪 模拟盘](#-模拟盘-)
-- [📋 Digest](#-digest) · [📅 事件](#-事件events) · [📓 交易日记](#-交易日记)
+- [📋 Digest](#-digest) · [📅 事件](#-事件events) · [📓 交易日记](#-交易日记) · [🔌 AI 智能体（MCP）](#-ai-智能体mcp-)
 - [⚙ 设置](#-设置) · [🔁 后台自动在跑的任务](#-后台自动在跑的任务) · [🌍 数据来源](#-数据来源) · [🛠 给开发者](#-给开发者)
 - [还没接上的部分（欢迎 PR）](#还没接上的部分欢迎-pr)
 
@@ -190,6 +190,18 @@ ZEUS 的功能远不止 README 截图里那些。顶栏有 7 个页面，后台�
 | ✅ | 每日复盘页 | `/journal-review`：昨天开了和平了哪些单、规则检查、今天的观察清单 | 免费 |
 | ✅ | 同步 | 接 tastytrade 每小时自动同步；手动模式上传后立刻重算 | 免费（自动同步要 tastytrade） |
 
+## 🔌 AI 智能体（MCP） <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!">
+
+| ✓ | 功能 | 做什么 | 需要 |
+|---|---|---|---|
+| ✅ | MCP 接口 | 运行中的终端上的 `http://127.0.0.1:8765/mcp`：Claude Code、Claude Desktop、Codex CLI（GPT）、Gemini CLI 和你自己的智能体都能把 ZEUS 当工具用；不要 API key，也不用另起进程 | 免费 |
+| ✅ | 18 个工具 | 状态；持仓（ZEUS 自己算的盈亏、最大盈亏、盈亏平衡点、获利概率、希腊值、压力测试和出场建议）；任意策略的假设分析；开单前体检；价差推荐；流动性；报价和期权链；大盘概览；事件；新闻；行业轮动；交易点子；单票报告；交易日记；模拟单 | 免费（各工具背后的数据照常） |
+| ✅ | 4 个提示词 | 持仓复盘、开单前检查、早盘简报、交易日记教练：在 Claude Code 和 Gemini CLI 里是斜杠命令 | 免费 |
+| ✅ | 智能体下模拟单 | 智能体可以开仓、平仓模拟单，但要你在设置里允许 | 免费 |
+| ✅ | stdio 桥接 | `zeus_mcp_stdio.py`，给以命令方式启动工具的客户端（Claude Desktop）用；只用标准库；`--check` 检查连接 | 免费 |
+| ✅ | 新旧客户端都能连 | 当前的无状态协议（2026-07-28）和更早的握手式版本（2025-11-25 及以前） | 免费 |
+| ✅ | 只对本机开放 | 只回应本机程序；没有任何工具能下真实订单或读出已保存的密钥 | 免费 |
+
 ## ⚙ 设置
 
 | ✓ | 分组 | 能设什么 |
@@ -197,6 +209,7 @@ ZEUS 的功能远不止 README 截图里那些。顶栏有 7 个页面，后台�
 | ✅ | 券商与交易 | tastytrade 的 client ID、client secret、refresh token、账户号；或者手动交易（上传 CSV 或表单录入）和初始现金；测试连接 |
 | ✅ | 新闻源 | Benzinga cookie、Benzinga 数据 API key、Benzinga 账号、Finviz Elite token、用哪些免费新闻源、标题翻译（Google / Bing / AI / 关闭）、Google 翻译 key |
 | ✅ | AI | 提供方、Claude CLI 路径、Anthropic 或 OpenAI 兼容接口的 key 和地址、快模型和强模型、回答语言、定时 AI 任务开关 |
+| ✅ | AI 智能体（MCP） | MCP 接口开关、是否允许智能体下模拟单、接口地址和每个智能体的接法、测试按钮 |
 | ✅ | 其他数据 | Barchart 账号、Finviz「为什么在涨跌」抓取开关、SEC EDGAR 的 User-Agent |
 | ✅ | 邮件提醒 | 发件人、收件人、应用专用密码、SMTP 服务器和端口；一个按钮发测试邮件 |
 | ✅ | 通用 | 语言、监听地址、端口、桌面通知 |
@@ -238,6 +251,7 @@ ZEUS 的功能远不止 README 截图里那些。顶栏有 7 个页面，后台�
 | ✓ | 功能 | 说明 |
 |---|---|---|
 | ✅ | REST API | `/api/...` 下 200 多个接口，比如 `/api/paper-trade`、`/api/digest`、`/api/checkup`、`/api/sec` |
+| ✅ | MCP 接口 | `zeus_mcp.py`（用 `@tool` 装饰器加工具）；智能体读到的期权计算在 `zeus_payoff.py`，有测试和页面自己的 JavaScript 逐项对比 |
 | ✅ | 环境变量配置 | 任何设置都能写成 `ZEUS_<KEY>`；用 `ZEUS_HOME` 换设置文件夹的位置 |
 | ✅ | 测试 | `python -m pytest`（离线跑，行情是假的） |
 | ✅ | CI | 每个 PR 都会在 Linux、macOS、Windows 上跑测试（7 个任务）；`main` 只接受全部通过的 PR |

@@ -19,16 +19,17 @@
 ## Contents
 
 - [🆕 What's new](#-whats-new) · [The story](#the-story) · [Two ways to play](#two-ways-to-play)
-- [🗺️ Feature tour](#️-feature-tour): [Positions](#️-positions--the-command-center) · [Discipline engine](#-discipline-engine--the-part-that-saves-money) · [Picker](#-picker--find-the-next-trade) · [Paper trade](#-paper-trade--practice-before-real-money) · [Market brief](#-market-brief--the-big-picture-without-the-drama) · [Digest](#-digest--four-wires-two-languages) · [Events](#-events) · [Trade journal](#-trade-journal--the-honest-mirror) · [Three languages](#-three-interface-languages-中文--双语--english) · [Bring your own AI](#-bring-your-own-ai)
+- [🗺️ Feature tour](#️-feature-tour): [Positions](#️-positions--the-command-center) · [Discipline engine](#-discipline-engine--the-part-that-saves-money) · [Picker](#-picker--find-the-next-trade) · [Paper trade](#-paper-trade--practice-before-real-money) · [Market brief](#-market-brief--the-big-picture-without-the-drama) · [Digest](#-digest--four-wires-two-languages) · [Events](#-events) · [Trade journal](#-trade-journal--the-honest-mirror) · [Three languages](#-three-interface-languages-中文--双语--english) · [Bring your own AI](#-bring-your-own-ai) · [Your agents (MCP)](#-plug-in-your-own-agents-mcp)
 - [📸 Screenshots](#-screenshots) · [🚀 Quick start](#-quick-start) · [🔑 What each setting unlocks](#-what-each-setting-unlocks) · [📄 Manual trades: the CSV](#-manual-trades-the-csv)
 - [🔒 Privacy & security](#-privacy--security) · [🏗️ Under the hood](#️-under-the-hood) · [❓ FAQ](#-faq) · [🤝 Contributing](#-contributing) · [📜 License](#-license-non-commercial)
 
 ## 🆕 What's new
 
-<sub>Latest release **0.2.1** (2026-11-12). The full history is in the [changelog](CHANGELOG.md).</sub>
+<sub>Latest release **0.3.0** (2026-11-12). The full history is in the [changelog](CHANGELOG.md).</sub>
 
-| | New in 0.2.1 and 0.2.0 |
+| | New in 0.3.0 and 0.2.x |
 |---|---|
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🔌 Plug in your own AI agents (MCP)**: Claude Code, Claude Desktop, GPT through Codex, Gemini CLI or an agent you build can read your positions, run the pre-trade checkup, price spreads, and read the news and your journal. If you allow it, they can also paper trade. ZEUS is a local MCP server, so no API key is needed. [Connect an agent →](docs/USER_GUIDE.md#18-ai-agents-mcp) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🟩 Heatmap**: the picker's heatmap is back, one click away from the K-line chart wall. [How to use it →](docs/USER_GUIDE.md#69-heatmap) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🧪 Paper Trade**: build any strategy on the live option chain with option *and* stock legs, save it as a simulated trade and follow its P/L. [How to use it →](docs/USER_GUIDE.md#8-paper-trade) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **📧 E-mail alerts**: every desktop alert can also arrive in your inbox, on macOS and on Linux. [How to set it up →](docs/USER_GUIDE.md#123-e-mail-alerts) |
@@ -153,6 +154,9 @@ This tour covers the highlights. ZEUS does far more than fits on one page: the *
 ### 🤖 Bring your own AI
 Use whichever you have: **Claude Code CLI** (your Claude subscription), an **Anthropic API key**, or **any OpenAI-compatible endpoint** (OpenAI, DeepSeek, OpenRouter, a local Ollama…). With nothing configured, ZEUS simply runs without the AI buttons.
 
+### 🔌 Plug in your own agents (MCP)
+It works the other way round too: ZEUS is an MCP server. Point Claude Code, Claude Desktop, Codex (GPT), Gemini CLI or your own agent at `http://127.0.0.1:8765/mcp`. It gets 18 tools backed by ZEUS's own numbers: positions with exact max profit and loss, breakevens, Greeks and exit advice, what-if pricing of any strategy, the four-gate checkup, liquidity, news, events, sector rotation and your journal. Then ask something like *"which of my positions should I take profit on, and what earnings land before they expire?"* It is read-only unless you let agents paper trade, it answers only programs on this computer, and it never touches a real order. [Connect an agent →](docs/USER_GUIDE.md#18-ai-agents-mcp)
+
 ---
 
 ## 📸 Screenshots
@@ -177,7 +181,7 @@ Use whichever you have: **Claude Code CLI** (your Claude subscription), an **Ant
 <tr><td width="50%"><img src="docs/screenshots/journal_en.png" alt="Trade journal"><br><sub><b>Trade journal</b> — win rate, profit factor, monthly targets, equity curve</sub></td>
 <td width="50%"><img src="docs/screenshots/analysis_en.png" alt="Journal analysis"><br><sub><b>Journal analysis</b> — what works and what doesn't, from your own trades</sub></td></tr>
 <tr><td width="50%"><img src="docs/screenshots/settings_en.png" alt="Settings"><br><sub><b>Settings</b> — everything is entered in the browser; saved secrets are write-only</sub></td>
-<td width="50%"></td></tr>
+<td width="50%"><img src="docs/screenshots/agents_en.png" alt="AI agents (MCP)"><br><sub><b>AI agents (MCP)</b> — connect Claude, GPT (Codex), Gemini or your own agent; no API key</sub></td></tr>
 </table>
 
 ---
@@ -215,6 +219,7 @@ my.tastytrade.com → **Manage → API Access → OAuth Applications** → creat
 | AI provider | AI summaries, market brief, AI picker, AI journal review, position review | your own |
 | Barchart login | Barchart screener and signal lists | Barchart account |
 | E-mail (SMTP) | Every alert also by e-mail, with a test button (macOS and Linux) | ✅ |
+| AI agents (MCP) | Your own agents (Claude, GPT through Codex, Gemini…) use ZEUS as tools; on by default, paper trading by agents off | ✅ |
 
 ---
 
@@ -244,6 +249,7 @@ date,symbol,asset,side,effect,qty,price,fees,option_type,strike,expiration,multi
 - **The code folder holds code only.** Everything the terminal writes while running — position snapshots, the trade journal and its screenshots, news archives, caches, downloads, logs — goes to `~/.zeus-terminal/runtime/`. The runtime folders inside the code are links to that place and are ignored by git.
 - **Sharing safely.** Publish with `git push`, or build a zip with `tools/export_clean_zip.sh`; both contain code only. Do not drag the whole folder into a website or zip it by hand. `tools/install_git_hook.sh` adds a local pre-commit check that refuses links, data files, anything shaped like a key or token, and your own home path, login name or git identity.
 - Saved secrets are **write-only** from the browser: the settings API reports *set / not set* and never sends a secret back.
+- The MCP endpoint for AI agents answers only programs on this computer, and no MCP tool can place a real order or read a saved key. What an agent reads goes to that agent's model provider.
 - The server listens on **127.0.0.1** only by default, refuses foreign `Host` headers (DNS rebinding), only accepts cross-origin calls from localhost, and write endpoints need a header that other websites cannot send.
 - No telemetry. The app only talks to the services you connect plus public market data (Cboe delayed quotes, Yahoo Finance, SEC EDGAR, Finviz, Dow Jones RSS).
 - Free market data is rate-limit aware: company data (sector, industry, market cap) comes from Finviz in batches of 20 tickers, stock quotes fall back to Finviz whenever Yahoo Finance throttles, and a whole option chain is one Cboe request instead of one Yahoo request per expiration.

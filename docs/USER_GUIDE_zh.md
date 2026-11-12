@@ -38,7 +38,9 @@
     - [15.1 文件放在哪](#151-文件放在哪) · [15.2 环境变量](#152-环境变量) · [15.3 备份 迁移 重置](#153-备份-迁移-重置) · [15.4 会连哪些网络服务](#154-会连哪些网络服务)
 16. [快捷键](#16-快捷键)
 17. [遇到问题](#17-遇到问题)
-18. [名词解释](#18-名词解释)
+18. [AI 智能体（MCP）](#18-ai-智能体mcp)
+    - [18.1 智能体能做什么](#181-智能体能做什么) · [18.2 连接你的智能体](#182-连接你的智能体) · [18.3 你自己的智能体](#183-你自己的智能体) · [18.4 权限和隐私](#184-权限和隐私)
+19. [名词解释](#19-名词解释)
 
 ---
 
@@ -767,7 +769,7 @@ ZEUS 没有任何遥测。它只连你自己接入的服务（tastytrade、Benzi
 |---|---|---|
 | 回车 | 任何代码框或搜索框 | 加载或搜索 |
 | B | TA 单票页 | 把主推荐价差载入模拟盘 |
-| Esc | TA 扫描的帮助弹窗 | 关闭弹窗 |
+| Esc | 任何地方 | 关掉打开着的弹窗（体检、风险雷达、提醒、流动性、K 线图、TA 帮助），或者退出详情页 |
 | Cmd+Shift+R / Ctrl+Shift+R | 任何页面 | 不走缓存强制刷新（更新之后用） |
 
 ---
@@ -788,12 +790,103 @@ ZEUS 没有任何遥测。它只连你自己接入的服务（tastytrade、Benzi
 | 行业轮动或期权情绪是空的 | 行业轮动点 **🔄 重拉数据**。期权情绪要攒几周盘后爬取的数据。 |
 | 模拟盘提示 "No market data yet" | 终端刚启动还在加载，等几秒。用 tastytrade 的话，到设置里点测试连接。 |
 | 更新之后页面还是旧的 | 按 Cmd+Shift+R（Ctrl+Shift+R）强制刷新。 |
+| AI 智能体连不上 | ZEUS 要开着，并且 设置 → AI 智能体（MCP）→ MCP 接口 要是 on。在 ZEUS 文件夹里运行 `python3 zeus_mcp_stdio.py --check`；地址用 `127.0.0.1`，别用 `localhost`。 |
+| 智能体说不能下模拟单 | 打开 设置 → AI 智能体（MCP）→ 允许智能体下模拟单。 |
 
 还是解决不了？[提一个 Issue](https://github.com/jackson-cmd/zeus-options-terminal/issues)，写清楚你做了什么、看到了什么（别贴 token、cookie 和账户号）。
 
 ---
 
-## 18. 名词解释
+## 18. AI 智能体（MCP）
+
+ZEUS 支持 MCP（Model Context Protocol，AI 智能体调用工具的通用协议）。本机上的智能体（Claude Code、Claude Desktop、通过 Codex 用的 GPT、Gemini CLI，或者你自己写的）可以读你的持仓、跑开单前体检、给价差估价、读新闻、日历和交易日记，你允许的话还能下模拟单。用的全是 ZEUS 自己算出来的数字，不需要 API key，也不用另起服务：ZEUS 开着，接口就在。
+
+### 18.1 智能体能做什么
+
+| 工具 | 返回什么 |
+|---|---|
+| `get_status` | 券商模式、数据新鲜度、账户（净值、现金、购买力）、持仓和模拟单数量、市场环境，以及智能体被允许做什么。智能体一般先调它 |
+| `get_positions` | 每个持仓，算法和持仓页一样：成本、浮动盈亏和今日盈亏、最大盈利和最大亏损、盈亏平衡点、获利概率、希腊值、到期前有没有财报、单日压力测试和 VaR、出场建议；再加每个标的的风险占净值比例 |
+| `analyze_strategy` | 任意期权或股票组合的假设分析，按实时期权链估价：借方还是贷方、精确的最大盈亏、赔率、盈亏平衡点、获利概率、希腊值、盈亏表，以及价差太宽、未平仓太少的提醒。不会保存任何东西 |
+| `pretrade_checkup` | 四道关体检（[5.5](#55-四道关体检页)），带理由和结论 |
+| `suggest_spreads` | 排好序的牛市看涨价差，附成本、最大盈亏、盈亏平衡点和流动性 |
+| `check_liquidity` | 每个到期日平值附近的买卖价差、成交量和未平仓，每个行权价的最佳到期日，以及同一个价差跨周的价格 |
+| `get_quotes`、`get_option_chain` | 最多 20 只票的报价；平值附近的期权链，带买价、卖价、中间价、隐波、Delta、成交量和未平仓 |
+| `get_market_overview` | 市场环境、VIX、风险雷达、当天生成过的 AI 大盘判断、行业轮动、期权情绪、SPY / QQQ / IWM / VIX |
+| `get_events` | 宏观数据和财报，并标出哪些持仓会跨过财报日 |
+| `get_news` | 新闻流，按时间倒序，可以按代码（公司名也算）或标题里的词筛选 |
+| `get_sector_rotation` | 80 个行业组按收益排序，带趋势和广度 |
+| `get_trade_ideas` | 最新的 AI 选股和 TA 扫描信号 |
+| `get_ticker_report` | 单只票的深度信息：报价、基本面、分析师动作、历次财报后的涨跌、TA 观点、新闻 |
+| `get_trade_journal` | 胜率、盈亏比、期望值，按策略、代码、持有时间和开仓 DTE 拆开的结果，以及最近平仓的交易和你写的笔记 |
+| `list_paper_trades` · `paper_trade_open` · `paper_trade_close` | 模拟盘：列出模拟单和实时盈亏；开仓和平仓需要你允许（[18.4](#184-权限和隐私)） |
+
+没有任何工具能下真实订单、读出已保存的密钥，或者看到文件路径。
+
+另外有四个现成的提示词：**持仓复盘**、**开单前检查**（针对一只票）、**早盘简报** 和 **交易日记教练**。在 Claude Code 里是斜杠命令，比如 `/mcp__zeus__portfolio_review`；在 Gemini CLI 里是 `/portfolio_review`。
+
+### 18.2 连接你的智能体
+
+打开 ⚙ 设置 → **AI 智能体（MCP）**，那里列出了本机的接口地址和每个智能体的完整命令，都带复制按钮。地址是 `http://127.0.0.1:8765/mcp`（改过端口就换成你的端口）。
+
+![设置 → AI 智能体（MCP）](screenshots/agents_zh.png)
+
+| 智能体 | 怎么接 |
+|---|---|
+| Claude Code | `claude mcp add --transport http --scope user zeus http://127.0.0.1:8765/mcp` |
+| Codex CLI（用 ChatGPT 订阅里的 GPT） | `codex mcp add zeus --url http://127.0.0.1:8765/mcp` |
+| Gemini CLI | `gemini mcp add --transport http --scope user zeus http://127.0.0.1:8765/mcp` |
+| Claude Desktop | 设置 → 开发者 → 编辑配置：加上下面这段，然后重启 Claude |
+| 你自己的智能体 | 任何 MCP 客户端库，或者直接通过 HTTP 发 JSON-RPC（[18.3](#183-你自己的智能体)） |
+
+Claude Desktop 以命令的方式启动本地工具，所以要用 ZEUS 自带的桥接脚本。它只用 Python 标准库（Python 3.8 及以上）：
+
+```json
+{
+  "mcpServers": {
+    "zeus": {
+      "command": "python3",
+      "args": ["/path/to/zeus-options-terminal/zeus_mcp_stdio.py"]
+    }
+  }
+}
+```
+
+设置页会帮你填好本机的真实路径。随时可以在 ZEUS 文件夹里运行 `python3 zeus_mcp_stdio.py --check` 检查连接。
+
+连上以后直接问就行，比如：「用 zeus 看看我的持仓，哪些该止盈？」「对 NVDA 跑一下开单前体检，再给一个 30 天的牛市看涨价差估价」「这个月有哪些财报落在我的到期日之前？」
+
+### 18.3 你自己的智能体
+
+用官方 Python SDK（`pip install mcp`，示例是 1.x 版本）：
+
+```python
+import asyncio
+from mcp import ClientSession
+from mcp.client.streamable_http import streamablehttp_client
+
+async def main():
+    async with streamablehttp_client("http://127.0.0.1:8765/mcp") as (read, write, _):
+        async with ClientSession(read, write) as session:
+            await session.initialize()
+            result = await session.call_tool("get_positions", {"include_legs": False})
+            print(result.content[0].text)
+
+asyncio.run(main())
+```
+
+同一个地址也能用 TypeScript SDK，以及任何接受 MCP 服务器地址的智能体框架。不用 SDK 的话，每次 POST 一条 JSON-RPC 消息即可，设置页里有 `curl` 示例。ZEUS 同时支持当前的协议（2026-07-28，无状态，带 `server/discover`）和更早的握手式版本（2025-11-25、2025-06-18、2025-03-26），新旧客户端都能连。
+
+### 18.4 权限和隐私
+
+- **MCP 接口**（默认开）：在 设置 → AI 智能体（MCP）里关掉后，所有智能体请求都会被拒绝。
+- **允许智能体下模拟单**（默认关）：允许智能体在模拟盘里开仓、平仓。全是模拟，不会发给任何券商。
+- 只有本机程序能得到回应。来自别的电脑、网页（外来的 `Origin`）或者 `Host` 不对的请求一律拒绝，即使 ZEUS 监听在 0.0.0.0 也一样。
+- 智能体读到的内容会发给它背后的模型服务商（Anthropic、OpenAI、Google……），和你粘贴给它的任何东西一样。
+
+---
+
+## 19. 名词解释
 
 | 名词 | 含义 |
 |---|---|

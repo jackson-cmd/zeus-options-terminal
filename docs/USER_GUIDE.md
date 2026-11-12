@@ -38,7 +38,9 @@ This manual explains every page, button and setting of ZEUS Terminal: what it do
     - [15.1 Where files live](#151-where-files-live) · [15.2 Environment variables](#152-environment-variables) · [15.3 Back up, move, reset](#153-back-up-move-reset) · [15.4 What goes over the network](#154-what-goes-over-the-network)
 16. [Keyboard shortcuts](#16-keyboard-shortcuts)
 17. [Troubleshooting](#17-troubleshooting)
-18. [Glossary](#18-glossary)
+18. [AI agents (MCP)](#18-ai-agents-mcp)
+    - [18.1 What agents can do](#181-what-agents-can-do) · [18.2 Connect your agent](#182-connect-your-agent) · [18.3 Your own agent](#183-your-own-agent) · [18.4 Permissions and privacy](#184-permissions-and-privacy)
+19. [Glossary](#19-glossary)
 
 ---
 
@@ -767,7 +769,7 @@ ZEUS has no telemetry. It talks only to the services you connect (tastytrade, Be
 |---|---|---|
 | Enter | Any ticker or search box | Load or search |
 | B | TA single-ticker page | Open the main recommended spread in Paper Trade |
-| Esc | TA screener help | Close the help pop-up |
+| Esc | Anywhere | Close the open pop-up (checkup, risk radar, alerts, liquidity, chart, TA help) or leave a detail view |
 | Cmd+Shift+R / Ctrl+Shift+R | Anywhere | Reload without the cache (after an update) |
 
 ---
@@ -788,12 +790,103 @@ ZEUS has no telemetry. It talks only to the services you connect (tastytrade, Be
 | Sector rotation or options sentiment is empty | Press **🔄 Reload data** for rotation. Options sentiment needs a few weeks of after-close crawls. |
 | Paper Trade says "No market data yet" | The terminal is still loading after start; wait a few seconds. With tastytrade, press Test connection in Settings. |
 | The page looks old after an update | Reload with Cmd+Shift+R (Ctrl+Shift+R). |
+| An AI agent cannot connect | ZEUS must be running, and Settings → AI agents (MCP) → MCP server must be on. Run `python3 zeus_mcp_stdio.py --check` in the ZEUS folder; use `127.0.0.1`, not `localhost`. |
+| An agent says it may not paper trade | Turn on Settings → AI agents (MCP) → Agents may place paper trades. |
 
 Still stuck? [Open an issue](https://github.com/jackson-cmd/zeus-options-terminal/issues) with what you did and what you saw (leave out tokens, cookies and account numbers).
 
 ---
 
-## 18. Glossary
+## 18. AI agents (MCP)
+
+ZEUS speaks the Model Context Protocol (MCP), the standard way AI agents use tools. An agent on this computer (Claude Code, Claude Desktop, GPT through Codex, Gemini CLI, or one you build) can read your positions, run the pre-trade checkup, price a spread, read the news, the calendar and your journal, and paper trade if you allow it. It works from ZEUS's own numbers, with no API key and no extra server: while ZEUS runs, the endpoint is there.
+
+### 18.1 What agents can do
+
+| Tool | What it returns |
+|---|---|
+| `get_status` | Broker mode, data freshness, the account (net liquidating value, cash, buying power), open positions and paper trades, the market regime, and what agents may do. Agents call it first |
+| `get_positions` | Every position computed the way the Positions page does: cost, P/L open and today, max profit and loss, breakevens, chance of profit, Greeks, earnings before expiration, one-day stress and VaR, and the exit advice; plus risk per underlying as a share of net liquidating value |
+| `analyze_strategy` | What-if analysis of any option or stock strategy priced from the live chain: debit or credit, exact max profit and loss, reward to risk, breakevens, chance of profit, Greeks, a P/L table, and warnings for wide markets or thin open interest. Nothing is saved |
+| `pretrade_checkup` | The four gates ([5.5](#55-four-gate-pre-trade-page)) with reasons and the verdict |
+| `suggest_spreads` | Ranked bull call spreads with debit, max profit and loss, breakeven and liquidity |
+| `check_liquidity` | Bid/ask width, volume and open interest at the money for every expiration, the best expiration per strike, and the same spread priced across weeks |
+| `get_quotes`, `get_option_chain` | Quotes for up to 20 tickers; the chain near the money with bid, ask, mid, IV, delta, volume and open interest |
+| `get_market_overview` | Regime, VIX, risk radar, the AI market judgement if it ran today, sector rotation, option sentiment, SPY / QQQ / IWM / VIX |
+| `get_events` | Macro releases and earnings, with every position that holds through an earnings date |
+| `get_news` | The news wire, newest first, by ticker (company names count too) or by words in the headline |
+| `get_sector_rotation` | The 80 industry groups ranked by return, with trend and breadth |
+| `get_trade_ideas` | The latest AI picks and TA screener signals |
+| `get_ticker_report` | One ticker in depth: quote, fundamentals, analyst actions, past earnings reactions, TA view, headlines |
+| `get_trade_journal` | Win rate, profit factor, expectancy, results by strategy, ticker, holding time and DTE, and your latest closed trades with their notes |
+| `list_paper_trades` · `paper_trade_open` · `paper_trade_close` | Paper Trade: list with live P/L; opening and closing need your permission ([18.4](#184-permissions-and-privacy)) |
+
+No tool can place a real order, read a saved key, or see a file path.
+
+There are also four ready-made prompts: **portfolio review**, **pre-trade check** (for one ticker), **morning brief** and **journal coach**. In Claude Code they are slash commands such as `/mcp__zeus__portfolio_review`; in Gemini CLI, `/portfolio_review`.
+
+### 18.2 Connect your agent
+
+Open ⚙ Settings → **AI agents (MCP)**. It shows the address and the exact command for each agent on this computer, each with a copy button. The address is `http://127.0.0.1:8765/mcp` (with your port if you changed it).
+
+![Settings → AI agents (MCP)](screenshots/agents_en.png)
+
+| Agent | How |
+|---|---|
+| Claude Code | `claude mcp add --transport http --scope user zeus http://127.0.0.1:8765/mcp` |
+| Codex CLI (GPT on your ChatGPT plan) | `codex mcp add zeus --url http://127.0.0.1:8765/mcp` |
+| Gemini CLI | `gemini mcp add --transport http --scope user zeus http://127.0.0.1:8765/mcp` |
+| Claude Desktop | Settings → Developer → Edit Config: add the block below, then restart Claude |
+| Your own agent | Any MCP client library, or plain JSON-RPC over HTTP ([18.3](#183-your-own-agent)) |
+
+Claude Desktop starts local tools as a command, so it uses the bridge that ships with ZEUS. The bridge needs only the Python standard library (Python 3.8 or newer):
+
+```json
+{
+  "mcpServers": {
+    "zeus": {
+      "command": "python3",
+      "args": ["/path/to/zeus-options-terminal/zeus_mcp_stdio.py"]
+    }
+  }
+}
+```
+
+The Settings page fills in the real paths for this computer. To check the connection at any time, run `python3 zeus_mcp_stdio.py --check` in the ZEUS folder.
+
+Then just ask, for example: "Use zeus: which of my positions should I take profit on?", "Run the pre-trade checkup on NVDA and price a 30-day bull call spread", "Which earnings land before my expirations this month?"
+
+### 18.3 Your own agent
+
+With the official Python SDK (`pip install mcp`, version 1.x shown):
+
+```python
+import asyncio
+from mcp import ClientSession
+from mcp.client.streamable_http import streamablehttp_client
+
+async def main():
+    async with streamablehttp_client("http://127.0.0.1:8765/mcp") as (read, write, _):
+        async with ClientSession(read, write) as session:
+            await session.initialize()
+            result = await session.call_tool("get_positions", {"include_legs": False})
+            print(result.content[0].text)
+
+asyncio.run(main())
+```
+
+The same address works with the TypeScript SDK and with agent frameworks that take an MCP server URL. Without an SDK, send one JSON-RPC message per POST; the Settings page has a `curl` example. ZEUS speaks both the current protocol (2026-07-28, stateless, with `server/discover`) and the earlier handshake-based revisions (2025-11-25, 2025-06-18, 2025-03-26), so older and newer clients both connect.
+
+### 18.4 Permissions and privacy
+
+- **MCP server** (on by default): turn it off in Settings → AI agents (MCP) and every agent request is refused.
+- **Agents may place paper trades** (off by default): lets agents open and close trades in the Paper Trade tab. They are simulated; nothing is ever sent to a broker.
+- Only programs on this computer get an answer. Requests from other computers, from web pages (a foreign `Origin`) or with a foreign `Host` header are refused, even if ZEUS listens on 0.0.0.0.
+- Whatever an agent reads goes to that agent's model provider (Anthropic, OpenAI, Google…), like anything else you paste into it.
+
+---
+
+## 19. Glossary
 
 | Term | Meaning |
 |---|---|
