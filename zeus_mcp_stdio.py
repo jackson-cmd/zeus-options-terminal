@@ -187,6 +187,10 @@ def main(argv=None) -> int:
     args = ap.parse_args(argv)
     url = args.url or default_url()
     if args.check:
+        try:   # a Windows console or pipe may not be UTF-8; the report has ✓ and Chinese in it
+            sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError):
+            pass
         return check(url)
     bridge = Bridge(url)
     pending = []
