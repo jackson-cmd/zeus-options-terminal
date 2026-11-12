@@ -12362,11 +12362,15 @@ async def api_pre_trade_checkup_override(request: Request):
         return JSONResponse({"error": str(e)}, status_code=500)
 
 
+# The interface-language switch (中文 / 双语 / English) for standalone pages.
+_ZEUS_SHELL = '<link rel="stylesheet" href="/static/zeus.css"><script src="/static/zeus.js"></script>'
+
+
 @app.get("/pretrade-checkup", response_class=HTMLResponse)
 async def pretrade_checkup_page():
     """开单前体检独立页面 —— 不进主 dashboard tab,直接开 URL 用
     (?ticker=&direction=&dte= 可预填 + 自动跑一次)。"""
-    return HTMLResponse(content=PRETRADE_CHECKUP_HTML)
+    return HTMLResponse(content=PRETRADE_CHECKUP_HTML.replace("</body>", _ZEUS_SHELL + "</body>", 1))
 
 
 # ════════════════════════════════════════════════════════════════════
@@ -12481,7 +12485,7 @@ async def api_journal_review(today: Optional[str] = Query(None)):
 @app.get("/journal-review", response_class=HTMLResponse)
 async def journal_review_page():
     """Journal Review 独立页面 —— 不进 Trade Journal 的 tab 结构,直接开 URL 用。"""
-    return HTMLResponse(content=JOURNAL_REVIEW_HTML)
+    return HTMLResponse(content=JOURNAL_REVIEW_HTML.replace("</body>", _ZEUS_SHELL + "</body>", 1))
 
 
 # ── Live prices (老 /api/screener/data 的替代, 数据源=heatmap live_prices) ──
