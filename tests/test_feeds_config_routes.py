@@ -95,8 +95,9 @@ def test_secrets_are_write_only_and_file_is_private():
     assert "value" not in view["tt_refresh_token"]
     assert "abc-secret-value" not in json.dumps(zc.public_view())
     assert view["port"]["value"] == "9999"
-    mode = stat.S_IMODE(os.stat(zc.config_path()).st_mode)
-    assert mode == 0o600
+    if os.name == "posix":  # Windows has no owner-only permission bits; it relies on the user profile ACL
+        mode = stat.S_IMODE(os.stat(zc.config_path()).st_mode)
+        assert mode == 0o600
     assert "not_a_key" not in json.loads(zc.config_path().read_text())
     zc.update({"tt_refresh_token": "", "port": ""})
     assert zc.broker_mode() == "manual"
