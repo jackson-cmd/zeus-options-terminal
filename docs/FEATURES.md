@@ -17,6 +17,15 @@ ZEUS does far more than the screenshots in the README show. There are 7 pages in
 
 ---
 
+## Contents
+
+- [Top bar](#top-bar-on-every-page) · [⚔️ Positions](#️-positions) · [🔍 Strategy detail](#-strategy-detail-click-any-position) · [⚠ Risk view](#-risk-view)
+- [🩺 Discipline and alerts](#-discipline-and-alerts) · [🩺 Pre-trade checkup and liquidity](#-pre-trade-checkup-and-liquidity)
+- [🎯 Picker](#-picker) · [🔎 TA screener](#-ta-screener-ta) · [🧪 Paper Trade](#-paper-trade-)
+- [📋 Digest](#-digest) · [📅 Events](#-events) · [📓 Trade journal](#-trade-journal)
+- [⚙ Settings](#-settings) · [🔁 What runs by itself](#-what-runs-by-itself) · [🌍 Data sources](#-data-sources) · [🛠 For developers](#-for-developers)
+- [Not wired up yet: ideas for pull requests](#not-wired-up-yet--ideas-for-pull-requests)
+
 ## Top bar (on every page)
 
 | ✓ | Feature | What it does | Needs |
