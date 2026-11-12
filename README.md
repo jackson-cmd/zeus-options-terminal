@@ -8,7 +8,7 @@
 
 **Live positions & Greeks · P/L and risk · exit discipline · paper trading with option and stock legs · a four-source news desk (Benzinga · Finviz · WSJ · MarketWatch) · stock picker · earnings & SEC filings · an honest trade journal — tastytrade API or a plain CSV, running entirely on your own computer, in 中文 / 双语 / English.**
 
-[中文说明 → README_zh.md](README_zh.md) · [License](#-license-non-commercial) · [Quick start](#-quick-start)
+[中文说明 → README_zh.md](README_zh.md) · [All features](docs/FEATURES.md) · [User guide](docs/USER_GUIDE.md) · [Quick start](#-quick-start) · [Contributing](#-contributing) · [License](#-license-non-commercial)
 
 ![Python](https://img.shields.io/badge/python-3.10%2B-3776ab) ![Self-hosted](https://img.shields.io/badge/self--hosted-100%25%20local-2ea043) ![Languages](https://img.shields.io/badge/UI-中文%20%7C%20双语%20%7C%20English-e3b341) ![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial-b31b1b)
 
@@ -59,6 +59,8 @@ I have lived inside this tool through rallies, crashes and earnings seasons, and
 ---
 
 ## 🗺️ Feature tour
+
+This tour covers the highlights. ZEUS does far more than fits on one page: the **[complete feature checklist](docs/FEATURES.md)** lists every page, button, alert and background job, and the **[user guide](docs/USER_GUIDE.md)** walks you through setup and a full trading day.
 
 ### ⚔️ Positions — the command center
 - **Every strategy recognized automatically**: verticals, calendars, diagonals, iron condors, butterflies, naked and covered legs, stock. Legs are grouped by the order that opened them, so spreads stay together even when you leg in or roll.
@@ -188,7 +190,6 @@ my.tastytrade.com → **Manage → API Access → OAuth Applications** → creat
 | Finviz Elite token | Finviz news through the official export (otherwise the free page) | optional |
 | AI provider | AI summaries, market brief, AI picker, AI journal review, position review | your own |
 | Barchart login | Barchart screener and signal lists | Barchart account |
-| E-mail (SMTP) | E-mail alerts | ✅ |
 
 ---
 
@@ -260,6 +261,12 @@ Runtime data (candles, caches, digests) lives in `~/.zeus-terminal/runtime/`; fo
 **Where are my settings?** `~/.zeus-terminal/config.json`. Delete the folder to forget everything.
 
 **First launch after the close and the picker shows 0 quotes?** Press **Refresh** on the picker; the last session's closing prices fill in within seconds.
+
+---
+
+## 🤝 Contributing
+
+ZEUS has far more features than this page can show, and it keeps growing; new features may be added over time. **Pull requests are welcome**: a bug fix, a new data source or broker, a translation, better docs, or one of the [parts not wired up yet](docs/FEATURES.md#not-wired-up-yet--ideas-for-pull-requests). Read [CONTRIBUTING.md](CONTRIBUTING.md) first. Every pull request runs the test suite on Linux, macOS and Windows, and `main` only accepts pull requests whose checks pass.
 
 ---
 
