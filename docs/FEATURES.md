@@ -1,8 +1,8 @@
 # ZEUS Terminal — complete feature checklist
 
-[中文 → FEATURES_zh.md](FEATURES_zh.md) · [User guide](USER_GUIDE.md) · [Back to README](../README.md)
+[中文 → FEATURES_zh.md](FEATURES_zh.md) · [User manual](USER_GUIDE.md) · [What's new](../CHANGELOG.md) · [Back to README](../README.md)
 
-ZEUS does far more than the screenshots in the README show. There are 7 pages in the top bar, about 30 jobs that run by themselves in the background, and more than 200 API endpoints. This page lists every feature you can reach from the interface today. Pull requests are welcome, and new features may be added over time ([Contributing](../CONTRIBUTING.md)).
+ZEUS does far more than the screenshots in the README show. There are 7 pages in the top bar, about 30 jobs that run by themselves in the background, and more than 200 API endpoints. This page lists every feature you can reach from the interface today. Pull requests are welcome, and new features may be added over time ([Contributing](../CONTRIBUTING.md)). Features marked <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> arrived in version 0.2.0 ([changelog](../CHANGELOG.md)); how to use each one is in the [user manual](USER_GUIDE.md).
 
 **What each feature needs:**
 
@@ -38,7 +38,7 @@ ZEUS does far more than the screenshots in the README show. There are 7 pages in
 |---|---|---|---|
 | ✅ | Automatic strategy grouping | Verticals, calendars, diagonals, iron condors, butterflies, naked and covered legs and stock, grouped by the order that opened them, so rolls and legging-in stay together | Free |
 | ✅ | Live P/L | Every leg marked to market; today's P/L from the official previous close; total return in $ and % | Free (live streaming with tastytrade) |
-| ✅ | Sortable board | Name, underlying, total return, today's return, distance to breakeven, max profit, max loss, chance of profit, DTE, progress to max profit | Free |
+| ✅ | Sortable board | Name, underlying, total return, today's return, distance to breakeven, max profit, max loss (∞ when unlimited), chance of profit, DTE, progress to max profit | Free |
 | ✅ | Status lights and filter | 🔴 deep loss · 🔵 take profit · 🟡 near target · 🟢 hold; click a light to filter | Free |
 | ✅ | Account bar | Net liquidating value, buying power used, cash, live tickers | Free (buying power with tastytrade) |
 | ✅ | Compact · Freeze · Refresh | Denser rows; freeze the numbers while you read; refresh on demand | Free |
@@ -81,12 +81,14 @@ ZEUS does far more than the screenshots in the README show. There are 7 pages in
 | ✅ | Concentration, correlation, liquidity | Position size as % of net liquidation, correlation matrix, cash-reserve guard | Free |
 | ✅ | Decision-log reminders | Reminds you to record why you opened or closed a trade | Free |
 | ✅ | Desktop notifications | Everything above as macOS notifications, even with the browser closed | macOS |
+| ✅ | E-mail alerts <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | Every alert above also by e-mail; the same alert at most once per 30 minutes and at most 20 alerts per hour; test button in Settings | SMTP account (macOS, Linux) |
 
 ## 🩺 Pre-trade checkup and liquidity
 
 | ✓ | Feature | What it does | Needs |
 |---|---|---|---|
-| ✅ | Pre-trade checkup | Four gates before you open a trade: trend → touch of support / resistance → IV and earnings → macro calendar | Free |
+| ✅ | Four-gate pre-trade page | `/pretrade-checkup`: one ticker and direction through four gates (trend → touch of support / resistance → IV and earnings → macro calendar) to a verdict; trading against it is recorded with your reason | Free |
+| ✅ | 🩺 Checkup panel | From the Positions toolbar: each candidate's trend, beta, correlation with what you hold, concentration, and a mirror of the mistakes your own journal shows | Free |
 | ✅ | Spread check | Enter the spread you plan to open (or load the chain): price, direction, how far out of the money, reward to risk | Free |
 | ✅ | Spread suggestions | Ranked bull call spreads by fill quality, liquidity and reward to risk, adapted to the market regime | Free |
 | ✅ | Position exits | The same checks for positions you already hold: take profit or stop now? | Free |
@@ -100,7 +102,8 @@ ZEUS does far more than the screenshots in the README show. There are 7 pages in
 | ✅ | Sorting and filters | By market cap, today's change or TA score; by earnings date and bullish / bearish setup | Free |
 | ✅ | 🚀 AI picks | Trend-following and dip-buying candidates with strikes, chance of profit and orders you can paste; AI re-ranks them with news and earnings | Free (AI re-rank needs AI) |
 | ✅ | 🧭 Market judgement | How bad the news is versus how much price has absorbed, crash probability against base rates, three layers of support, and what would prove the view wrong | AI |
-| ✅ | 🎲 Options sentiment | IV percentile, 25-delta skew percentile and put/call percentiles by sector, against their own history | Free (needs a few weeks of after-close crawls) |
+| ✅ | 🔄 Sector rotation <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | 80 industry groups (575 tickers) ranked by their moves over 5 days to a year, with each group's trend and the share above the 50- and 200-day averages | Free |
+| ✅ | 🎲 Options sentiment <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | IV percentile, 25-delta skew percentile and put/call percentiles by sector, against their own history | Free (needs a few weeks of after-close crawls) |
 | ✅ | 📊 Barchart lists | Intersect or union your saved Barchart screeners and signal pages | Barchart account |
 | ✅ | Ticker detail | Chart (1 week to 2 years), Finviz technicals and fundamentals, news, ⚖️ bull/bear narratives, 🏢 company profile written from the latest 10-Q, 📑 jump to SEC filings | Free (narratives and profile need AI) |
 | ✅ | ⚡ After-close crawl | Pull the day's closing data for the whole universe on demand | Free |
@@ -115,7 +118,7 @@ ZEUS does far more than the screenshots in the README show. There are 7 pages in
 | ✅ | 📋 Order ticket | Copy the spread as an order ticket | Free |
 | ✅ | ⚡ Paper Trade | Open the recommended spread in the Paper Trade builder (shortcut **B** on a ticker page) | Free |
 
-## 🧪 Paper Trade
+## 🧪 Paper Trade <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!">
 
 | ✓ | Feature | What it does | Needs |
 |---|---|---|---|
@@ -184,7 +187,7 @@ ZEUS does far more than the screenshots in the README show. There are 7 pages in
 | ✅ | News sources | Benzinga cookies, Benzinga data API key, Benzinga login, Finviz Elite token, which free sources to use, headline translation (Google / Bing / AI / off), Google translate key |
 | ✅ | AI | Provider, Claude CLI path, Anthropic or OpenAI-compatible key and URL, fast and smart models, answer language, scheduled AI jobs on / off |
 | ✅ | Other data | Barchart login, Finviz "why is it moving" crawl on / off, SEC EDGAR User-Agent |
-| ✅ | E-mail alerts | From, to, app password, SMTP server and port (stored for e-mail alerts, which are not wired up yet) |
+| ✅ | E-mail alerts | From, to, app password, SMTP server and port; a button sends a test e-mail |
 | ✅ | General | Language, listen address, port, desktop notifications |
 
 Saved secrets are write-only: the page shows *set* or *not set* and never sends a secret back.
@@ -202,7 +205,7 @@ Saved secrets are write-only: the page shows *set* or *not set* and never sends 
 | ✅ | Unusual options activity archive | Every 15 minutes in market hours (Benzinga) |
 | ✅ | Earnings and macro calendar | Daily |
 | ✅ | Journal sync | Hourly (tastytrade) |
-| ✅ | Alerts: take-profit, missing GTC, credit-spread mistakes, support / resistance, risk radar, decision-log reminders, weekly review | Continuously |
+| ✅ | Alerts: take-profit, missing GTC, credit-spread mistakes, support / resistance, risk radar, decision-log reminders, weekly review (also by e-mail when set up) | Continuously |
 | ✅ | Bilingual news notification | Daily |
 
 ## 🌍 Data sources
@@ -236,11 +239,9 @@ Saved secrets are write-only: the page shows *set* or *not set* and never sends 
 
 These parts exist in the code but are hidden or incomplete in the public version. They are good places to start a pull request.
 
-- **Sector rotation** (Market judgement → 🔄 rotation): needs an industry universe file that is not shipped yet.
 - **Unusual options activity** sub-tab in Events: the background fetch exists; the tab is hidden.
 - **More picker data modes**: ETF trends, beta and correlation, movers lists and option volume are hidden in the picker toolbar.
-- **Signal backtest**: an automatic paper backtest of screener signals (stop-loss / take-profit modes); it has no entry point in the interface.
+- **Signal backtest**: an automatic paper backtest of screener signals (stop-loss / take-profit modes). It needs SSP1 screener signals and a page, so its daily job is off.
 - **History news search panel**: the search API works; the panel has no entry point.
-- **E-mail alerts**: the settings exist, but nothing sends e-mail yet; alerts go to the desktop and the browser.
-- **Desktop notifications on Windows and Linux**: only macOS today.
+- **Alerts on Windows**: desktop notifications are macOS only and e-mail alerts run on macOS and Linux; Windows has neither yet.
 - **More brokers** for live positions: today only tastytrade connects live; any other broker works through CSV.
