@@ -65,7 +65,7 @@ This tour covers the highlights. ZEUS does far more than fits on one page: the *
 ### ⚔️ Positions — the command center
 - **Every strategy recognized automatically**: verticals, calendars, diagonals, iron condors, butterflies, naked and covered legs, stock. Legs are grouped by the order that opened them, so spreads stay together even when you leg in or roll.
 - **Live P/L that matches your broker**: mark-to-market per leg, today's P/L from the official previous close, total return in $ and %.
-- **Risk at a glance**: max profit, max loss, breakevens, distance to breakeven, probability of profit, days to expiry and a progress bar toward max profit — for every position, in one sortable table.
+- **Risk at a glance**: max profit, max loss (∞ when unlimited), breakevens, distance to breakeven, probability of profit, days to expiry and a progress bar toward max profit — for every position, in one sortable table.
 - **Status lights**: 🔴 deep loss · 🔵 take profit · 🟡 near target · 🟢 hold. One click filters the board.
 - **Detail view per strategy**: a full P/L table across prices and dates, a P/L graph, implied-volatility override, mid/natural pricing, a TradingView chart, and per-leg Greeks (Δ Γ Θ Vega) with a skew-aware, vega-weighted spread IV.
 - **Stress test**: 1σ / 2σ moves, VaR 95 %, CVaR 95 %, worst case, an expiry calendar, scenario sliders and P/L probabilities for the whole book.
@@ -77,7 +77,7 @@ This tour covers the highlights. ZEUS does far more than fits on one page: the *
 - **Credit-spread mistake detector**, **concentration**, **correlation** and **liquidity** checks, position sizing as % of NLV, cash-reserve guard.
 - **Pre-trade checkup** — a four-layer gate you run *before* opening: trend → touch of support/resistance → IV & earnings → macro calendar. It exists to create friction on purpose.
 - **Risk radar**: today's news risk, event density for the next 30 days and a landmine calendar.
-- **Desktop alerts** (macOS) for take-profit hits, support/resistance touches, risk-radar spikes and big movers — they fire even when the browser is closed.
+- **Desktop and e-mail alerts** for take-profit hits, support/resistance touches, risk-radar spikes and big movers. Desktop notifications (macOS) fire even when the browser is closed, and with e-mail set up every alert also arrives in your inbox (macOS and Linux).
 
 ### 🎯 Picker — find the next trade
 - **K-line chart wall**: a wall of daily candles with EMA 50/200, multi-timeframe support/resistance, gold zones and badges; sort by market cap, today's change or TA score, filter by earnings date and by bullish / bearish setup.
@@ -96,6 +96,7 @@ This tour covers the highlights. ZEUS does far more than fits on one page: the *
 
 ### 🧭 Market brief — the big picture, without the drama
 - **AI market judgement**: how bad the news is versus how much price has already priced in, crash probability against historical base rates, three layers of support, and what would prove the view wrong. No bull/bear labels — probabilities and falsifiers.
+- **Sector rotation**: 80 industry groups (575 tickers) ranked by their moves over 5 days to a year, with each group's trend and the share of its stocks above the 50- and 200-day averages.
 - **Options sentiment** by sector: IV percentile, 25-delta skew percentile, put/call volume and open-interest percentiles, each against its own history. It reads the daily option-chain archive (run it from the `/ta/` page), so the percentiles need a few weeks of history.
 
 ### 📋 Digest — four wires, two languages
@@ -123,7 +124,7 @@ This tour covers the highlights. ZEUS does far more than fits on one page: the *
 ### 🌐 Three interface languages: 中文 · 双语 · English
 - **中文** — the original interface: explanations, tips and news translations in Chinese, while trading tables such as Positions, the strategy detail, Paper Trade and the journal keep the usual English labels (Max Profit, Win Rate…).
 - **双语 Bilingual** — the Chinese interface with the English term beside Chinese tabs, buttons, headers and labels, and English inside tooltips. Made for learning the market vocabulary in both languages.
-- **English** — the interface in English, except the single-ticker page and a few labels, which stay in Chinese.
+- **English** — the interface in English, the TA screener and single-ticker page included; a few labels may still show Chinese.
 - Switch in the top bar at any time. News arrives in English with a Chinese translation under every headline (hidden by default in English mode, one click to show). AI answers follow your language.
 
 ### 🤖 Bring your own AI
@@ -144,7 +145,7 @@ Use whichever you have: **Claude Code CLI** (your Claude subscription), an **Ant
 <td width="50%"><img src="docs/screenshots/selector_en.png" alt="AI picker"><br><sub><b>AI picker</b> — trend and dip candidates with strikes and ready-to-paste orders, works without AI too</sub></td></tr>
 <tr><td width="50%"><img src="docs/screenshots/paper_en.png" alt="Paper trades"><br><sub><b>Paper trades</b> — simulated option and stock trades with total, today's and realized P/L</sub></td>
 <td width="50%"><img src="docs/screenshots/paper_builder_en.png" alt="Paper trade builder"><br><sub><b>Paper trade builder</b> — a covered call (100 shares + a short call): exact max profit and loss, P/L by price and date</sub></td></tr>
-<tr><td width="50%"><img src="docs/screenshots/ticker_en.png" alt="Single-ticker page"><br><sub><b>Single-ticker page</b> — chart, Finviz technicals and fundamentals, news (this page is in Chinese)</sub></td>
+<tr><td width="50%"><img src="docs/screenshots/ticker_en.png" alt="Single-ticker page"><br><sub><b>Single-ticker page</b> — chart, Finviz technicals and fundamentals, news</sub></td>
 <td width="50%"><img src="docs/screenshots/digest_en.png" alt="Digest"><br><sub><b>Digest</b> — Finviz, WSJ and MarketWatch, plus Benzinga with a login</sub></td></tr>
 <tr><td width="50%"><img src="docs/screenshots/chart_en.png" alt="Market chart"><br><sub><b>Market chart</b> — SPY / QQQ full-history candles</sub></td>
 <td width="50%"><img src="docs/screenshots/calendar_en.png" alt="Calendar"><br><sub><b>Calendar</b> — earnings and high-impact macro dates</sub></td></tr>
@@ -190,6 +191,7 @@ my.tastytrade.com → **Manage → API Access → OAuth Applications** → creat
 | Finviz Elite token | Finviz news through the official export (otherwise the free page) | optional |
 | AI provider | AI summaries, market brief, AI picker, AI journal review, position review | your own |
 | Barchart login | Barchart screener and signal lists | Barchart account |
+| E-mail (SMTP) | Every alert also by e-mail, with a test button (macOS and Linux) | ✅ |
 
 ---
 
@@ -256,7 +258,7 @@ Runtime data (candles, caches, digests) lives in `~/.zeus-terminal/runtime/`; fo
 
 **Does it place orders?** Not real ones. The 🧪 Paper Trade tab records simulated trades for practice; real trades happen in your broker.
 
-**Does it work on Windows / Linux?** The core does. Desktop notifications are macOS only.
+**Does it work on Windows / Linux?** The core does. Desktop notifications are macOS only; on Linux, set up e-mail alerts instead.
 
 **Where are my settings?** `~/.zeus-terminal/config.json`. Delete the folder to forget everything.
 

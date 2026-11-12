@@ -64,6 +64,7 @@ Pick a provider: **Claude Code CLI** (uses your Claude subscription), an **Anthr
 
 - **Desktop notifications (macOS):** Settings → General. They fire even when the browser is closed. Allow notifications for your terminal app in macOS System Settings if they don't show.
 - **Browser notifications:** Positions → 🔔 → **Enable Notifications**.
+- **E-mail:** Settings → E-mail alerts. Fill in the sender, the recipients, an app password (Gmail: Google Account → Security → App passwords) and the SMTP server and port (587 or 465). Press **Save**, then **Send a test e-mail**. From then on every desktop alert also arrives by mail; on Linux this is how alerts reach you. Not available on Windows yet.
 - **🔔 in the top bar** mutes everything for a while.
 
 ### Language
@@ -132,6 +133,7 @@ From the TA screener, **⚡** (or the **B** key on a ticker page) opens the reco
 | No AI buttons | Set an AI provider in ⚙ Settings → AI, then reload the page. |
 | Benzinga news stopped | The Benzinga cookies expired. Paste fresh cookies in Settings → News sources. |
 | No desktop notifications | macOS only. Turn them on in Settings → General, and allow notifications for your terminal app in macOS System Settings. |
+| The test e-mail fails | Use an app password, not your normal one, and check the server and port (587 with STARTTLS or 465 with SSL). The message next to the button shows what the mail server answered. |
 | The page looks out of date after an update | Reload with Cmd+Shift+R (Ctrl+Shift+R on Windows); the installed app caches pages. |
 | Paper Trade says "No market data yet" | The terminal is still loading after start; wait a few seconds. If it stays, look at the terminal window: with tastytrade, the connection may have failed (press Test connection in Settings). |
 

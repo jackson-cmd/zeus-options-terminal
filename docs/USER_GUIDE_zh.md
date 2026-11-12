@@ -64,6 +64,7 @@ Windows 上是 `.venv\Scripts\python -m pip install -r requirements.txt`。直�
 
 - **桌面通知（macOS）**：设置 → 通用。浏览器关着也会弹。如果没弹，到 macOS 的系统设置里允许你的终端程序发通知。
 - **浏览器通知**：Positions → 🔔 → **Enable Notifications**。
+- **邮件**：设置 → 邮件提醒。填好发件人、收件人、应用专用密码（Gmail：Google 账号 → 安全性 → 应用专用密码）、SMTP 服务器和端口（587 或 465），点 **保存**，再点 **发一封测试邮件**。之后每条桌面提醒都会同时发到邮箱；Linux 上就靠它收提醒。Windows 暂不支持。
 - 顶栏的 **🔔** 可以一键全部静音。
 
 ### 语言
@@ -132,6 +133,7 @@ Windows 上是 `.venv\Scripts\python -m pip install -r requirements.txt`。直�
 | 没有 AI 按钮 | 在 ⚙ 设置 → AI 里配一个提供方，然后刷新页面。 |
 | Benzinga 新闻停了 | Benzinga 的 cookie 过期了，到 设置 → 新闻源 里粘贴新的。 |
 | 没有桌面通知 | 只支持 macOS。在 设置 → 通用 里打开，再到 macOS 系统设置里允许你的终端程序发通知。 |
+| 测试邮件发不出去 | 用应用专用密码，不是平时登录的密码；检查服务器和端口（587 走 STARTTLS，465 走 SSL）。按钮旁边会显示邮件服务器的回复。 |
 | 更新之后页面还是旧的 | 按 Cmd+Shift+R（Windows 上是 Ctrl+Shift+R）强制刷新；装成应用后页面会被缓存。 |
 | 模拟盘提示 "No market data yet" | 终端刚启动还在加载，等几秒。一直这样的话看命令行窗口：如果用的是 tastytrade，可能是连接失败了，到设置里点测试连接。 |
 
