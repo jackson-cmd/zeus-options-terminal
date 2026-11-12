@@ -16,6 +16,13 @@
 
 ---
 
+## Contents
+
+- [🆕 What's new](#-whats-new) · [The story](#the-story) · [Two ways to play](#two-ways-to-play)
+- [🗺️ Feature tour](#️-feature-tour): [Positions](#️-positions--the-command-center) · [Discipline engine](#-discipline-engine--the-part-that-saves-money) · [Picker](#-picker--find-the-next-trade) · [Paper trade](#-paper-trade--practice-before-real-money) · [Market brief](#-market-brief--the-big-picture-without-the-drama) · [Digest](#-digest--four-wires-two-languages) · [Events](#-events) · [Trade journal](#-trade-journal--the-honest-mirror) · [Three languages](#-three-interface-languages-中文--双语--english) · [Bring your own AI](#-bring-your-own-ai)
+- [📸 Screenshots](#-screenshots) · [🚀 Quick start](#-quick-start) · [🔑 What each setting unlocks](#-what-each-setting-unlocks) · [📄 Manual trades: the CSV](#-manual-trades-the-csv)
+- [🔒 Privacy & security](#-privacy--security) · [🏗️ Under the hood](#️-under-the-hood) · [❓ FAQ](#-faq) · [🤝 Contributing](#-contributing) · [📜 License](#-license-non-commercial)
+
 ## 🆕 What's new
 
 <sub>Latest release **0.2.0** (2026-11-12). The full history is in the [changelog](CHANGELOG.md).</sub>
