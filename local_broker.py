@@ -576,7 +576,10 @@ def equity_quote(sym: str) -> dict:
         try:
             fi = _yf().Ticker(_ysym(sym)).fast_info
             last = float(fi.get("lastPrice") or fi.get("last_price") or 0)
-            prev = float(fi.get("previousClose") or fi.get("previous_close") or fi.get("regularMarketPreviousClose") or 0)
+            # The close before the latest session, the same bar equity_quotes_batch uses.
+            # Yahoo's previousClose can be days out of date, so it is only a fallback.
+            prev = float(fi.get("regularMarketPreviousClose") or fi.get("regular_market_previous_close")
+                         or fi.get("previousClose") or fi.get("previous_close") or 0)
             hi = float(fi.get("dayHigh") or 0)
             lo = float(fi.get("dayLow") or 0)
             vol = float(fi.get("lastVolume") or 0)

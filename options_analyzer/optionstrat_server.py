@@ -76,6 +76,11 @@ from history_news_api import router as history_news_router
 from history_news import HISTORY_NEWS_HTML, HISTORY_NEWS_JS
 # --- /history news ---
 
+# --- paper trade (simulated option + stock trades with live P/L) ---
+from paper_trade import PAPER_TRADE_JS
+import paper_trade_routes as _pt_routes
+# --- /paper trade ---
+
 # --- heatmap ---
 # heatmap/ is a top-level package; project root is already on sys.path via
 # the .parent.parent insertion above (line ~28). Import the router + the two
@@ -213,6 +218,17 @@ app.include_router(signals_router)
 import zeus_routes as _hroutes  # noqa: E402
 app.include_router(_hroutes.router)
 # --- /sec filings ---
+
+# --- paper trade: same quotes as the Positions tab (fetch_* are defined further down) ---
+_pt_routes.configure(
+    client=lambda: state.client,
+    option_marks=lambda c, syms: fetch_option_marks(c, syms),
+    equity_quotes=lambda c, tickers: fetch_equity_quotes(c, tickers),
+    quotes=lambda: state.quotes,
+    metrics=lambda: state.metrics_data,
+)
+app.include_router(_pt_routes.router)
+# --- /paper trade ---
 
 # --- TA Screener(技术分析 screener:MTF S/R 共振 + 概率 edge,ta_screener/)---
 # 以包形式导入(ta_screener.api),内部相对导入 —— 避免裸 `import data/api`
@@ -1879,6 +1895,10 @@ async def index():
     html += "<script>" + SIGNALS_JS + "</script>"
     # --- /sec filings ---
 
+    # --- paper trade ---
+    html += "<script>" + PAPER_TRADE_JS + "</script>"
+    # --- /paper trade ---
+
 
     # Add LIVE indicator + top-nav CSS
     live_css = """
@@ -2372,6 +2392,7 @@ if ('serviceWorker' in navigator) {
   <div class="top-nav-tab" data-tab="events" onclick="switchTopTab('events')">📅 Events</div>
   <!-- Benzinga tab 已移除: Today/History→Digest(Pre-market), Market Events→Events -->
   <div class="top-nav-tab" data-tab="journal" onclick="switchTopTab('journal')">Trade Journal <span id="dl-pending-badge" style="display:none;background:#f85149;color:#fff;border-radius:10px;padding:1px 6px;font-size:10px;font-weight:700;margin-left:4px"></span></div>
+  <div class="top-nav-tab" data-tab="paper" onclick="switchTopTab('paper')">🧪 模拟盘</div>
   <!-- Strategy Builder / Screener / Options 量稳定性 tab 已在 2026-07-30 轻量化重构里删除 -->
   <div class="top-nav-right">
     <button id="powerPill" class="privacy-btn" onclick="togglePowerLive()" title="电源模式" style="font-size:11px;font-weight:700;display:none"></button>
@@ -2688,6 +2709,10 @@ __HEATMAP_HTML__
     __ME_PANE_HTML__
   </div>
 
+</div>
+
+<div id="tab-paper" class="top-tab-panel" style="overflow-y:auto">
+  <div id="papersim-container"></div>
 </div>
 
 <div id="tab-journal" class="top-tab-panel">
@@ -3093,6 +3118,7 @@ function switchTopTab(tab) {
   if (tab === 'positions' && typeof renderPositionsLive === 'function') renderPositionsLive(null);
   if (tab === 'screener') { startMarketPulse(); if (!screenerLoaded) loadScreener(); }
   if (tab === 'journal' && !journalLoaded) loadJournal();
+  if (tab === 'paper' && typeof PT !== 'undefined') PT.init();   // 🧪 模拟盘: reload trades + live marks
   // 回到 Events 恢复上次的子 tab。原来写死 evNav('cal') 无条件执行 —— 在 SEC 里
   // 拉了财报、开了双语翻译, 去 Positions 瞄一眼再回来就被打回财报日历, 白干。
   // (Journal 的 _tjSub 本来就是记住的, Events 这里不一致。)

@@ -6,7 +6,7 @@
 
 *驾驭希腊值。· Rule the Greeks.*
 
-**实时持仓与希腊值 · 盈亏与风险 · 出场纪律 · 四路新闻台（Benzinga · Finviz · 华尔街日报 · MarketWatch）· 选股 · 财报与 SEC 文件 · 不说假话的交易日记 —— 接 tastytrade API 或者一份 CSV 就能用，完全跑在你自己的电脑上，界面支持 中文 / 双语 / English。**
+**实时持仓与希腊值 · 盈亏与风险 · 出场纪律 · 期权和股票都能下的模拟盘 · 四路新闻台（Benzinga · Finviz · 华尔街日报 · MarketWatch）· 选股 · 财报与 SEC 文件 · 不说假话的交易日记 —— 接 tastytrade API 或者一份 CSV 就能用，完全跑在你自己的电脑上，界面支持 中文 / 双语 / English。**
 
 [English → README.md](README.md) · [许可证](#-许可证禁止商业使用) · [快速开始](#-快速开始)
 
@@ -84,6 +84,14 @@ ZEUS Terminal（宙斯期权终端）是我给自己做的网站。前前后后�
 - **Barchart 榜单**（可选，用你自己的 Barchart 账户）：对保存的筛选器和信号页取交集或并集。
 - **单票深挖**：图表、基本面、根据近期新闻生成的多空叙事、公司简介、历次财报反应。
 
+### 🧪 模拟盘 —— 先用假钱练手
+- **在实时期权链上搭策略，用法和 OptionStrat 一样**：输入代码，在时间轴上选到期日，在行权价条上拖动每条腿；也可以从 23 个一键模板开始，从单买看涨、垂直价差到铁鹰、蝶式、跨式、宽跨式、比率价差和 Jade Lizard。
+- **期权腿和股票腿都能加**：可以在期权旁边买入或卖空股票，所以备兑看涨、保护性看跌、领口策略都能算对。
+- **下单之前什么都看得到**：净付出或净收入、精确的最大盈利和最大亏损（没有上限时显示 ∞）、盈亏平衡点、获利概率、希腊值，以及按价格和日期的盈亏表和曲线，范围、价格和隐波都能调。
+- **「Save Paper Trade」按中间价记一笔模拟成交**，永远不会发到券商。
+- **存下来的单子实时算盈亏**：持仓中的单子用终端自己的行情重新估值，有总收益、今日收益，以及持仓盈亏、今日盈亏、已实现盈亏的汇总。可以分组、排序、按市价平仓、导出 CSV。
+- **从 TA 扫描一键载入**：单票详情页里推荐的价差，点 ⚡ 就进模拟盘。
+
 ### 🧭 市场判断 —— 大局观，不带情绪
 - **AI 市场判断**：坏消息有多坏、价格已经反映了多少；对照历史基准率的大跌概率；三层支撑；以及什么情况会证明这个判断是错的。不贴「看多 / 看空」标签，只给概率和证伪条件。
 - **期权情绪**：按板块看 IV 百分位、25Δ 偏斜百分位、Put/Call 成交量和持仓量百分位，都是和自己的历史比。数据来自每日期权链归档（在 `/ta/` 页运行），要攒几周历史，百分位才有意义。
@@ -111,7 +119,7 @@ ZEUS Terminal（宙斯期权终端）是我给自己做的网站。前前后后�
 - **决策日志**：每次开仓平仓记下理由、信心、情绪、信号来源，可以贴截图，事后看价格怎么走；漏写的会提醒你补。
 
 ### 🌐 三种界面语言：中文 · 双语 · English
-- **中文** —— 原汁原味的界面：说明、提示和新闻翻译是中文；持仓表、策略详情、交易日记这类页面沿用交易软件里常见的英文标签（Max Profit、Win Rate……）。
+- **中文** —— 原汁原味的界面：说明、提示和新闻翻译是中文；持仓表、策略详情、模拟盘、交易日记这类页面沿用交易软件里常见的英文标签（Max Profit、Win Rate……）。
 - **双语** —— 在中文界面上，中文的标签页、按钮、表头和字段旁边挂上对应的英文，鼠标悬停的提示里也附英文。适合边用边熟悉中英两套交易术语。
 - **English** —— 界面换成英文；单票详情页和少数标签仍是中文。
 - 顶栏随时切换。新闻以英文原文为主，每条标题下面配中文翻译（英文模式默认隐藏，点一下就显示）。AI 的回答跟着你的语言走。
@@ -132,6 +140,8 @@ ZEUS Terminal（宙斯期权终端）是我给自己做的网站。前前后后�
 <td width="50%"><img src="docs/screenshots/checkup_zh.png" alt="开单前体检"><br><sub><b>开单前体检</b> —— 按流动性和赔率排好的价差推荐</sub></td></tr>
 <tr><td width="50%"><img src="docs/screenshots/picker_zh.png" alt="选股"><br><sub><b>选股</b> —— K 线墙，带支撑阻力和 EMA50/200</sub></td>
 <td width="50%"><img src="docs/screenshots/selector_zh.png" alt="AI 选股"><br><sub><b>AI 选股</b> —— 趋势和回踩候选，附行权价和可直接复制的挂单，不配 AI 也能用</sub></td></tr>
+<tr><td width="50%"><img src="docs/screenshots/paper_zh.png" alt="模拟盘"><br><sub><b>模拟盘</b> —— 期权和股票的模拟单，总收益、今日收益、已实现盈亏</sub></td>
+<td width="50%"><img src="docs/screenshots/paper_builder_zh.png" alt="模拟盘搭策略"><br><sub><b>模拟盘搭策略</b> —— 备兑看涨（100 股加一张卖出看涨）：精确的最大盈亏，按价格和日期的盈亏表</sub></td></tr>
 <tr><td width="50%"><img src="docs/screenshots/ticker_zh.png" alt="单票详情"><br><sub><b>单票详情</b> —— K 线、Finviz 技术面和基本面、新闻</sub></td>
 <td width="50%"><img src="docs/screenshots/digest_zh.png" alt="Digest"><br><sub><b>Digest</b> —— Finviz、华尔街日报、MarketWatch，登录 Benzinga 后再加一路</sub></td></tr>
 <tr><td width="50%"><img src="docs/screenshots/chart_zh.png" alt="大盘图"><br><sub><b>大盘图</b> —— SPY / QQQ 全历史蜡烛图</sub></td>
@@ -228,6 +238,7 @@ FastAPI 服务 ── options_analyzer/optionstrat_server.py
    ├─ 事件 ......... sec_filings/ · benzinga_market_events/ · trade_journal/calendar_events.py
    ├─ 日记 ......... trade_journal/ · journal_review/ · journal_expiry_whatif/
    ├─ 纪律 ......... options_analyzer/checkup/ · pre_trade_checkup/ · sr_alert/
+   ├─ 模拟盘 ....... options_analyzer/paper_trade.py · paper_trade_routes.py（只做模拟，从不发到券商）
    ├─ AI ........... zeus_ai.py（Claude CLI · Anthropic · OpenAI 兼容）
    └─ 设置 ......... zeus_config.py → ~/.zeus-terminal/config.json
 ```
@@ -242,7 +253,7 @@ FastAPI 服务 ── options_analyzer/optionstrat_server.py
 
 **一定要 Benzinga 吗？** 不用。Digest 免费跑在 Finviz + 华尔街日报 + MarketWatch 上。
 
-**它会帮我下单吗？** 不会。ZEUS 只读取、分析和提醒，交易在你自己的券商里做。
+**它会帮我下单吗？** 不会真的下单。🧪 模拟盘只记模拟交易，用来练手；真正的交易在你自己的券商里做。
 
 **Windows / Linux 能用吗？** 核心功能都能用，桌面通知只支持 macOS。
 

@@ -173,6 +173,7 @@ def test_rest_answers_have_tastytrade_shape():
 from datetime import date as _date, timedelta as _td
 
 _REAL_OPTION_QUOTE = lb.option_quote
+_REAL_EQUITY_QUOTE = lb.equity_quote
 _EXP = _date.today() + _td(days=30)
 _YMD = _EXP.strftime("%y%m%d")
 
@@ -242,6 +243,18 @@ def test_cboe_iv30_feeds_market_metrics(fake_cboe, monkeypatch):
             return _T()
     monkeypatch.setattr(lb, "_yf", lambda: _YF())
     assert lb._metrics("AAPL")["implied-volatility-index"] == 0.25
+
+
+def test_equity_quote_prefers_regular_market_previous_close(monkeypatch):
+    class _T:     # Yahoo fast_info as seen live: previousClose was days out of date
+        fast_info = {"lastPrice": 173.73, "previousClose": 158.78, "regularMarketPreviousClose": 168.89}
+
+    class _YF:
+        def Ticker(self, s):
+            return _T()
+    monkeypatch.setattr(lb, "_yf", lambda: _YF())
+    q = _REAL_EQUITY_QUOTE("NVDA")
+    assert (q["last"], q["prev_close"]) == (173.73, 168.89)
 
 
 def test_yahoo_iv_cleaning():

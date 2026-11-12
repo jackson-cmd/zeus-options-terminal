@@ -6,7 +6,7 @@
 
 *Rule the Greeks. · 驾驭希腊值。*
 
-**Live positions & Greeks · P/L and risk · exit discipline · a four-source news desk (Benzinga · Finviz · WSJ · MarketWatch) · stock picker · earnings & SEC filings · an honest trade journal — tastytrade API or a plain CSV, running entirely on your own computer, in 中文 / 双语 / English.**
+**Live positions & Greeks · P/L and risk · exit discipline · paper trading with option and stock legs · a four-source news desk (Benzinga · Finviz · WSJ · MarketWatch) · stock picker · earnings & SEC filings · an honest trade journal — tastytrade API or a plain CSV, running entirely on your own computer, in 中文 / 双语 / English.**
 
 [中文说明 → README_zh.md](README_zh.md) · [License](#-license-non-commercial) · [Quick start](#-quick-start)
 
@@ -84,6 +84,14 @@ I have lived inside this tool through rallies, crashes and earnings seasons, and
 - **Barchart lists** *(optional, your own Barchart account)*: intersect or union saved screeners and signal pages.
 - **Single-ticker deep dive**: chart, fundamentals, bull/bear narratives from recent news, company profile, earnings history.
 
+### 🧪 Paper trade — practice before real money
+- **An OptionStrat-style builder on the live chain**: type a ticker, pick an expiration on the timeline, drag legs along the strike bar, or start from 23 one-click strategies, from long calls and verticals to iron condors, butterflies, straddles, strangles, ratio backspreads and jade lizards.
+- **Option legs and stock legs**: buy or sell shares next to your options, so covered calls, protective puts and collars are priced correctly.
+- **Everything before you commit**: net debit or credit, exact max profit and max loss (∞ when unlimited), breakeven, chance of profit, Greeks, and a P/L table and chart across prices and dates with range, price and IV controls.
+- **Save Paper Trade** records a simulated fill at the mid price. Nothing is ever sent to a broker.
+- **Saved trades with live P/L**: open trades are marked to market from the terminal's own quotes, with total return, today's return and a summary of open, today's and realized P/L. Groups, sorting, close at market, CSV export.
+- **⚡ from the TA screener**: the recommended spread on a ticker's detail page opens here with one click.
+
 ### 🧭 Market brief — the big picture, without the drama
 - **AI market judgement**: how bad the news is versus how much price has already priced in, crash probability against historical base rates, three layers of support, and what would prove the view wrong. No bull/bear labels — probabilities and falsifiers.
 - **Options sentiment** by sector: IV percentile, 25-delta skew percentile, put/call volume and open-interest percentiles, each against its own history. It reads the daily option-chain archive (run it from the `/ta/` page), so the percentiles need a few weeks of history.
@@ -111,7 +119,7 @@ I have lived inside this tool through rallies, crashes and earnings seasons, and
 - **Decision log**: record the thesis, confidence, emotion and signal source for every opening and closing decision, attach screenshots, see the price path after you acted, and get reminded to fill in what you skipped.
 
 ### 🌐 Three interface languages: 中文 · 双语 · English
-- **中文** — the original interface: explanations, tips and news translations in Chinese, while trading tables such as Positions, the strategy detail and the journal keep the usual English labels (Max Profit, Win Rate…).
+- **中文** — the original interface: explanations, tips and news translations in Chinese, while trading tables such as Positions, the strategy detail, Paper Trade and the journal keep the usual English labels (Max Profit, Win Rate…).
 - **双语 Bilingual** — the Chinese interface with the English term beside Chinese tabs, buttons, headers and labels, and English inside tooltips. Made for learning the market vocabulary in both languages.
 - **English** — the interface in English, except the single-ticker page and a few labels, which stay in Chinese.
 - Switch in the top bar at any time. News arrives in English with a Chinese translation under every headline (hidden by default in English mode, one click to show). AI answers follow your language.
@@ -132,6 +140,8 @@ Use whichever you have: **Claude Code CLI** (your Claude subscription), an **Ant
 <td width="50%"><img src="docs/screenshots/checkup_en.png" alt="Pre-trade checkup"><br><sub><b>Pre-trade checkup</b> — spread suggestions ranked by liquidity and reward / risk</sub></td></tr>
 <tr><td width="50%"><img src="docs/screenshots/picker_en.png" alt="Picker"><br><sub><b>Picker</b> — K-line chart wall with support / resistance and EMA 50/200</sub></td>
 <td width="50%"><img src="docs/screenshots/selector_en.png" alt="AI picker"><br><sub><b>AI picker</b> — trend and dip candidates with strikes and ready-to-paste orders, works without AI too</sub></td></tr>
+<tr><td width="50%"><img src="docs/screenshots/paper_en.png" alt="Paper trades"><br><sub><b>Paper trades</b> — simulated option and stock trades with total, today's and realized P/L</sub></td>
+<td width="50%"><img src="docs/screenshots/paper_builder_en.png" alt="Paper trade builder"><br><sub><b>Paper trade builder</b> — a covered call (100 shares + a short call): exact max profit and loss, P/L by price and date</sub></td></tr>
 <tr><td width="50%"><img src="docs/screenshots/ticker_en.png" alt="Single-ticker page"><br><sub><b>Single-ticker page</b> — chart, Finviz technicals and fundamentals, news (this page is in Chinese)</sub></td>
 <td width="50%"><img src="docs/screenshots/digest_en.png" alt="Digest"><br><sub><b>Digest</b> — Finviz, WSJ and MarketWatch, plus Benzinga with a login</sub></td></tr>
 <tr><td width="50%"><img src="docs/screenshots/chart_en.png" alt="Market chart"><br><sub><b>Market chart</b> — SPY / QQQ full-history candles</sub></td>
@@ -228,6 +238,7 @@ FastAPI server  ── options_analyzer/optionstrat_server.py
    ├─ events ........ sec_filings/ · benzinga_market_events/ · trade_journal/calendar_events.py
    ├─ journal ....... trade_journal/ · journal_review/ · journal_expiry_whatif/
    ├─ discipline .... options_analyzer/checkup/ · pre_trade_checkup/ · sr_alert/
+   ├─ paper trade ... options_analyzer/paper_trade.py · paper_trade_routes.py (simulated, never sent to a broker)
    ├─ AI ............ zeus_ai.py (Claude CLI · Anthropic · OpenAI-compatible)
    └─ settings ...... zeus_config.py → ~/.zeus-terminal/config.json
 ```
@@ -242,7 +253,7 @@ Runtime data (candles, caches, digests) lives in `~/.zeus-terminal/runtime/`; fo
 
 **Do I need Benzinga?** No. The Digest runs on Finviz + WSJ + MarketWatch for free.
 
-**Does it place orders?** No. ZEUS reads, analyzes and alerts. You trade in your broker.
+**Does it place orders?** Not real ones. The 🧪 Paper Trade tab records simulated trades for practice; real trades happen in your broker.
 
 **Does it work on Windows / Linux?** The core does. Desktop notifications are macOS only.
 
