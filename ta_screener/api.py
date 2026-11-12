@@ -139,9 +139,13 @@ def _digest_news(ticker: str, days: int = 6, limit: int = 30) -> list:
     return out
 
 
+# The interface-language switch (中文 / 双语 / English) and its bilingual-label styles.
+ZEUS_SHELL = '<link rel="stylesheet" href="/static/zeus.css"><script src="/static/zeus.js"></script>'
+
+
 @router.get("/ta/")
 def ta_page():
-    return HTMLResponse(page.PAGE_HTML)
+    return HTMLResponse(page.PAGE_HTML.replace("</body>", ZEUS_SHELL + "</body>", 1))
 
 
 @router.get("/api/ta/results")

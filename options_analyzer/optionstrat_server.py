@@ -13014,7 +13014,8 @@ window.addEventListener('message', e => {
         """<button class="reload-btn" onclick="triggerFilePick()">⟳ Reload</button>""",
         ""
     )
-    html = html.replace("</body>", '<script src="/static/zeus.js"></script></body>')   # 中/EN switch inside the journal iframe
+    html = html.replace("</body>", '<link rel="stylesheet" href="/static/zeus.css">'
+                        '<script src="/static/zeus.js"></script></body>')   # 中/双语/EN switch + bilingual labels inside the journal iframe
     return HTMLResponse(content=html)
 
 
