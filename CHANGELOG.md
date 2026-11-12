@@ -13,6 +13,14 @@ What changed in each version of ZEUS Terminal. New features carry the <img src="
 - Sector rotation chart: labels no longer print over each other in a narrow window (every second or third bar is labelled instead), English group names are shortened to fit instead of running off the chart, the first labels stay inside it, and the ±% scale moved to the left margin, where the bars cannot cover it. (#26)
 - The movers notice in the top right corner no longer blocks clicks on the buttons under it while it is on screen. (#26)
 - The movers notice moved from the top right corner, where it covered the Market Brief's 🔄 Re-analyze button for a few seconds, to the bottom of the window. When it opened the chart wall while 🧭 Market Brief was showing, the two were stacked on one page; the Picker now switches over to the chart wall completely. (#28)
+- English interface: many sentences came out as word salad, such as "future30-day event density", "Chip leader's earnings report=Sector level landmine:bad earnings report day…" or "Recently≥2%down". They now read as whole English sentences in the 📡 risk radar and its data panels, the 🩺 checkup, the liquidity scan, the positions risk view (portfolio Greeks, Monte Carlo, Theta runway), exit advice and take-profit alerts, the 🔔 alert settings, the digest status lines, sector rotation, the picker's controls, risk map and ETF trends, the trade journal's analysis cards and chart notes, the daily review page, the pre-trade checkup page and the TA page. (#PR)
+- Bilingual mode: labels keep their numbers and Latin words ("7 days", "Hide ETF groups") instead of dropping them, and labels such as "💹 Option volume stability · Not crawled yet" keep their separators. (#PR)
+- Tickers and names inside translated text are no longer split ("SOXX", "MarketWatch"). (#PR)
+
+### Project
+
+- `static/zeus_lang.js` gives page scripts `zt(zh, en)` and `ztt(zh, en)` before they run, so a sentence built with numbers carries its English where it is built; the server sends English next to Chinese where it builds such sentences (`label_en`, `reasons_en`, `insight_en`, `headline_en`…). The dictionary lookup in `zeus.js` finds a sentence through line breaks, emoji and colons around it, and translates the parts of a line joined by " · " or " — " one by one. About 350 sentences were added to `i18n_en.json` and 24 wrong ones corrected ("流动性体检" read "Mobile medical check-up", "出场" read "Appearance"). (#PR)
+- `tests/test_english_text.py` keeps the page text, the dictionary and the English templates in step, and runs the lookup code of `zeus.js` under node. (#PR)
 
 ## 0.3.0 — 2026-11-12
 

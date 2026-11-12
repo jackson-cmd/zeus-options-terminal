@@ -710,6 +710,7 @@ HEATMAP_JS = r"""
 
   // ── ETF trend mode (not real-time): leaders vs laggards over 3d/7d/1mo/3mo/1yr
   const _ETF_PERIOD_LABEL = {r3d:'3天', r7d:'7天', r1mo:'1月', r3mo:'3月', r1yr:'1年'};
+  const _ETF_PERIOD_LABEL_EN = {r3d:'3-day', r7d:'7-day', r1mo:'1-month', r3mo:'3-month', r1yr:'1-year'};
   function _etfScale(p) { return {r3d:3, r7d:5, r1mo:10, r3mo:20, r1yr:50}[p] || 10; }
   function _etfPct(v) { return (v === null || v === undefined || isNaN(v)) ? '—' : ((v >= 0 ? '+' : '') + v.toFixed(1) + '%'); }
 
@@ -2172,6 +2173,7 @@ HEATMAP_JS = r"""
 
   // ── β / 相关性 模式 (非实时, 每周更新) ─────────────────────────────────
   const _RISK_WIN_LABEL = {'3m':'3月', '6m':'6月', '1y':'1年'};
+  const _RISK_WIN_LABEL_EN = {'3m':'3 mo', '6m':'6 mo', '1y':'1 yr'};
   window.hmSetRiskBench = function (b) {
     window.hmState.riskBench = (b === 'QQQ') ? 'QQQ' : 'SPY';
     document.querySelectorAll('#hmRiskBench button').forEach(x => {
@@ -2248,7 +2250,7 @@ HEATMAP_JS = r"""
     svg.on('.zoom', null);   // drop any d3-zoom handlers left by the perf swarm
     const data = _riskActiveData();
     if (!data) { svg.append('text').attr('x', 16).attr('y', 28).attr('fill', '#8b949e').attr('font-size', 13).text('计算 β / 相关性 中…'); return; }
-    const bench = window.hmState.riskBench, win = window.hmState.riskWindow, winLabel = _RISK_WIN_LABEL[win];
+    const bench = window.hmState.riskBench, win = window.hmState.riskWindow, winLabel = _RISK_WIN_LABEL[win], winEn = _RISK_WIN_LABEL_EN[win];
     const isEtf = window.hmState.riskUniverse === 'etf';
     _anaEnsurePickers();
 
@@ -2302,11 +2304,11 @@ HEATMAP_JS = r"""
     // emphasized reference lines: ρ=0.5 (跟盘紧/松) and median volatility (高/低波动)
     svg.append('line').attr('x1', xMid).attr('x2', xMid).attr('y1', m.top).attr('y2', m.top + ph).attr('stroke', '#484f58').attr('stroke-dasharray', '4 3');
     svg.append('line').attr('x1', m.left).attr('x2', m.left + pw).attr('y1', yMid).attr('y2', yMid).attr('stroke', '#484f58').attr('stroke-dasharray', '4 3');
-    svg.append('text').attr('x', m.left + pw - 4).attr('y', yMid - 5).attr('fill', '#8b949e').attr('font-size', 10).attr('text-anchor', 'end').text(`中位波动 ${medVol.toFixed(0)}%`);
+    svg.append('text').attr('x', m.left + pw - 4).attr('y', yMid - 5).attr('fill', '#8b949e').attr('font-size', 10).attr('text-anchor', 'end').text(zt(`中位波动 ${medVol.toFixed(0)}%`, `median volatility ${medVol.toFixed(0)}%`));
     // benchmark's own volatility, for reference (where the index itself sits)
     if (benchVol != null && y(benchVol) < m.top + ph - 2) {
       svg.append('line').attr('x1', m.left).attr('x2', m.left + pw).attr('y1', y(benchVol)).attr('y2', y(benchVol)).attr('stroke', '#21262d').attr('stroke-dasharray', '2 4');
-      svg.append('text').attr('x', m.left + 4).attr('y', y(benchVol) - 4).attr('fill', '#6e7681').attr('font-size', 9).text(`${bench} 自身 ${benchVol.toFixed(0)}%`);
+      svg.append('text').attr('x', m.left + 4).attr('y', y(benchVol) - 4).attr('fill', '#6e7681').attr('font-size', 9).text(zt(`${bench} 自身 ${benchVol.toFixed(0)}%`, `${bench} itself ${benchVol.toFixed(0)}%`));
     }
 
     // axis titles
@@ -2321,19 +2323,19 @@ HEATMAP_JS = r"""
     cap(m.left + pw - 6, m.top + ph - 8, 'end', '低波动 · 稳跟大盘 (稳健)', '#3fb950');
 
     // title + how-to-read
-    svg.append('text').attr('x', m.left).attr('y', 24).attr('fill', '#e6edf3').attr('font-size', 14).attr('font-weight', 700).text(`风险地图 · ${isEtf ? 'ETF · ' : ''}vs ${bench} · ${winLabel} · ${pts.length} 只`);
+    svg.append('text').attr('x', m.left).attr('y', 24).attr('fill', '#e6edf3').attr('font-size', 14).attr('font-weight', 700).text(zt(`风险地图 · ${isEtf ? 'ETF · ' : ''}vs ${bench} · ${winLabel} · ${pts.length} 只`, `Risk map · ${isEtf ? 'ETF · ' : ''}vs ${bench} · ${winEn} · ${pts.length} tickers`));
     svg.append('text').attr('x', m.left).attr('y', 44).attr('fill', '#8b949e').attr('font-size', 11)
       .text('↑波动越大  →越跟大盘同步  ●气泡=市值  颜色=β (蓝=防御<1 · 灰≈大盘 · 红=放大>1)');
     const nClamp = pts.filter(p => p.vol > vMax).length;
     if (nClamp) svg.append('text').attr('x', m.left).attr('y', 60).attr('fill', '#6e7681').attr('font-size', 10)
-      .text(`贴顶的 ${nClamp} 只波动 >${vMax.toFixed(0)}% (压缩在顶部, 悬停看真实值)`);
+      .text(zt(`贴顶的 ${nClamp} 只波动 >${vMax.toFixed(0)}% (压缩在顶部, 悬停看真实值)`, `${nClamp} with volatility >${vMax.toFixed(0)}% are pinned to the top (hover for the real value)`));
     const status = document.getElementById('hmStatus');
-    if (status) status.textContent = `β/相关 · vs ${bench} · ${winLabel} · ${pts.length} 只 (非实时, 每周更新)`;
+    if (status) status.textContent = zt(`β/相关 · vs ${bench} · ${winLabel} · ${pts.length} 只 (非实时, 每周更新)`, `β / correlation · vs ${bench} · ${winEn} · ${pts.length} tickers (not live, updated weekly)`);
 
     // legend (right gutter): β color scale + bubble size hint
     const lx = m.left + pw + 18, lyTop = m.top + 4;
     svg.append('text').attr('x', lx).attr('y', lyTop).attr('fill', '#8b949e').attr('font-size', 10).text('β 颜色');
-    [[0, '防御'], [0.5, ''], [1, '≈大盘'], [1.5, ''], [2, '放大']].forEach((bv, i) => {
+    [[0, zt('防御', 'defensive')], [0.5, ''], [1, zt('≈大盘', '≈ market')], [1.5, ''], [2, zt('放大', 'amplifies')]].forEach((bv, i) => {
       svg.append('rect').attr('x', lx).attr('y', lyTop + 8 + i * 16).attr('width', 12).attr('height', 12).attr('rx', 2).attr('fill', _betaColor(bv[0]));
       svg.append('text').attr('x', lx + 17).attr('y', lyTop + 18 + i * 16).attr('fill', '#8b949e').attr('font-size', 10).text(bv[0].toFixed(1) + (bv[1] ? '  ' + bv[1] : ''));
     });
@@ -2621,7 +2623,7 @@ HEATMAP_JS = r"""
       .attr('text-anchor', 'middle').attr('font-weight', 600).attr('fill', 'rgba(255,255,255,0.9)').attr('pointer-events', 'none')
       .each(function (d) { const ww = d.x1 - d.x0, hh = d.y1 - d.y0; if (ww < 40 || hh < 34) { this.remove(); return; } d3.select(this).attr('font-size', Math.min(12, ww / 6)).text(_etfPct(d.data.it[period])); });
     const status = document.getElementById('hmStatus');
-    if (status) { const t = data.generated_at ? data.generated_at.replace('T', ' ').replace('Z', ' UTC') : ''; status.innerHTML = `ETF 趋势 · ${cat === 'SECTOR' ? '板块' : '国家/全球'} · 按 ${_ETF_PERIOD_LABEL[period]} 强度 · ${items.length} 只 · ${t} <span style="color:#8b949e">(非实时, 绿=leader 红=lagger)</span>`; }
+    if (status) { const t = data.generated_at ? data.generated_at.replace('T', ' ').replace('Z', ' UTC') : ''; status.innerHTML = zt(`ETF 趋势 · ${cat === 'SECTOR' ? '板块' : '国家/全球'} · 按 ${_ETF_PERIOD_LABEL[period]} 强度 · ${items.length} 只 · ${t} <span style="color:#8b949e">(非实时, 绿=leader 红=lagger)</span>`, `ETF trends · ${cat === 'SECTOR' ? 'sectors' : 'country / global'} · by ${_ETF_PERIOD_LABEL_EN[period]} strength · ${items.length} ETFs · ${t} <span style="color:#8b949e">(not live; green = leader, red = laggard)</span>`); }
   }
 
   // ETF bar chart (finviz-groups style): ranked diverging horizontal bars,
@@ -3834,7 +3836,7 @@ HEATMAP_JS = r"""
 
   function _hmMcapLabel() {
     const m = window.hmState.mcapMin || 0;
-    return m >= 1e11 ? '大盘≥100B' : m >= 1e10 ? '≥10B' : '全部';
+    return m >= 1e11 ? zt('大盘≥100B', 'large caps ≥100B') : m >= 1e10 ? '≥10B' : zt('全部', 'all');
   }
 
   window.hmRenderGraph = async function () {
@@ -3847,7 +3849,7 @@ HEATMAP_JS = r"""
     const cnt = document.getElementById('hmGraphCount');
     // 空结果时原来把计数器置成空字符串 —— 而旁边 Barchart 面板还写着「·1选 交集 ·3票」
     //    (那是过滤前的原始名单), 两个计数器对不上又没有一个说"这里是 0"。明写 0。
-    if (cnt) cnt.textContent = items.length ? (items.length + ' 票 · ' + _hmMcapLabel()) : ('0 票 · ' + _hmMcapLabel());
+    if (cnt) cnt.textContent = zt(items.length + ' 票 · ', items.length + ' tickers · ') + _hmMcapLabel();
     // 拆掉上一轮的 observer / 队列
     if (window.hmState.graphIO) { try { window.hmState.graphIO.disconnect(); } catch (e) {} }
     window.hmState.graphQueue = []; window.hmState.graphActive = 0;
@@ -4279,7 +4281,7 @@ HEATMAP_JS = r"""
     else if (s.state === 'done') btn = '<button onclick="hmRunEodCrawl()" title="重爬今天的 EOD 期权链" style="margin-left:8px;background:#21262d;color:#e6edf3;border:1px solid #30363d;border-radius:4px;padding:3px 8px;font-size:11px;cursor:pointer;white-space:nowrap">↻ 重爬</button>';
     el.innerHTML = '<span style="font-size:13px">' + icon + '</span>' +
       '<b style="color:' + col + '">EOD 爬取</b>' +
-      '<span>' + (s.label || '') + '</span>' +
+      '<span>' + zt(s.label || '', s.label_en || s.label || '') + '</span>' +
       (tip ? '<span style="color:#8b949e;cursor:help" title="' + tip.replace(/"/g, '&quot;') + '">· ' + tip + '</span>' : '') +
       (s.file_mtime ? '<span style="color:#8b949e;margin-left:auto">数据文件 ' + s.file_mtime + '</span>' : '') +
       '<span onclick="hmLoadEodStatus()" title="刷新状态" style="cursor:pointer;opacity:.6;margin-left:' + (s.file_mtime ? '6px' : 'auto') + '">↻</span>' +
@@ -5659,6 +5661,7 @@ HEATMAP_JS = r"""
   function _hmPopupToast(slot) {
     try {
       const M = { s9: '开盘 9:00', s11: '午盘 11:00', s14: '盘尾 14:00', s20: '盘后 20:00', catchup: '今日异动' };
+      const M_EN = { s9: 'Open 9:00', s11: 'Midday 11:00', s14: 'Late session 14:00', s20: 'After hours 20:00', catchup: "Today's movers" };
       const lbl = M[slot] || '异动新闻';
       let t = document.getElementById('hmPopupToast');
       if (!t) {
@@ -5668,7 +5671,8 @@ HEATMAP_JS = r"""
         t.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:99999;background:#1f6feb;color:#fff;padding:10px 14px;border-radius:8px;font-size:13px;font-weight:600;box-shadow:0 6px 22px rgba(0,0,0,.55);max-width:300px;pointer-events:none';
         document.body.appendChild(t);
       }
-      t.textContent = '📰 ' + lbl + ' — 今日 ±1% 异动票新闻已为你打开';
+      t.textContent = zt('📰 ' + lbl + ' — 今日 ±1% 异动票新闻已为你打开',
+                         '📰 ' + (M_EN[slot] || 'Movers news') + ': news for tickers that moved ±1% today is open for you');
       t.style.display = 'block'; t.style.transition = ''; t.style.opacity = '1';
       clearTimeout(t._ht);
       t._ht = setTimeout(() => { t.style.transition = 'opacity .6s'; t.style.opacity = '0'; setTimeout(() => { t.style.display = 'none'; }, 700); }, 4500);

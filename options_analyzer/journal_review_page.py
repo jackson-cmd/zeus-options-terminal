@@ -224,8 +224,8 @@ JOURNAL_REVIEW_HTML = r"""<!DOCTYPE html>
 
     var ruleMap = {
       ok: ['ok', '✅ 正常'],
-      warn: ['warn', '⚠️ 有 ' + nViolations + ' 处违反'],
-      violated: ['fail', '🛑 违反较多(' + nViolations + ' 处)']
+      warn: ['warn', zt('⚠️ 有 ' + nViolations + ' 处违反', '⚠️ ' + nViolations + (nViolations === 1 ? ' violation' : ' violations'))],
+      violated: ['fail', zt('🛑 违反较多(' + nViolations + ' 处)', '🛑 Many violations (' + nViolations + ')')]
     };
     var rs = ruleMap[kpi.rule_status] || ['', escapeHtml(kpi.rule_status || '—')];
     var cashCls = (cash === null || cash === undefined) ? '' : (cash >= floor ? 'ok' : 'fail');
@@ -236,9 +236,9 @@ JOURNAL_REVIEW_HTML = r"""<!DOCTYPE html>
     html += '<div class="kpi-card"><div class="kpi-label">昨日 P&amp;L</div>' +
             '<div class="kpi-value ' + pnlClass(y) + '">' + fmtMoney(y) + '</div>' +
             '<div class="kpi-sub">7 天: ' + fmtMoney(w) + '</div></div>';
-    html += '<div class="kpi-card"><div class="kpi-label">仓位</div>' +
+    html += '<div class="kpi-card"><div class="kpi-label">' + zt('仓位', 'Positions') + '</div>' +
             '<div class="kpi-value">' + (posCount == null ? '—' : posCount) + '/' + (posMax == null ? '—' : posMax) + '</div>' +
-            '<div class="kpi-sub">' + (posLeft === null ? '' : '剩 ' + posLeft + ' 个') + '</div></div>';
+            '<div class="kpi-sub">' + (posLeft === null ? '' : zt('剩 ' + posLeft + ' 个', posLeft + ' left')) + '</div></div>';
     html += '<div class="kpi-card"><div class="kpi-label">现金 %(估算)</div>' +
             '<div class="kpi-value ' + cashCls + '">' + (cash === null || cash === undefined ? '—' : cash.toFixed(1) + '%') + '</div>' +
             '<div class="kpi-sub">底线 ' + (floor == null ? '—' : floor + '%') + '</div></div>';
@@ -248,8 +248,8 @@ JOURNAL_REVIEW_HTML = r"""<!DOCTYPE html>
     $('kpiGrid').innerHTML = html;
   }
 
-  function renderInsight(text) {
-    $('insightBox').innerHTML = '<span class="icon">🧭</span><span>' + escapeHtml(text || '(暂无洞察)') + '</span>';
+  function renderInsight(text, textEn) {
+    $('insightBox').innerHTML = '<span class="icon">🧭</span><span>' + escapeHtml(zt(text, textEn || text) || '(暂无洞察)') + '</span>';
   }
 
   // ── 昨日平的 ──
@@ -345,8 +345,9 @@ JOURNAL_REVIEW_HTML = r"""<!DOCTYPE html>
     var html = rows.map(function (r) {
       var dirCls = (r.direction === 'BULL') ? 'bull' : 'bear';
       var attention = r.attention || [];
-      var chips = attention.map(function (a) {
-        return '<span class="chip ' + attentionChipClass(a) + '">' + escapeHtml(a) + '</span>';
+      var attentionEn = r.attention_en || attention;
+      var chips = attention.map(function (a, i) {
+        return '<span class="chip ' + attentionChipClass(a) + '">' + escapeHtml(zt(a, attentionEn[i] || a)) + '</span>';
       }).join(' ');
       var reminder = (attention.indexOf('深亏') !== -1)
         ? '<div class="row-detail">⚠️ 记住:不止损!让它死等到期结算</div>' : '';
@@ -367,13 +368,13 @@ JOURNAL_REVIEW_HTML = r"""<!DOCTYPE html>
   // ── 本周规则违反 ──
   function violationDetailLine(v) {
     var parts = [];
-    if (v.date_range) { parts.push('持续 ' + v.n_days + ' 天(' + escapeHtml(v.date_range) + ')'); }
-    if (v.actual !== undefined && v.actual !== null) { parts.push('实际: ' + v.actual); }
-    if (v.actual_cash_pct !== undefined && v.actual_cash_pct !== null) { parts.push('现金实际: ' + v.actual_cash_pct + '%'); }
-    if (v.net_pnl_sum !== undefined && v.net_pnl_sum !== null) { parts.push('合计: ' + fmtMoney(v.net_pnl_sum)); }
-    if (v.pnl_pct !== undefined && v.pnl_pct !== null) { parts.push('亏损比例: ' + v.pnl_pct + '%'); }
-    if (v.dte_at_close !== undefined && v.dte_at_close !== null) { parts.push('距到期 ' + v.dte_at_close + ' 天'); }
-    if (v.pct_of_nlv !== undefined && v.pct_of_nlv !== null) { parts.push('占 NLV: ' + v.pct_of_nlv + '%'); }
+    if (v.date_range) { parts.push(zt('持续 ' + v.n_days + ' 天(' + escapeHtml(v.date_range) + ')', 'for ' + v.n_days + ' days (' + escapeHtml(v.date_range) + ')')); }
+    if (v.actual !== undefined && v.actual !== null) { parts.push(zt('实际: ', 'actual: ') + v.actual); }
+    if (v.actual_cash_pct !== undefined && v.actual_cash_pct !== null) { parts.push(zt('现金实际: ', 'actual cash: ') + v.actual_cash_pct + '%'); }
+    if (v.net_pnl_sum !== undefined && v.net_pnl_sum !== null) { parts.push(zt('合计: ', 'total: ') + fmtMoney(v.net_pnl_sum)); }
+    if (v.pnl_pct !== undefined && v.pnl_pct !== null) { parts.push(zt('亏损比例: ', 'loss: ') + v.pnl_pct + '%'); }
+    if (v.dte_at_close !== undefined && v.dte_at_close !== null) { parts.push(zt('距到期 ' + v.dte_at_close + ' 天', v.dte_at_close + ' days to expiration')); }
+    if (v.pct_of_nlv !== undefined && v.pct_of_nlv !== null) { parts.push(zt('占 NLV: ' + v.pct_of_nlv + '%', v.pct_of_nlv + '% of NLV')); }
     return parts.join(' · ');
   }
 
@@ -388,13 +389,13 @@ JOURNAL_REVIEW_HTML = r"""<!DOCTYPE html>
       var trade = v.trade ? escapeHtml(v.trade) : '';
       var tradesLine = '';
       if (v.trades && v.trades.length) {
-        var shown = v.trades.slice(0, 6).map(escapeHtml).join('、');
+        var shown = v.trades.slice(0, 6).map(escapeHtml).join(zt('、', ', '));
         tradesLine = '<div class="row-detail">' + shown +
-          (v.trades.length > 6 ? ' 等共 ' + v.trades.length + ' 笔' : '') + '</div>';
+          (v.trades.length > 6 ? zt(' 等共 ' + v.trades.length + ' 笔', ' and more, ' + v.trades.length + ' in all') : '') + '</div>';
       }
       return '<div class="row-item">' +
         '<div class="row-head">' +
-          '<span class="chip danger">' + escapeHtml(v.rule || '') + '</span>' +
+          '<span class="chip danger">' + escapeHtml(zt(v.rule || '', v.rule_en || v.rule || '')) + '</span>' +
           '<span>' + escapeHtml(v.date || '') + '</span>' +
           (trade ? '<span style="margin-left:auto">' + trade + '</span>' : '') +
         '</div>' +
@@ -438,7 +439,7 @@ JOURNAL_REVIEW_HTML = r"""<!DOCTYPE html>
 
     var nViol = (data.rule_violations_7d || []).length;
     renderKpi(data.kpi, nViol);
-    renderInsight(data.insight);
+    renderInsight(data.insight, data.insight_en);
     renderClosed(data.yesterday_closed);
     renderOpened(data.yesterday_opened);
     renderWatchlist(data.watchlist_today);

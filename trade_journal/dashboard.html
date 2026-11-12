@@ -1247,6 +1247,9 @@ table.at-table {
 ═══════════════════════════════════════════════════════ -->
 <script>
 'use strict';
+// zt / ztt (English for sentences built with numbers) come from /static/zeus_lang.js, which ZEUS
+// loads in <head>; opened as a plain file this page has no language switch and keeps the Chinese
+if (!window.zt) { window.zt = function (zh) { return zh; }; window.ztt = window.zt; }
 
 // ─── Global state ───────────────────────────────────────
 const S = {
@@ -3975,7 +3978,7 @@ function _entriesToBuckets(entries) {
 
 // buckets: [{label, wr (0-100), trades}]. Returns {tone, text} or null.
 function narrateBuckets(buckets, opts) {
-  const { dim, minN = 8, advice = '' } = opts || {};
+  const { dim, dimEn = '', minN = 8, advice = '', adviceEn = '' } = opts || {};
   const elig = (buckets || []).filter(b => b && b.trades >= minN && b.label != null);
   if (elig.length < 2) return null;
   const best  = elig.reduce((a, b) => b.wr > a.wr  ? b : a);
@@ -3985,9 +3988,12 @@ function narrateBuckets(buckets, opts) {
   const tone  = ratio >= 1.5 ? 'warn' : 'neutral';
   return {
     tone,
-    text: '📊 <b>' + dim + '</b>：' + best.label + ' 胜率 ' + best.wr.toFixed(0) + '%（' + best.trades + '笔），' +
-          worst.label + ' 仅 ' + worst.wr.toFixed(0) + '%（' + worst.trades + '笔）。' +
-          ((ratio >= 1.5 && advice) ? ' <b>' + advice + '</b>' : ''),
+    text: zt('📊 <b>' + dim + '</b>：' + best.label + ' 胜率 ' + best.wr.toFixed(0) + '%（' + best.trades + '笔），' +
+             worst.label + ' 仅 ' + worst.wr.toFixed(0) + '%（' + worst.trades + '笔）。' +
+             ((ratio >= 1.5 && advice) ? ' <b>' + advice + '</b>' : ''),
+             '📊 <b>' + (dimEn || dim) + '</b>: ' + best.label + ' wins ' + best.wr.toFixed(0) + '% (' + best.trades + ' trades), ' +
+             worst.label + ' only ' + worst.wr.toFixed(0) + '% (' + worst.trades + ' trades).' +
+             ((ratio >= 1.5 && (adviceEn || advice)) ? ' <b>' + (adviceEn || advice) + '</b>' : '')),
   };
 }
 
@@ -4022,8 +4028,8 @@ function renderChartNarratives() {
   putNarrative(
     _cardOf('pnl-dte-chart'),
     narrateBuckets(_entriesToBuckets(dteEntries), {
-      dim: '开单时机（DTE）',
-      advice: '长到期日才是你的 edge，别开短打。',
+      dim: '开单时机（DTE）', dimEn: 'Entry timing (DTE)',
+      advice: '长到期日才是你的 edge，别开短打。', adviceEn: "Long expirations are your edge; don't trade short ones.",
     })
   );
 
@@ -4032,8 +4038,8 @@ function renderChartNarratives() {
   putNarrative(
     _cardOf('pnl-hold-chart'),
     narrateBuckets(_entriesToBuckets(holdEntries), {
-      dim: '持有时长',
-      advice: '当利多时尽早关仓，别拠沋。',
+      dim: '持有时长', dimEn: 'Holding time',
+      advice: '当利多时尽早关仓，别拠沋。', adviceEn: "Close early when you're ahead; don't drag it out.",
     })
   );
 
@@ -4042,8 +4048,8 @@ function renderChartNarratives() {
   putNarrative(
     _cardOf('pnl-tod-chart'),
     narrateBuckets(_entriesToBuckets(todEntries), {
-      dim: '开单时段',
-      advice: '在胜率最高的时段集中开单。',
+      dim: '开单时段', dimEn: 'Time of day',
+      advice: '在胜率最高的时段集中开单。', adviceEn: 'Open your trades in the hours that win most.',
     })
   );
 
@@ -4052,8 +4058,8 @@ function renderChartNarratives() {
   putNarrative(
     _cardOf('pnl-price-chart'),
     narrateBuckets(_entriesToBuckets(priceEntries), {
-      dim: '标的价格区间',
-      advice: '聚焦最高胜率的价格区间。',
+      dim: '标的价格区间', dimEn: 'Underlying price range',
+      advice: '聚焦最高胜率的价格区间。', adviceEn: 'Focus on the price range that wins most.',
     })
   );
 
@@ -4062,8 +4068,8 @@ function renderChartNarratives() {
   putNarrative(
     _cardOf('pnl-contract-chart'),
     narrateBuckets(_entriesToBuckets(contractEntries), {
-      dim: '合约数量',
-      advice: '小仓位胜率更高，尔压大就容易犯错。',
+      dim: '合约数量', dimEn: 'Number of contracts',
+      advice: '小仓位胜率更高，尔压大就容易犯错。', adviceEn: 'Small positions win more often; size up and mistakes come easier.',
     })
   );
 
@@ -4072,8 +4078,8 @@ function renderChartNarratives() {
   putNarrative(
     _cardOf('pnl-pop-chart'),
     narrateBuckets(_entriesToBuckets(popEntries), {
-      dim: '开仓POP',
-      advice: '年大概率的合约胜率更稳定。',
+      dim: '开仓POP', dimEn: 'POP at entry',
+      advice: '年大概率的合约胜率更稳定。', adviceEn: 'High-probability contracts win more steadily.',
     })
   );
 }
@@ -4135,14 +4141,14 @@ async function renderInsights() {
       extra = n.items.map(m=>`<div class="mistake-bar">
         <span style="min-width:110px">${_escHtml(m.mistake)}</span>
         <div class="mb-fill" style="width:${Math.abs(m.net_pnl)/max*180}px"></div>
-        <span>${m.n}笔 -$${Math.abs(m.net_pnl).toFixed(0)}</span></div>`).join('');
+        <span>${zt(m.n + '笔', m.n + ' trades')} -$${Math.abs(m.net_pnl).toFixed(0)}</span></div>`).join('');
     }
     cards.push(`<div class="insight-card ${n.tone||'neutral'}">
-      <div class="ic-title">${_escHtml(n.title)}</div>
-      <div class="ic-headline">${_escHtml(n.headline)}</div>
-      ${n.body?`<div class="ic-body">${_escHtml(n.body)}</div>`:''}
+      <div class="ic-title">${_escHtml(zt(n.title, n.title_en || n.title))}</div>
+      <div class="ic-headline">${_escHtml(zt(n.headline, n.headline_en || n.headline))}</div>
+      ${n.body?`<div class="ic-body">${_escHtml(zt(n.body, n.body_en || n.body))}</div>`:''}
       ${extra}
-      ${n.evidence?`<div class="ic-ev">${_escHtml(n.evidence)}</div>`:''}
+      ${n.evidence?`<div class="ic-ev">${_escHtml(zt(n.evidence, n.evidence_en || n.evidence))}</div>`:''}
     </div>`);
   }
   panel.innerHTML = cards.length ? cards.join('')

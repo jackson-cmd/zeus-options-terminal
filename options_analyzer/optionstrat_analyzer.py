@@ -2042,6 +2042,11 @@ input[type="range"]::-webkit-slider-thumb {
 <div class="graph-tooltip" id="graphTooltip"></div>
 
 <script>
+// zt / ztt (English for sentences built with numbers) come from /static/zeus_lang.js, which the
+// server loads first; the report generate_html() writes on its own has no zeus_lang.js and no
+// language switch, so there they keep the Chinese
+if (!window.zt) { window.zt = function (zh) { return zh; }; window.ztt = window.zt; }
+
 // ── Embedded Data ──
 const RAW_DATA = /*__DATA_PLACEHOLDER__*/;
 
@@ -2400,15 +2405,18 @@ function renderTimeView() {
     days.push(d); cum.push(v - base);
   }
   const d7 = cum[7], d14 = cum[14];
-  const runwayNote = '横盘下未来 <b>7天</b> 约 <b style="color:' + col(d7) + '">' + money(d7) + '</b>' +
+  const runwayNote = zt('横盘下未来 <b>7天</b> 约 <b style="color:' + col(d7) + '">' + money(d7) + '</b>' +
     (NLV > 0 ? '（' + (d7 / NLV * 100).toFixed(1) + '% NLV）' : '') +
-    '、<b>14天</b> 约 <b style="color:' + col(d14) + '">' + money(d14) + '</b>。净 Theta <b style="color:' + col(netTheta) + '">' + money(netTheta) + '/天</b>（>0=收时间价值，<0=付）。';
+    '、<b>14天</b> 约 <b style="color:' + col(d14) + '">' + money(d14) + '</b>。净 Theta <b style="color:' + col(netTheta) + '">' + money(netTheta) + '/天</b>（>0=收时间价值，<0=付）。',
+    'If the market goes sideways, the next <b>7 days</b> make about <b style="color:' + col(d7) + '">' + money(d7) + '</b>' +
+    (NLV > 0 ? ' (' + (d7 / NLV * 100).toFixed(1) + '% of NLV)' : '') +
+    ' and <b>14 days</b> about <b style="color:' + col(d14) + '">' + money(d14) + '</b>. Net Theta <b style="color:' + col(netTheta) + '">' + money(netTheta) + '/day</b> (>0 = you collect time value, <0 = you pay it).');
 
   let thetaRows = '';
   rows.slice().sort((x, y) => Math.abs(y.a.greeks.theta) - Math.abs(x.a.greeks.theta)).slice(0, 8).forEach(({ s, a }) => {
     thetaRows += '<tr><td style="padding:3px 10px;color:var(--blue);font-weight:700">' + s.underlying + '</td>' +
       '<td style="padding:3px 10px;color:var(--text2);font-size:11px">' + (s.name || '') + '</td>' +
-      '<td style="text-align:right;padding:3px 10px;color:' + col(a.greeks.theta) + '">' + money(a.greeks.theta) + '/天</td>' +
+      '<td style="text-align:right;padding:3px 10px;color:' + col(a.greeks.theta) + '">' + money(a.greeks.theta) + zt('/天', '/day') + '</td>' +
       '<td style="text-align:right;padding:3px 10px">' + Math.round(a.dte) + 'd</td></tr>';
   });
 
@@ -2516,10 +2524,11 @@ function renderProbView() {
       <tr><td colspan="3" style="border-top:1px solid #30363d;padding-top:4px"></td></tr>
       ${tr('期望(均值)', R.mean, '概率加权平均')}
       <tr><td style="padding:4px 10px;color:var(--text2)">盈利概率</td><td style="padding:4px 10px;text-align:right;color:var(--green);font-weight:700">${pctS(R.pProfit)}</td><td style="padding:4px 10px;color:var(--text2);font-size:11px">到期为正</td></tr>
-      <tr><td style="padding:4px 10px;color:var(--text2)">扛到期 &gt; 现在</td><td style="padding:4px 10px;text-align:right;color:var(--text);font-weight:700">${pctS(R.pBeat)}</td><td style="padding:4px 10px;color:var(--text2);font-size:11px">现在 ${money(R.curMark)},继续拿能更好的概率</td></tr>
+      <tr><td style="padding:4px 10px;color:var(--text2)">扛到期 &gt; 现在</td><td style="padding:4px 10px;text-align:right;color:var(--text);font-weight:700">${pctS(R.pBeat)}</td><td style="padding:4px 10px;color:var(--text2);font-size:11px">${zt(`现在 ${money(R.curMark)},继续拿能更好的概率`, `now ${money(R.curMark)}: the chance that holding on ends better`)}</td></tr>
     </table>`;
     const updatedAt = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
-    body.innerHTML = `<div style="display:flex;align-items:center;gap:8px;margin:10px 0 6px"><div style="flex:1;font-size:12px;color:var(--text2)">蒙特卡洛 ${R.nSims.toLocaleString()} 次模拟「持有到期」组合盈亏:每标的按 IV/DTE 对数正态、用 β 与大盘相关(SPY 波动≈${pctS(R.SPY_VOL)},取自实时 VIX);无方向假设。<b>每小时自动重算一次</b>,或点 🔄。绿=赚 / 红=亏,<span style="color:#58a6ff">蓝线</span>=现在浮盈,<span style="color:#e3b341">黄线</span>=中位。</div><span style="flex:none;font-size:10px;color:#6e7681">更新于 ${updatedAt}</span><button onclick="_probForce=true;renderProbView()" style="flex:none;background:#21262d;color:#58a6ff;border:1px solid #30363d;border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer">&#128260; 重新模拟</button></div>${svg}${tbl}`;
+    body.innerHTML = `<div style="display:flex;align-items:center;gap:8px;margin:10px 0 6px"><div style="flex:1;font-size:12px;color:var(--text2)">${zt(`蒙特卡洛 ${R.nSims.toLocaleString()} 次模拟「持有到期」组合盈亏:每标的按 IV/DTE 对数正态、用 β 与大盘相关(SPY 波动≈${pctS(R.SPY_VOL)},取自实时 VIX);无方向假设。<b>每小时自动重算一次</b>,或点 🔄。绿=赚 / 红=亏,<span style="color:#58a6ff">蓝线</span>=现在浮盈,<span style="color:#e3b341">黄线</span>=中位。`,
+      `${R.nSims.toLocaleString()} Monte Carlo runs of the portfolio's P/L if everything is held to expiration: each underlying is log-normal from its IV/DTE and tied to the market through β (SPY volatility ≈ ${pctS(R.SPY_VOL)}, from the live VIX); no directional view. <b>Recomputed every hour</b>, or click 🔄. Green = profit / red = loss, <span style="color:#58a6ff">blue line</span> = unrealized P/L now, <span style="color:#e3b341">yellow line</span> = median.`)}</div><span style="flex:none;font-size:10px;color:#6e7681">更新于 ${updatedAt}</span><button onclick="_probForce=true;renderProbView()" style="flex:none;background:#21262d;color:#58a6ff;border:1px solid #30363d;border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer">&#128260; 重新模拟</button></div>${svg}${tbl}`;
     body.dataset.done = '1';
   }, 30);
 }
@@ -3746,7 +3755,8 @@ function renderCorrMatrix() {
       '<span style="color:' + (p.c >= 0.7 ? 'var(--red)' : '#e8a33d') + '">' + p.a + '↔' + p.b +
       ' <strong>' + p.c.toFixed(2) + '</strong></span>').join('&nbsp;&nbsp;·&nbsp;&nbsp;');
     html += '<div style="font-size:11px;margin-top:10px;color:var(--text2);line-height:1.9">' +
-            '高相关对（&ge;' + HL_POS.toFixed(2) + '，共 ' + strongPairs.length + ' 对，注意叠加风险）：' + items + '</div>';
+            zt('高相关对（&ge;' + HL_POS.toFixed(2) + '，共 ' + strongPairs.length + ' 对，注意叠加风险）：',
+               'Highly correlated pairs (&ge;' + HL_POS.toFixed(2) + ', ' + strongPairs.length + ' pairs; their risks add up): ') + items + '</div>';
   } else {
     html += '<div style="font-size:11px;margin-top:10px;color:var(--text2)">无 &ge;0.5 的高相关对 — 分散度尚可。</div>';
   }
@@ -3969,14 +3979,14 @@ function renderRiskView() {
   `;
   const captured = totMaxProfit > 0 ? (totPnlBounded / totMaxProfit * 100) : 0;
   const remaining = totMaxProfit - totPnlBounded;
-  const unbNote = nUnbounded > 0 ? ` <span style="color:var(--text2);font-weight:400">(${nUnbounded} 个无限上限未计入)</span>` : '';
+  const unbNote = nUnbounded > 0 ? ` <span style="color:var(--text2);font-weight:400">${zt(`(${nUnbounded} 个无限上限未计入)`, `(${nUnbounded} with unlimited upside not counted)`)}</span>` : '';
   const upHtml = `
     <div style="background:rgba(63,185,80,0.08);border:1px solid rgba(63,185,80,0.35);border-radius:8px;padding:8px 14px;margin-bottom:12px">
       <div class="risk-summary-row"><span class="risk-summary-label">&#128176; 理想最大盈利(全部持有到期)${unbNote}</span><span class="risk-summary-value" style="color:var(--green)">$${totMaxProfit.toFixed(0)}</span></div>
       <div class="risk-summary-row"><span class="risk-summary-label">&#127922; 概率加权期望(到期) <span style="color:var(--text2);font-weight:400">— IV/DTE 对数正态加权,无方向假设</span></span><span class="risk-summary-value" style="color:${col2(totEv)}">${fmtSign(totEv)}</span></div>
-      <div class="risk-summary-row"><span class="risk-summary-label">当前浮盈 · 已吃到 <b style="color:var(--green)">${captured.toFixed(0)}%</b> 最大利润</span><span class="risk-summary-value" style="color:${col2(totPnlBounded)}">${fmtSign(totPnlBounded)}</span></div>
+      <div class="risk-summary-row"><span class="risk-summary-label">${zt(`当前浮盈 · 已吃到 <b style="color:var(--green)">${captured.toFixed(0)}%</b> 最大利润`, `Unrealized P/L · <b style="color:var(--green)">${captured.toFixed(0)}%</b> of max profit captured`)}</span><span class="risk-summary-value" style="color:${col2(totPnlBounded)}">${fmtSign(totPnlBounded)}</span></div>
       <div class="risk-summary-row"><span class="risk-summary-label">还能赚到顶(剩余空间)</span><span class="risk-summary-value" style="color:var(--green)">+$${remaining.toFixed(0)}</span></div>
-      <div class="risk-summary-row"><span class="risk-summary-label">&#127919; ${Math.round(b.soft*100)}% 软止盈线 <span style="color:var(--text2);font-weight:400">— ${b.label} ${b.zone} 建议落袋(强制 ${Math.round(b.forced*100)}%);随 regime 自适应</span></span><span class="risk-summary-value" style="color:var(--green)">$${(totMaxProfit*b.soft).toFixed(0)}</span></div>
+      <div class="risk-summary-row"><span class="risk-summary-label">&#127919; ${zt(`${Math.round(b.soft*100)}% 软止盈线 <span style="color:var(--text2);font-weight:400">— ${b.label} ${b.zone} 建议落袋(强制 ${Math.round(b.forced*100)}%);随 regime 自适应</span>`, `${Math.round(b.soft*100)}% soft take-profit line <span style="color:var(--text2);font-weight:400">— ${b.label_en}: bank it at ${b.zone} (forced at ${Math.round(b.forced*100)}%); adapts to the regime</span>`)}</span><span class="risk-summary-value" style="color:var(--green)">$${(totMaxProfit*b.soft).toFixed(0)}</span></div>
     </div>`;
   document.getElementById('riskSummary').innerHTML = upHtml + sumHtml;
   document.getElementById('riskBody').innerHTML = rowsHtml;
@@ -4053,34 +4063,44 @@ async function renderPortfolioGreeks() {
 
   const tiles =
     tile('β加权 Delta（SPY当量）', money(bwdNotional), col(bwdNotional),
-         '≈ ' + (spyShares != null ? shares(spyShares) + ' 股SPY' : '—') + ' · SPY每+1%≈ <b style="color:' + col(per1pct) + '">' + money(per1pct) + '</b>') +
+         zt('≈ ' + (spyShares != null ? shares(spyShares) + ' 股SPY' : '—') + ' · SPY每+1%≈ <b style="color:' + col(per1pct) + '">' + money(per1pct) + '</b>',
+            '≈ ' + (spyShares != null ? shares(spyShares) + ' SPY shares' : '—') + ' · each +1% in SPY ≈ <b style="color:' + col(per1pct) + '">' + money(per1pct) + '</b>')) +
     tile('净 Theta / 天', money(netTheta), col(netTheta),
-         netTheta >= 0 ? '每天<b>收</b>时间价值' : '每天<b>付</b>时间价值') +
+         netTheta >= 0 ? zt('每天<b>收</b>时间价值', 'you <b>collect</b> time value every day') : zt('每天<b>付</b>时间价值', 'you <b>pay</b> time value every day')) +
     tile('净 Vega（每+1vol点）', money(netVega), col(netVega),
-         netVega >= 0 ? '净<b>做多</b>波动率' : '净<b>做空</b>波动率') +
+         netVega >= 0 ? zt('净<b>做多</b>波动率', 'net <b>long</b> volatility') : zt('净<b>做空</b>波动率', 'net <b>short</b> volatility')) +
     tile('净 Gamma', (netGamma >= 0 ? '+' : '') + netGamma.toFixed(1), col(netGamma),
-         '曲率 · 市场涨则Delta变' + (netGamma >= 0 ? '多' : '空'));
+         zt('曲率 · 市场涨则Delta变' + (netGamma >= 0 ? '多' : '空'), 'curvature · Delta gets ' + (netGamma >= 0 ? 'longer' : 'shorter') + ' as the market rises'));
 
   const dirWord = bwdNotional >= 0 ? '多' : '空';
   const concPct = NLV > 0 ? Math.abs(bwdNotional) / NLV * 100 : 0;
   let concNote;
-  if (concPct >= 50) concNote = ' <b style="color:var(--red)">⚠️ 方向性敞口偏大</b>(净敞口≈NLV的' + concPct.toFixed(0) + '%),小心无意中押同一边。';
-  else if (concPct >= 25) concNote = ' 方向性敞口中等(≈NLV的' + concPct.toFixed(0) + '%)。';
-  else concNote = ' 方向上相对均衡。';
+  if (concPct >= 50) concNote = zt(' <b style="color:var(--red)">⚠️ 方向性敞口偏大</b>(净敞口≈NLV的' + concPct.toFixed(0) + '%),小心无意中押同一边。',
+                                   ' <b style="color:var(--red)">⚠️ Large directional exposure</b> (net ≈ ' + concPct.toFixed(0) + '% of NLV): watch out for betting on one side without meaning to.');
+  else if (concPct >= 25) concNote = zt(' 方向性敞口中等(≈NLV的' + concPct.toFixed(0) + '%)。', ' Moderate directional exposure (≈ ' + concPct.toFixed(0) + '% of NLV).');
+  else concNote = zt(' 方向上相对均衡。', ' Fairly balanced in direction.');
 
-  const narr =
+  const narr = zt(
     '你整个仓位 β加权后 <b style="color:' + col(bwdNotional) + '">净' + dirWord + '头 ≈ ' + money(bwdNotional) + ' SPY当量</b>' +
     (spyShares != null ? '(≈ ' + shares(spyShares) + ' 股SPY)' : '') + '。' +
     'SPY 明天每 ±1%,组合约 <b style="color:' + col(per1pct) + '">' + money(per1pct) + '</b>;' +
     (dn2 != null ? '若 SPY −2% 约 <b style="color:' + col(dn2) + '">' + money(dn2) + '</b>(' + pctNlv(dn2) + ' NLV),+2% 约 <b style="color:' + col(up2) + '">' + money(up2) + '</b>。' : '') +
     concNote +
-    ' 另外时间价值每天 <b style="color:' + col(netTheta) + '">' + money(netTheta) + '</b>,IV每+1点 <b style="color:' + col(netVega) + '">' + money(netVega) + '</b>(净' + (netVega >= 0 ? '做多' : '做空') + '波动率)。';
+    ' 另外时间价值每天 <b style="color:' + col(netTheta) + '">' + money(netTheta) + '</b>,IV每+1点 <b style="color:' + col(netVega) + '">' + money(netVega) + '</b>(净' + (netVega >= 0 ? '做多' : '做空') + '波动率)。',
+    'Beta-weighted, your whole book is <b style="color:' + col(bwdNotional) + '">net ' + (bwdNotional >= 0 ? 'long' : 'short') + ' ≈ ' + money(bwdNotional) + ' in SPY terms</b>' +
+    (spyShares != null ? ' (≈ ' + shares(spyShares) + ' SPY shares)' : '') + '. ' +
+    'Each ±1% move in SPY tomorrow is about <b style="color:' + col(per1pct) + '">' + money(per1pct) + '</b> for the portfolio' +
+    (dn2 != null ? '; SPY −2% is about <b style="color:' + col(dn2) + '">' + money(dn2) + '</b> (' + pctNlv(dn2) + ' of NLV) and +2% about <b style="color:' + col(up2) + '">' + money(up2) + '</b>.' : '.') +
+    concNote +
+    ' Time value adds <b style="color:' + col(netTheta) + '">' + money(netTheta) + '</b> a day, and each +1 point of IV <b style="color:' + col(netVega) + '">' + money(netVega) + '</b> (net ' + (netVega >= 0 ? 'long' : 'short') + ' volatility).');
 
   host.innerHTML =
     '<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:8px;flex-wrap:wrap">' +
       '<h3 style="margin:0;font-size:14px;color:var(--text)">📊 组合级希腊 · Beta加权（全账户合计 vs SPY）</h3>' +
-      '<span style="font-size:11px;color:var(--text2)">' + strats.length + ' 个策略 · ' + unders.length + ' 个标的' +
-        (_pfBeta.missing && _pfBeta.missing.length ? ' · ' + _pfBeta.missing.length + ' 个无beta按1.0' : '') + '</span>' +
+      '<span style="font-size:11px;color:var(--text2)">' + zt(strats.length + ' 个策略 · ' + unders.length + ' 个标的' +
+        (_pfBeta.missing && _pfBeta.missing.length ? ' · ' + _pfBeta.missing.length + ' 个无beta按1.0' : ''),
+        strats.length + ' strategies · ' + unders.length + ' underlyings' +
+        (_pfBeta.missing && _pfBeta.missing.length ? ' · ' + _pfBeta.missing.length + ' without a beta, counted as 1.0' : '')) + '</span>' +
     '</div>' +
     '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">' + tiles + '</div>' +
     '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:12.5px;line-height:1.8;color:var(--text);margin-bottom:12px">' + narr + '</div>' +
@@ -4796,13 +4816,13 @@ function updateDashSummary() {
     } catch (e) { /* ignore */ }
   });
   const F = (typeof dashExitFilter !== 'undefined') ? dashExitFilter : '';
-  const _chip = (code, emoji, label, key) => {
+  const _chip = (code, emoji, label, key, labelEn) => {
     const on = F === code;
-    return `<span onclick="setExitFilter('${code}')" data-tip="只看${label}的仓位(快捷键 ${key};再按一次清除)" style="cursor:pointer;display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:5px;font-size:11px;border:1px solid ${on ? '#58a6ff' : '#30363d'};background:${on ? 'rgba(88,166,255,0.14)' : 'transparent'};color:#c9d1d9">${emoji} ${label} <strong style="color:#e6edf3">${vc[code]}</strong></span>`;
+    return `<span onclick="setExitFilter('${code}')" data-tip="${zt(`只看${label}的仓位(快捷键 ${key};再按一次清除)`, `Only ${labelEn} positions (shortcut ${key}; press again to clear)`)}" style="cursor:pointer;display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:5px;font-size:11px;border:1px solid ${on ? '#58a6ff' : '#30363d'};background:${on ? 'rgba(88,166,255,0.14)' : 'transparent'};color:#c9d1d9">${emoji} ${label} <strong style="color:#e6edf3">${vc[code]}</strong></span>`;
   };
   const filters = `<span style="display:inline-flex;gap:5px;margin-left:8px;align-items:center">`
-    + _chip('cut', '🔴', '深亏', '1') + _chip('tp', '🔵', '止盈', '2')
-    + _chip('near', '🟡', '接近', '3') + _chip('hold', '🟢', '持有', '4')
+    + _chip('cut', '🔴', '深亏', '1', 'deep-loss') + _chip('tp', '🔵', '止盈', '2', 'take-profit')
+    + _chip('near', '🟡', '接近', '3', 'near-take-profit') + _chip('hold', '🟢', '持有', '4', 'hold')
     + `<span onclick="setExitFilter('')" data-tip="显示全部(快捷键 0)" style="cursor:pointer;padding:2px 7px;border-radius:5px;font-size:11px;border:1px solid ${F ? '#30363d' : '#58a6ff'};background:${F ? 'transparent' : 'rgba(88,166,255,0.14)'};color:#8b949e">全部</span></span>`;
   el.innerHTML =
     `<span class="dash-stat ${tickerCls}">${tickerWarn}<span class="lbl">Tickers</span><strong>${tickerCount}</strong></span>` +
@@ -5241,7 +5261,7 @@ function renderDashboard(strategies) {
     const underPctStr = r.underPct == null ? '' : ` <span style="font-size:10px;font-weight:600;${underCls}">${r.underPct >= 0 ? '+' : ''}${r.underPct.toFixed(2)}%</span>`;
     const underPriceStr = r.underPrice > 0 ? `<span style="font-weight:700">$${r.underPrice.toFixed(2)}</span>` : '<span style="color:var(--text3)">-</span>';
     html += `<tr onclick="enterDetail(${r.idx})">
-      <td><div class="dash-name">${r.exitBadge?('<span data-tip="'+(r.exitBadge.label+': '+r.exitBadge.reason).replace(/"/g,'')+'" style="margin-right:5px;cursor:help">'+r.exitBadge.emoji+'</span>'):''}${r.name}${earningsIcon}</div></td>
+      <td><div class="dash-name">${r.exitBadge?('<span data-tip="'+(zt(r.exitBadge.label, r.exitBadge.label_en)+': '+r.exitBadge.reason).replace(/"/g,'')+'" style="margin-right:5px;cursor:help">'+r.exitBadge.emoji+'</span>'):''}${r.name}${earningsIcon}</div></td>
       <td><div style="font-size:11.5px"><span class="dash-meta" style="font-weight:600">${r.underlying||''}</span> ${underPriceStr}${underPctStr}</div></td>
       <td><div class="dash-return ${cls}">${dashTotalMode==='pct' ? `${r.pct>=0?'+':'-'}${Math.abs(r.pct).toFixed(0)}% <span style="opacity:.55;font-weight:600">(${r.pnl>=0?'+':'-'}$${Math.abs(r.pnl).toFixed(0)})</span>` : `${r.pnl>=0?'+':'-'}$${Math.abs(r.pnl).toFixed(0)} <span style="opacity:.55;font-weight:600">(${r.pct>=0?'+':'-'}${Math.abs(r.pct).toFixed(0)}%)</span>`}</div></td>
       <td><div class="dash-return ${todayCls}">${r.today>=0?'+':'-'}$${Math.abs(r.today).toFixed(0)} (${r.todayPct>=0?'+':'-'}${Math.abs(r.todayPct).toFixed(0)}%)</div></td>
@@ -6141,7 +6161,8 @@ function _ckBand() {
   const forced = Math.min(1, soft + 0.10);
   const meta = (_ckRegime && _ckRegime.band) || {};
   const label = meta.label || (rg === 'bull' ? '牛市' : rg === 'chop' ? '震荡/弱' : '中性');
-  return { near: Math.max(0, soft - 0.10), soft, forced, label,
+  const label_en = meta.label_en || (rg === 'bull' ? 'bull market' : rg === 'chop' ? 'choppy / weak' : 'neutral');
+  return { near: Math.max(0, soft - 0.10), soft, forced, label, label_en,
            zone: Math.round(soft*100) + '-' + Math.round(forced*100) + '%',
            dte_gate: meta.dte_gate || 20 };
 }
@@ -6169,25 +6190,32 @@ setInterval(loadMacroAlerts, 300000); // 5 分钟刷一次(事件表很少变)
 function ckExitVerdict(unrealizedPnl, maxProfit, dte, pnlPct) {
   const prog = (maxProfit != null && maxProfit > 0 && maxProfit < 1e9) ? (unrealizedPnl / maxProfit) : null;
   const b = _ckBand(); const rg = b.label, zone = b.zone;
+  const rgEn = b.label_en, RgEn = rgEn.charAt(0).toUpperCase() + rgEn.slice(1);
+  const pc = prog != null ? (prog*100).toFixed(0) : null;
   const forcedPct = Math.round(b.forced*100);
   const shortT = (dte != null && dte < (b.dte_gate || 20));
   const fa = shortT ? b.soft : b.forced;   // 强制下沿:时间少则提前到 soft
   if (prog != null && prog >= fa)
-    return {code:'force_tp', emoji:'🔴', label:'强制止盈', sev:'good',
-      reason: shortT ? `已 ${(prog*100).toFixed(0)}% 最大利润 · 剩${dte}天时间不多、利润易回吐 → 现在就平、开下单`
-                     : `已 ${(prog*100).toFixed(0)}% 最大利润 → ${rg}到 ${forcedPct}% 强制档,现在就平、别再等`};
+    return {code:'force_tp', emoji:'🔴', label:'强制止盈', label_en:'Forced take-profit', sev:'good',
+      reason: shortT ? zt(`已 ${pc}% 最大利润 · 剩${dte}天时间不多、利润易回吐 → 现在就平、开下单`,
+                          `${pc}% of max profit · only ${dte} days left and profit is easy to give back → close now and open the next trade`)
+                     : zt(`已 ${pc}% 最大利润 → ${rg}到 ${forcedPct}% 强制档,现在就平、别再等`,
+                          `${pc}% of max profit → ${rgEn}: reached the ${forcedPct}% forced level, close now and don't wait`)};
   if (prog != null && prog >= b.soft)
-    return {code:'tp', emoji:'🔵', label:'止盈', sev:'good',
-      reason:`已吃到 ${(prog*100).toFixed(0)}% 最大利润 → ${rg}进入 ${zone} 止盈区,建议落袋;到 ${forcedPct}% 强制`};
+    return {code:'tp', emoji:'🔵', label:'止盈', label_en:'Take profit', sev:'good',
+      reason: zt(`已吃到 ${pc}% 最大利润 → ${rg}进入 ${zone} 止盈区,建议落袋;到 ${forcedPct}% 强制`,
+                 `${pc}% of max profit captured → ${rgEn}: in the ${zone} take-profit zone, bank it; forced at ${forcedPct}%`)};
   if (prog != null && prog >= b.near)
-    return {code:'near', emoji:'🟡', label:'接近', sev:'warn',
-      reason:`已 ${(prog*100).toFixed(0)}% 最大利润,${rg}快到 ${zone} 止盈区 → 别提前跑`};
+    return {code:'near', emoji:'🟡', label:'接近', label_en:'Near', sev:'warn',
+      reason: zt(`已 ${pc}% 最大利润,${rg}快到 ${zone} 止盈区 → 别提前跑`,
+                 `${pc}% of max profit; ${rgEn}: close to the ${zone} take-profit zone → don't exit early`)};
   if (pnlPct != null && pnlPct <= -50)
-    return {code:'cut', emoji:'🔴', label:'深亏', sev:'bad',
-      reason:`亏 ${Math.abs(pnlPct).toFixed(0)}% —— 但别砍!借方价差已限损,历史这类多半反弹,持有到 ${zone} 或到期`};
-  const why = (prog != null) ? `已 ${(prog*100).toFixed(0)}% 最大利润,${rg}持有到 ${zone} 再走`
-                             : `${rg}:持有到 ${zone} 最大利润或到期,不止损`;
-  return {code:'hold', emoji:'🟢', label:'持有', sev:'ok', reason:why};
+    return {code:'cut', emoji:'🔴', label:'深亏', label_en:'Deep loss', sev:'bad',
+      reason: zt(`亏 ${Math.abs(pnlPct).toFixed(0)}% —— 但别砍!借方价差已限损,历史这类多半反弹,持有到 ${zone} 或到期`,
+                 `Down ${Math.abs(pnlPct).toFixed(0)}%, but don't cut it! A debit spread's loss is capped and losers like this have mostly come back; hold to ${zone} or expiration`)};
+  const why = (prog != null) ? zt(`已 ${pc}% 最大利润,${rg}持有到 ${zone} 再走`, `${pc}% of max profit; ${rgEn}: hold to ${zone}, then exit`)
+                             : zt(`${rg}:持有到 ${zone} 最大利润或到期,不止损`, `${RgEn}: hold to ${zone} of max profit or expiration, no stop-loss`);
+  return {code:'hold', emoji:'🟢', label:'持有', label_en:'Hold', sev:'ok', reason:why};
 }
 
 let _ckState = {tab:'pre', spreadOpen:false};
@@ -6289,7 +6317,8 @@ async function renderWiimCauses() {
      <div><div style="font-size:11px;color:#3fb950;margin-bottom:2px">📈 看到≈偏多</div>${bl}</div>
      <div><div style="font-size:11px;color:#f85149;margin-bottom:2px">📉 看到≈偏空</div>${br}</div></div>`;
   el.innerHTML =
-    `<div style="font-size:11px;color:#6e7681;margin-bottom:10px">来源: ${m.source || 'WIIM'} · 共 ${(m.total||0).toLocaleString()} 条 · 方向(按文章措辞): <span style="color:#3fb950">涨 ${pct(m.up_share)}</span> / <span style="color:#f85149">跌 ${pct(1-(m.up_share||0))}</span> · 约 ${pct(m.nonfund_share)} 无公司催化</div>`
+    `<div style="font-size:11px;color:#6e7681;margin-bottom:10px">${zt(`来源: ${m.source || 'WIIM'} · 共 ${(m.total||0).toLocaleString()} 条 · 方向(按文章措辞): <span style="color:#3fb950">涨 ${pct(m.up_share)}</span> / <span style="color:#f85149">跌 ${pct(1-(m.up_share||0))}</span> · 约 ${pct(m.nonfund_share)} 无公司催化`,
+      `Source: ${m.source || 'WIIM'} · ${(m.total||0).toLocaleString()} stories · direction (by the article's wording): <span style="color:#3fb950">up ${pct(m.up_share)}</span> / <span style="color:#f85149">down ${pct(1-(m.up_share||0))}</span> · about ${pct(m.nonfund_share)} with no company catalyst`)}</div>`
     + card('📌 核心规律', rules)
     + card('🎯 催化剂方向性 — 看到这类新闻偏多还是偏空', dirBody, '涨占比 = 该原因的 WIIM 里文章说 trading higher 的比例(样本≥200)')
     + card('📊 全部异动原因分布', tbl, '占比 = 该原因占全部 WIIM 的比例; 条形 = 涨(绿)/跌(红)拆分');
@@ -6325,19 +6354,19 @@ async function renderRiskRadar() {
   const _rd = (o,k) => (o && o[k] != null) ? o[k] : '—';
   const rcLine = (rc.error || !rc.spy_m1) ? '' : `
       <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:8px;padding-top:8px;border-top:1px solid #21262d;font-size:11px;color:#8b949e">
-        <span>近1月 SPY 跌≥1%: <b style="color:#e6edf3">${_rd(rc.spy_m1,'d1')}</b> · ≥2%: <b style="color:${(_rd(rc.spy_m1,'d2')||0)>0?'#f85149':'#e6edf3'}">${_rd(rc.spy_m1,'d2')}</b></span>
-        <span>近3月 ≥1%: <b style="color:#e6edf3">${_rd(rc.spy_m3,'d1')}</b> · ≥2%: <b style="color:#e6edf3">${_rd(rc.spy_m3,'d2')}</b></span>
-        ${(rc.recent2pct||[]).length ? `<span>近期≥2%跌: <b style="color:#e6edf3">${rc.recent2pct.slice(0,4).map(x=>x.date.slice(5)).join('、')}</b></span>` : ''}
+        <span>${zt('近1月 SPY 跌≥1%', 'SPY days down ≥1%, last month')}: <b style="color:#e6edf3">${_rd(rc.spy_m1,'d1')}</b> · ≥2%: <b style="color:${(_rd(rc.spy_m1,'d2')||0)>0?'#f85149':'#e6edf3'}">${_rd(rc.spy_m1,'d2')}</b></span>
+        <span>${zt('近3月 ≥1%', 'last 3 months ≥1%')}: <b style="color:#e6edf3">${_rd(rc.spy_m3,'d1')}</b> · ≥2%: <b style="color:#e6edf3">${_rd(rc.spy_m3,'d2')}</b></span>
+        ${(rc.recent2pct||[]).length ? `<span>${zt('近期≥2%跌', 'recent ≥2% drops')}: <b style="color:#e6edf3">${rc.recent2pct.slice(0,4).map(x=>x.date.slice(5)).join(zt('、', ', '))}</b></span>` : ''}
       </div>`;
   let hot = (g.hot_topics || []).map(h => `
     <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-top:1px solid #21262d">
       <span style="flex:1;color:#e6edf3;font-size:13px">${h.label}</span>
-      <span style="color:#8b949e;font-size:11px">${h.count}条·占${Math.round((h.share||0)*100)}%</span>
+      <span style="color:#8b949e;font-size:11px">${zt(`${h.count}条·占${Math.round((h.share||0)*100)}%`, `${h.count} stories · ${Math.round((h.share||0)*100)}% of today's news`)}</span>
       <span style="color:${col};font-size:11px">${h.percentile}</span>
       <span style="background:#21262d;color:#ff9f0a;border-radius:4px;padding:1px 6px;font-size:11px">lift ${h.lift}×</span>
     </div>`).join('');
   if (!hot) hot = '<div style="color:#3fb950;font-size:13px;padding:8px 0">今日无明显风险话题在烧 · 新闻面平静</div>';
-  const ctx = (g.context_topics || []).map(c => `<div style="color:#6e7681;font-size:11px;padding:2px 0">· ${c.label} ${c.count}条 — ${c.note||''}</div>`).join('');
+  const ctx = (g.context_topics || []).map(c => `<div style="color:#6e7681;font-size:11px;padding:2px 0">· ${zt(c.label + ' ' + c.count + '条', (c.label_en || c.label) + ': ' + c.count + ' stories')} — ${c.note||''}</div>`).join('');
   const f = d.forward || {};
   const fscore = f.score || 0;
   const fcol = fscore >= 60 ? '#f85149' : fscore >= 30 ? '#ff9f0a' : '#3fb950';
@@ -6351,9 +6380,11 @@ async function renderRiskRadar() {
       <div style="height:6px;background:#21262d;border-radius:4px;overflow:hidden;margin-top:7px"><div style="height:100%;width:${sc}%;background:${c}"></div></div>
       <div style="color:#8b949e;font-size:11px;margin-top:7px;line-height:1.5">${sub}</div>
     </div>`;
-  const busy = (f.busiest_week_count >= 3) ? `⚠️ 最挤一周 ${f.busiest_week_count} 个事件扎堆` : `${f.n_events||0} 个高 lift 事件`;
+  const busy = (f.busiest_week_count >= 3)
+    ? zt(`⚠️ 最挤一周 ${f.busiest_week_count} 个事件扎堆`, `⚠️ ${f.busiest_week_count} events crowd into one week`)
+    : zt(`${f.n_events||0} 个高 lift 事件`, `${f.n_events||0} high-lift events`);
   const gauges = `<div style="display:flex;gap:10px;margin-bottom:12px">
-    ${miniGauge('今日新闻风险', score, col, lvl, g.top ? `主导：${g.top.label}（这类日子跌≥1% ${g.top.lift}×）` : '今日新闻面平静')}
+    ${miniGauge('今日新闻风险', score, col, lvl, g.top ? zt(`主导：${g.top.label}（这类日子跌≥1% ${g.top.lift}×）`, `Leading: ${g.top.label_en || g.top.label} (on days like this a ≥1% drop is ${g.top.lift}× as likely)`) : '今日新闻面平静')}
     ${miniGauge('未来30天事件密度', fscore, fcol, flvl, busy + (fscore>=60 ? ' — 格外小心，别满仓撞上去' : ''))}
   </div>`;
   const hotCard = `
@@ -6361,7 +6392,7 @@ async function renderRiskRadar() {
       <div style="color:#e6edf3;font-weight:700;font-size:13px;margin-bottom:2px">今日在烧的风险话题</div>
       ${hot}
       ${ctx ? `<div style="margin-top:8px">${ctx}</div>` : ''}
-      <div style="color:#6e7681;font-size:10px;margin-top:8px">今日 digest 累计 ${g.n_items||0} 条 · 基线截至 ${g.baseline_through||'—'} · 盘前偏低</div>
+      <div style="color:#6e7681;font-size:10px;margin-top:8px">${zt(`今日 digest 累计 ${g.n_items||0} 条 · 基线截至 ${g.baseline_through||'—'} · 盘前偏低`, `${g.n_items||0} digest stories so far today · baseline through ${g.baseline_through||'—'} · reads low before the open`)}</div>
       ${rcLine}
     </div>`;
   const lm = (d.landmines || []).slice(0, 14).map(e => `
@@ -6375,7 +6406,7 @@ async function renderRiskRadar() {
   const lmCard = `
     <div style="background:#161b22;border:1px solid #30363d;border-radius:10px;padding:14px 16px;margin-bottom:12px">
       <div style="color:#e6edf3;font-weight:700;font-size:14px;margin-bottom:3px">📅 未来 30 天 landmine 日历</div>
-      <div style="color:#6e7681;font-size:11px;margin-bottom:2px;display:flex;align-items:center;gap:6px">${dot('red')} 你的持仓 ${dot('warn')} 计划内/龙头 ${dot('info')} 一般</div>
+      <div style="color:#6e7681;font-size:11px;margin-bottom:2px;display:flex;align-items:center;gap:6px">${dot('red')} 你的持仓 ${dot('warn')} 计划内/龙头 ${dot('info')} ${zt('一般', 'other')}</div>
       ${lm || '<div style="color:#8b949e;font-size:13px;padding:8px 0">未来 3 周无重大事件</div>'}
     </div>`;
   let nlv = liveNLV(), dep=0, big=0;
@@ -6386,10 +6417,11 @@ async function renderRiskRadar() {
   const tail = `
     <div style="background:#161b22;border:1px solid #30363d;border-radius:10px;padding:14px 16px">
       <div style="color:#e6edf3;font-weight:700;font-size:14px;margin-bottom:6px">🛡 尾部防御（研究铁律）</div>
-      <div style="color:#8b949e;font-size:12px;line-height:1.6;margin-bottom:8px">暴跌是<b style="color:#e6edf3">隔夜砸</b>的（≤-5% 日均开盘 gap −5.5%）——盘中来不及反应，<b style="color:#e6edf3">止损防不住、只有事前现金能防</b>。</div>
+      <div style="color:#8b949e;font-size:12px;line-height:1.6;margin-bottom:8px">${zt('暴跌是<b style="color:#e6edf3">隔夜砸</b>的（≤-5% 日均开盘 gap −5.5%）——盘中来不及反应，<b style="color:#e6edf3">止损防不住、只有事前现金能防</b>。',
+        'Crashes <b style="color:#e6edf3">gap down overnight</b> (days of −5% or worse open with a −5.5% gap on average): there is no time to react during the session, so <b style="color:#e6edf3">a stop-loss cannot protect you; only cash held beforehand can</b>.')}</div>
       <div style="display:flex;gap:18px;margin-bottom:8px;font-size:12px">
-        <div><span style="color:#6e7681">部署</span> <b style="color:${dCol}">${depPct==null?'—':depPct+'%'}</b> <span style="color:#6e7681;font-size:10px">≤60绿</span></div>
-        <div><span style="color:#6e7681">单笔最大</span> <b style="color:${bCol}">${bigPct==null?'—':bigPct+'%'}</b> <span style="color:#6e7681;font-size:10px">≤5绿</span></div>
+        <div><span style="color:#6e7681">部署</span> <b style="color:${dCol}">${depPct==null?'—':depPct+'%'}</b> <span style="color:#6e7681;font-size:10px">${zt('≤60绿', 'green at ≤60')}</span></div>
+        <div><span style="color:#6e7681">单笔最大</span> <b style="color:${bCol}">${bigPct==null?'—':bigPct+'%'}</b> <span style="color:#6e7681;font-size:10px">${zt('≤5绿', 'green at ≤5')}</span></div>
       </div>
       <div style="color:#8b949e;font-size:12px">手动盯的慢变量：<span style="color:#c9d1d9">美债收益率曲线 · 信用利差 · 部署% · VIX</span> <span style="color:#6e7681">（"AI 泡沫"喊话 lift 0.85 = 非择时信号，别被带节奏）</span></div>
     </div>`;
@@ -6414,18 +6446,18 @@ function renderRiskStats(ref) {
     <div style="display:flex;align-items:center;gap:8px;padding:3px 0;border-top:1px solid #21262d;font-size:12px">
       <span style="flex:1;color:#e6edf3">${r.label}</span>
       <span style="color:#6e7681;font-size:11px">${r.kind||''}</span>
-      <span style="color:#8b949e">普通 ${r.p80}×</span><span style="color:${lim(r.p95)};font-weight:700">饱和 ${r.p95}×</span>
+      <span style="color:#8b949e">${zt('普通 ' + r.p80 + '×', 'typical ' + r.p80 + '×')}</span><span style="color:${lim(r.p95)};font-weight:700">${zt('饱和 ' + r.p95 + '×', 'saturated ' + r.p95 + '×')}</span>
     </div>`).join('');
   // 事件→板块
   const es = (ref.event_sectors||[]).map(r => `<div style="font-size:12px;padding:3px 0;border-top:1px solid #21262d"><b style="color:#58a6ff">${r.event}</b> <span style="color:#c9d1d9">→ ${r.sectors}</span></div>`).join('');
   // 板块主因
-  const sd = (ref.sector_drivers||[]).map(r => `<div style="font-size:12px;padding:3px 0;border-top:1px solid #21262d"><span style="color:#e6edf3">${r.etf}</span> <span style="color:#6e7681">(基础跌率 ${r.base})</span> <span style="color:#c9d1d9">${r.top}</span></div>`).join('');
+  const sd = (ref.sector_drivers||[]).map(r => `<div style="font-size:12px;padding:3px 0;border-top:1px solid #21262d"><span style="color:#e6edf3">${r.etf}</span> <span style="color:#6e7681">${zt('(基础跌率 ' + r.base + ')', '(base drop rate ' + r.base + ')')}</span> <span style="color:#c9d1d9">${r.top}</span></div>`).join('');
   // 财报溢出
   const e = ref.earnings_spillover || {};
   const earn = `<div style="font-size:12px;color:#c9d1d9;line-height:1.7">${e.chip_bad||''}<br>${e.chip_hit||''}<br>${e.mega_bad||''}<br><span style="color:#8b949e">${e.note||''}</span></div>`;
   // 未解释跌 taxonomy
   const u = ref.unknown_taxonomy || {};
-  const unk = `<div style="font-size:12px;color:#c9d1d9;line-height:1.6"><b style="color:#3fb950">${u.explained_pct||''}% 后续1-2周可归因</b> — ${u.blurb||''}<br>${(u.types||[]).map(x=>'· '+x).join('<br>')}</div>`;
+  const unk = `<div style="font-size:12px;color:#c9d1d9;line-height:1.6"><b style="color:#3fb950">${zt((u.explained_pct||'') + '% 后续1-2周可归因', (u.explained_pct||'') + '% explained within the next 1–2 weeks')}</b> — ${u.blurb||''}<br>${(u.types||[]).map(x=>'· '+x).join('<br>')}</div>`;
   // 铁律
   const kr = (ref.key_rules||[]).map(r => `<div style="font-size:12px;color:#c9d1d9;padding:2px 0;line-height:1.5">${r}</div>`).join('');
   el.innerHTML =
@@ -6651,9 +6683,9 @@ function _liqBanner(d) {
   const note = (d.market_hours === false)
     ? '<div style="color:#d29922;font-size:11px;margin-top:5px">⚠️ 盘后报价常单边,部分 🔴 可能只是收盘后没双边报价,以开盘为准</div>' : '';
   return '<div style="border:1px solid ' + m.c + '66;background:' + m.bg + ';border-radius:10px;padding:12px 14px;margin-bottom:12px">'
-    + '<div style="font-size:15px;font-weight:700;color:' + m.c + '">' + m.ic + ' ' + (tv.label || '—')
+    + '<div style="font-size:15px;font-weight:700;color:' + m.c + '">' + m.ic + ' ' + (zt(tv.label, tv.label_en || tv.label) || '—')
     + (d.earnings_date ? ' <span style="color:#f85149;font-weight:400;font-size:12px">· 财报 ' + d.earnings_date + '</span>' : '') + '</div>'
-    + '<div style="font-size:12px;color:#8b949e;margin-top:3px">' + (tv.detail || '') + '</div>' + note + '</div>';
+    + '<div style="font-size:12px;color:#8b949e;margin-top:3px">' + zt(tv.detail || '', tv.detail_en || tv.detail || '') + '</div>' + note + '</div>';
 }
 
 function _liqGrid(d) {
@@ -6666,7 +6698,7 @@ function _liqGrid(d) {
   cols.forEach(c => {
     const wk = c.type && /week/i.test(c.type);
     h += '<th style="padding:3px 8px;text-align:center;color:#c9d1d9;font-weight:600;min-width:58px">' + c.date.slice(5)
-      + '<div style="font-size:10px;color:' + (wk ? '#d29922' : '#6e7681') + ';font-weight:400">' + c.dte + 'd' + (wk ? '·周' : '') + '</div></th>';
+      + '<div style="font-size:10px;color:' + (wk ? '#d29922' : '#6e7681') + ';font-weight:400">' + c.dte + 'd' + (wk ? zt('·周', ' · weekly') : '') + '</div></th>';
   });
   h += '</tr>';
   g.strikes.forEach((s, ri) => {
@@ -6678,8 +6710,9 @@ function _liqGrid(d) {
       const st = _liqTierStyle(cell.tier);
       const txt = (cell.spread_pct == null) ? '单边' : Math.round(cell.spread_pct) + '%';
       const star = (ci === best) ? '★' : '';
-      const tip = 'bid ' + cell.bid + ' / ask ' + cell.ask + ' · mid ' + cell.mid + ' · vol ' + cell.vol + ' · OI ' + cell.oi
-        + (cell.reasons && cell.reasons.length ? ' · ' + cell.reasons.join(' · ') : '');
+      const tipQ = 'bid ' + cell.bid + ' / ask ' + cell.ask + ' · mid ' + cell.mid + ' · vol ' + cell.vol + ' · OI ' + cell.oi;
+      const tip = (cell.reasons && cell.reasons.length)
+        ? ztt(tipQ + ' · ' + cell.reasons.join(' · '), tipQ + ' · ' + (cell.reasons_en || cell.reasons).join(' · ')) : tipQ;
       h += '<td onclick="liqCell(' + ri + ',' + ci + ')" title="' + tip.replace(/"/g, '&quot;') + '" style="cursor:pointer;text-align:center;background:' + st.bg + ';color:' + st.fg + ';border:1px solid ' + st.bd + ';border-radius:5px;padding:4px 6px;min-width:50px;font-weight:' + (star ? 700 : 400) + '">' + star + txt + '</td>';
     });
     h += '</tr>';
@@ -6703,7 +6736,7 @@ function liqCell(ri, ci) {
   wrap.innerHTML = '<div style="border:1px solid ' + st.bd + ';background:#161b22;border-radius:8px;padding:10px 12px;margin-bottom:10px">'
     + '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span style="font-weight:700;color:' + st.fg + '">' + (_liqSide === 'call' ? 'Call' : 'Put') + ' ' + _liqFmtStrike(s) + ' · ' + (col.date || '') + (col.dte != null ? ' (' + col.dte + 'd)' : '') + '</span>'
     + '<span style="font-size:11px;color:#8b949e">spread ' + (cell.spread_pct == null ? '单边报价' : Math.round(cell.spread_pct) + '% ($' + (cell.spread_abs != null ? cell.spread_abs.toFixed(2) : '-') + ')') + ' · vol ' + cell.vol + ' · OI ' + cell.oi + (cell.iv ? ' · IV ' + cell.iv + '%' : '') + '</span></div>'
-    + (cell.reasons && cell.reasons.length ? '<div style="font-size:11px;color:#e3b341;margin-top:4px">⚠️ ' + cell.reasons.join(' · ') + '</div>' : '')
+    + (cell.reasons && cell.reasons.length ? '<div style="font-size:11px;color:#e3b341;margin-top:4px">⚠️ ' + zt(cell.reasons, cell.reasons_en || cell.reasons).join(' · ') + '</div>' : '')
     + bar + '</div>';
   wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
@@ -6854,7 +6887,7 @@ function renderExitAdvisor() {
           <div style="margin-top:7px"><b style="color:#58a6ff">出场</b> 90%最大利润止盈 · <b style="color:#3fb950">不止损</b> · 否则持到期</div>
         </div>
         <div style="padding:10px 12px;line-height:1.8">
-          <div><b style="color:#58a6ff">每单</b> 3-5% NLV (${_perLo}–${_perHi}) · 同时 ≤10-12 仓</div>
+          <div><b style="color:#58a6ff">每单</b> ${zt(`3-5% NLV (${_perLo}–${_perHi}) · 同时 ≤10-12 仓`, `3–5% of NLV (${_perLo}–${_perHi}) · ≤10–12 positions at once`)}</div>
           <div style="margin-top:7px"><b style="color:#58a6ff">现金</b> 部署 ≤60%(顶 70%)、留 40%+ 现金<br><span style="color:#6e7681">现金即对冲,别买 put(回测:常年放血、不降回撤)</span></div>
         </div>
       </div>
@@ -6994,9 +7027,10 @@ function fireExitAlert(ticker, prog, dte) {
   const forced = (prog >= (shortT ? b.soft : b.forced));
   const act = forced ? '强制止盈' : '止盈';
   const title = (forced ? '🔴 ' : '🔵 ') + ticker + ' ' + act;
-  const tail = forced ? (shortT ? '剩' + Math.round(dte) + '天时间不多 — 现在就平' : '现在就平、别再等')
-                      : ('建议落袋;到 ' + forcedPct + '% 强制');
-  const bodyTxt = '已吃到 ' + (prog * 100).toFixed(0) + '% 最大利润 · 还 ' + Math.round(dte) + ' 天 · ' + b.label + b.zone + '区 — ' + tail;
+  const tail = forced ? (shortT ? zt('剩' + Math.round(dte) + '天时间不多 — 现在就平', 'only ' + Math.round(dte) + ' days left — close now') : zt('现在就平、别再等', "close now, don't wait"))
+                      : zt('建议落袋;到 ' + forcedPct + '% 强制', 'bank it; forced at ' + forcedPct + '%');
+  const bodyTxt = zt('已吃到 ' + (prog * 100).toFixed(0) + '% 最大利润 · 还 ' + Math.round(dte) + ' 天 · ' + b.label + b.zone + '区 — ' + tail,
+                     (prog * 100).toFixed(0) + '% of max profit captured · ' + Math.round(dte) + ' days left · ' + b.label_en + ' ' + b.zone + ' zone — ' + tail);
   // 系统级 macOS 通知现在【只】由后端 exit_alert_loop 发(osascript),无论 PWA
   // 前台 / 后台 / 完全关闭都会响 —— 后台标签的 JS 定时器被浏览器节流/挂起,客户端
   // 推送本就不可靠。这里只在你正盯着页面时弹个即时 in-page toast(前台便利),

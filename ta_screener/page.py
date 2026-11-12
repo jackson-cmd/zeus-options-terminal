@@ -1051,7 +1051,7 @@ async function loadEodStatus() {
   else if (s.state === 'done') btn = '<button class="chip" id="eodCrawlBtn" onclick="runEodCrawl()" title="重爬今天的 EOD 期权链" style="margin-left:8px;padding:3px 8px;font-size:11px;white-space:nowrap">↻ 重爬</button>';
   el.innerHTML = '<span style="font-size:13px">' + icon + '</span>' +
     '<b style="color:' + dot + '">EOD 爬取</b>' +
-    '<span>' + (s.label || '') + '</span>' +
+    '<span>' + zt(s.label || '', s.label_en || s.label || '') + '</span>' +
     (tip ? '<span class="muted" title="' + tip.replace(/"/g, '&quot;') + '" style="cursor:help">· ' + tip + '</span>' : '') +
     (s.file_mtime ? '<span class="muted" style="margin-left:auto">数据文件 ' + s.file_mtime + '</span>' : '') +
     '<span onclick="loadEodStatus()" title="刷新状态" style="cursor:pointer;opacity:.6;margin-left:' + (s.file_mtime ? '6px' : 'auto') + '">↻</span>' +

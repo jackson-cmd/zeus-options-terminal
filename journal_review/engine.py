@@ -130,6 +130,7 @@ def build_review(today: Optional[str] = None) -> dict:
     watchlist = _wt.build(open_positions, today_date, calendar, mtm_lookup)
 
     insight_text = _insight.build(kpi_dict, rule_violations, yesterday_closed, watchlist)
+    insight_en = _insight.build_en(kpi_dict, rule_violations, yesterday_closed, watchlist)
 
     quick_links = [
         {"label": "跑今日体检", "url": "/pretrade-checkup"},
@@ -146,5 +147,6 @@ def build_review(today: Optional[str] = None) -> dict:
         "watchlist_today": watchlist,
         "rule_violations_7d": rule_violations,
         "insight": insight_text,
+        "insight_en": insight_en,
         "quick_links": quick_links,
     }

@@ -70,6 +70,18 @@ LABEL = {
  "ai_efficiency":"AI效率/DeepSeek","export_controls":"芯片出口管制","drug_pricing":"药价/医保政治",
  "epidemic_nonc":"传染病(非COVID)",
 }
+# English names, for the interface in English (the page puts them inside its own sentences)
+LABEL_EN = {
+ "yields_bonds": "Treasury yields spike", "tariffs_trade": "Tariffs / trade war", "pandemic_covid": "Pandemic",
+ "fed_fomc": "Fed / FOMC", "inflation_cpi": "Inflation / CPI", "jobs_nfp": "Jobs / payrolls",
+ "banking_credit": "Bank / credit crisis", "geopolitics_war": "Geopolitics / war", "oil_energy": "Oil / energy",
+ "govt_fiscal": "Shutdown / debt ceiling", "gdp_growth": "GDP / recession", "vix_spike": "VIX / fear",
+ "ai_bubble_valuation": "AI bubble / valuation",
+ "sovereign_debt": "Euro debt / sovereign credit", "china_shock": "China devaluation / A-shares",
+ "vol_unwind": "Vol squeeze / gamma", "ai_efficiency": "AI efficiency / DeepSeek",
+ "export_controls": "Chip export controls", "drug_pricing": "Drug pricing / Medicare politics",
+ "epidemic_nonc": "Epidemics (non-COVID)",
+}
 # kind: scheduled=计划内(日期已知,前瞻可用) shock=突发冲击 indicator=并发指标 anti=反信号
 KIND = {
  "fed_fomc":"scheduled","inflation_cpi":"scheduled","jobs_nfp":"scheduled","gdp_growth":"scheduled",
@@ -192,7 +204,7 @@ def regime_saturation(today_items, data=None) -> dict:
         else:
             frac, plabel = 0.6, "偏高"
         lift = info.get("lift", 1.0)
-        entry = {"topic": t, "label": info.get("label", t), "count": c,
+        entry = {"topic": t, "label": info.get("label", t), "label_en": LABEL_EN.get(t, t), "count": c,
                  "percentile": plabel, "frac": frac, "lift": lift,
                  "share": round(share, 3), "kind": info.get("kind", "shock")}
         if lift > 1.0:

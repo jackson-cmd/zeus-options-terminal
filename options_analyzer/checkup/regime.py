@@ -23,9 +23,9 @@ VIX_HIGH = 22.0      # SPY>200SMA 但 VIX ≥ 此 → 视为震荡(波动大、�
 
 # 止盈带(占最大利润):near=接近, soft=建议落袋, forced=强制平
 BANDS = {
-    "bull": {"near": 0.60, "soft": 0.70, "forced": 0.80, "label": "牛市", "zone": "70-80%"},
-    "chop": {"near": 0.40, "soft": 0.50, "forced": 0.60, "label": "震荡/弱", "zone": "50-60%"},
-    None:   {"near": 0.55, "soft": 0.65, "forced": 0.75, "label": "中性", "zone": "65-75%"},
+    "bull": {"near": 0.60, "soft": 0.70, "forced": 0.80, "label": "牛市", "label_en": "bull market", "zone": "70-80%"},
+    "chop": {"near": 0.40, "soft": 0.50, "forced": 0.60, "label": "震荡/弱", "label_en": "choppy / weak", "zone": "50-60%"},
+    None:   {"near": 0.55, "soft": 0.65, "forced": 0.75, "label": "中性", "label_en": "neutral", "zone": "65-75%"},
 }
 
 

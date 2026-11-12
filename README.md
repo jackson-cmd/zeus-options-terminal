@@ -25,7 +25,7 @@
 
 ## 🆕 What's new
 
-<sub>Latest release **0.3.0** (2026-11-12). The full history is in the [changelog](CHANGELOG.md).</sub>
+<sub>Latest release **0.3.1** (2026-11-12). The full history is in the [changelog](CHANGELOG.md).</sub>
 
 | | New in 0.3.0 and 0.2.x |
 |---|---|

@@ -35,6 +35,7 @@ def leg_verdict(bid, ask, vol=0, oi=0) -> dict:
 
     if bid <= 0 or ask <= 0:
         return {"tier": "bad", "reasons": ["单边报价 — mid 挂不上"],
+                "reasons_en": ["one-sided quote — no order can rest at mid"],
                 "bid": round(bid, 2), "ask": round(ask, 2), "mid": 0.0,
                 "spread_abs": None, "spread_pct": None, "vol": vol, "oi": oi}
 
@@ -42,25 +43,30 @@ def leg_verdict(bid, ask, vol=0, oi=0) -> dict:
     spread_abs = ask - bid
     spread_pct = spread_abs / mid * 100 if mid > 0 else None
 
-    reasons = []
+    reasons, reasons_en = [], []      # the same reasons, for the interface in English
     vwide = spread_pct is not None and spread_pct >= VWIDE_PCT and spread_abs >= VWIDE_ABS
     if vwide:
         tier = "bad"
         reasons.append(f"极宽 {spread_pct:.0f}% (${spread_abs:.2f}) — mid 难成交")
+        reasons_en.append(f"very wide {spread_pct:.0f}% (${spread_abs:.2f}) — hard to fill at mid")
     else:
         tier = "good"
         if spread_pct is not None and spread_pct >= WIDE_PCT and spread_abs >= WIDE_ABS:
             reasons.append(f"宽 {spread_pct:.0f}% (${spread_abs:.2f})")
+            reasons_en.append(f"wide {spread_pct:.0f}% (${spread_abs:.2f})")
         if oi < 10:
             reasons.append(f"OI 极薄 ({oi})")
+            reasons_en.append(f"very thin OI ({oi})")
         elif oi < THIN_OI:
             reasons.append(f"OI 薄 ({oi})")
+            reasons_en.append(f"thin OI ({oi})")
         if 0 < vol < DEAD_VOL:
             reasons.append(f"当日 vol 低 ({vol})")
+            reasons_en.append(f"low volume today ({vol})")
         if reasons:
             tier = "warn"
 
-    return {"tier": tier, "reasons": reasons,
+    return {"tier": tier, "reasons": reasons, "reasons_en": reasons_en,
             "bid": round(bid, 2), "ask": round(ask, 2), "mid": round(mid, 2),
             "spread_abs": round(spread_abs, 2),
             "spread_pct": round(spread_pct, 1) if spread_pct is not None else None,
@@ -116,6 +122,7 @@ def _ticker_verdict(exps, per_exp_rows, spot, atm):
     """取 28–45 DTE 月期权(没有就最接近 35d)ATM 行权价,call/put 取更差的一档当 ticker 裁决。"""
     if not exps or atm is None:
         return {"tier": "unknown", "label": "无数据", "detail": "没抓到合适的期权链",
+                "label_en": "No data", "detail_en": "No suitable option chain found",
                 "spread_pct": None, "exp": None, "dte": None, "oi": None}
     target = sorted(exps, key=lambda e: (0 if 28 <= e["dte"] <= 45 else 1, abs(e["dte"] - 35)))[0]
     ti = exps.index(target)
@@ -126,6 +133,7 @@ def _ticker_verdict(exps, per_exp_rows, spot, atm):
         r = per_exp_rows[ti].get(nk) if nk is not None else None
     if not r:
         return {"tier": "unknown", "label": "无数据", "detail": f"{target['date']} ATM 无报价",
+                "label_en": "No data", "detail_en": f"No ATM quote for {target['date']}",
                 "spread_pct": None, "exp": target["date"], "dte": target["dte"], "oi": None}
 
     def _v(q):
@@ -136,13 +144,21 @@ def _ticker_verdict(exps, per_exp_rows, spot, atm):
     worse = cv if _ORDER[cv["tier"]] >= _ORDER[pv["tier"]] else pv
     tier, sp = worse["tier"], worse["spread_pct"]
     label = {"good": "流动性良好", "warn": "部分偏差", "bad": "此票慎开"}.get(tier, "无数据")
+    label_en = {"good": "Good liquidity", "warn": "Some weak spots", "bad": "Careful with this ticker"}.get(tier, "No data")
     sp_txt = "单边报价" if sp is None else f"spread {sp:.0f}%"
+    sp_en = "one-sided quote" if sp is None else f"spread {sp:.0f}%"
     detail = {
         "good": f"ATM {target['dte']}d 期权 {sp_txt} · mid 基本能成交",
         "warn": f"ATM {target['dte']}d 期权 {sp_txt} · 能开但要磨价",
         "bad": f"ATM {target['dte']}d 期权 {sp_txt} · mid 难成交、慎开",
     }.get(tier, "")
-    return {"tier": tier, "label": label, "detail": detail, "spread_pct": sp,
+    detail_en = {
+        "good": f"ATM {target['dte']}d options {sp_en} · fills at mid",
+        "warn": f"ATM {target['dte']}d options {sp_en} · tradable, but work the price",
+        "bad": f"ATM {target['dte']}d options {sp_en} · hard to fill at mid, open with care",
+    }.get(tier, "")
+    return {"tier": tier, "label": label, "detail": detail, "label_en": label_en, "detail_en": detail_en,
+            "spread_pct": sp,
             "exp": target["date"], "dte": target["dte"], "oi": min(cv["oi"], pv["oi"])}
 
 
