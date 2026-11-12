@@ -223,9 +223,8 @@ Without AI, ZEUS works fully; AI buttons say that AI is not configured.
 | **📅 Events** | Earnings, corporate events, SEC filings, risk radar ([section 10](#10-events)) |
 | **Trade Journal** | Statistics, analysis and the decision log ([section 11](#11-trade-journal)); a red badge counts decisions waiting for your notes |
 | **🧪 Paper Trade** | Simulated trades with live P/L ([section 8](#8-paper-trade)) |
-| **Mode badge** | ● tastytrade live, or ◐ Manual with the number of manual trades |
 | **Language menu** | 中文 · 双语 · English ([section 13](#13-interface-languages)) |
-| **⚙** | Opens Settings in an overlay |
+| **⚙** | Opens Settings in an overlay; hover it to see the mode: ● tastytrade live, or ◐ manual upload with the number of manual trades (also on the first card in Settings) |
 | **AI** | Pauses or resumes the scheduled AI jobs |
 | **🔔** | Mutes every notification: take-profit, movers, risk, AI position review |
 | **🌐** | Translation status: which engine works now, why the others fail, and a manual test |
@@ -398,7 +397,7 @@ Opens from a chart card (🔎 depth) or from a ticker link:
 
 ### 6.5 Market brief
 
-**🧭 Market brief → 🧭 Market judgement.** An AI reading of the market: how bad the news is versus how much price has already absorbed, the probability of a crash against historical base rates, three layers of support, and what would prove the view wrong. It runs every morning when scheduled AI jobs are on; **🔄 Re-analyze** runs it now. **Needs:** AI.
+**🧭 Market brief → 🧭 Market judgement.** An AI reading of the market: how bad the news is versus how much price has already absorbed, the probability of a crash against historical base rates, three layers of support, and what would prove the view wrong. It runs every morning when scheduled AI jobs are on; **🔄 Re-analyze** (top right of the brief) runs it now, in about 3 minutes. **Needs:** AI.
 
 ### 6.6 Sector rotation
 

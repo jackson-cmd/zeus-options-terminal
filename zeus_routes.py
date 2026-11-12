@@ -3,7 +3,7 @@
   /settings                   bilingual settings page (credentials, AI, news, trades)
   /api/settings               read (public view) / write settings
   /api/trades*                manual mode: add, import CSV, list, delete, export
-  /api/zeus/status         mode + capabilities for the UI badge
+  /api/zeus/status         mode + capabilities for the UI (gear tooltip, settings cards)
   /api/zeus/test/*         connection tests (tastytrade, AI, news, Benzinga, e-mail, MCP)
   /api/freenews/*             Finviz / WSJ / MarketWatch wire status and refresh
 
