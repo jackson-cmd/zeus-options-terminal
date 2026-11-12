@@ -2219,6 +2219,10 @@ function analyzeStrategy(strat, ivOverride) {
   const _stepP = (_hiP - _loP) / _nP;
   const priceRange = [];
   for (let _i = 0; _i <= _nP; _i++) priceRange.push(_loP + _i * _stepP);
+  // A payoff at expiration only turns at a strike, and puts pay most at a price
+  // of 0, so check those exact points too: the grid alone missed the bottom
+  // (short-put max loss, long-put max profit) and could step over a strike.
+  priceRange.push(0, ..._ks);
   let maxProfit = -Infinity, maxLoss = Infinity;
   priceRange.forEach(price => {
     let pnl = 0;
@@ -2236,6 +2240,12 @@ function analyzeStrategy(strat, ivOverride) {
     if (pnl > maxProfit) maxProfit = pnl;
     if (pnl < maxLoss) maxLoss = pnl;
   });
+  // Above the top strike the payoff keeps moving with the net number of calls:
+  // up without limit when long calls outnumber short ones, down without limit
+  // the other way. 1e9 / -1e9 is the "unlimited" value the dashboard shows as ∞.
+  const _netCalls = strat.legs.reduce((s, l) => s + (l.type === 'C' ? l.qty * l.mult : 0), 0);
+  if (_netCalls > 0) maxProfit = 1e9;
+  if (_netCalls < 0) maxLoss = -1e9;
 
   // Breakeven at expiration (find zero crossings)
   const breakevens = findBreakevens(strat, iv);
@@ -2967,6 +2977,7 @@ function toggleHeatmapPnl() {
 
 function _phmFmtMoney(v) {
   if (v === null || v === undefined || isNaN(v)) return '—';
+  if (Math.abs(v) >= 1e9) return '∞';          // unlimited max profit / loss
   const a = Math.abs(v);
   const sign = v < 0 ? '-' : '';
   if (a >= 1e6) return sign + '$' + (a / 1e6).toFixed(2) + 'M';
@@ -3006,8 +3017,11 @@ function _phmBuildData(sizeMode, colorMode) {
     if (!a) return;
     const maxLoss = Math.abs(a.maxLoss || 0);
     const maxProfit = Math.abs(a.maxProfit || 0);
-    const size = (sizeMode === 'maxprofit' ? maxProfit : maxLoss);
-    if (!isFinite(size) || size <= 0) return;
+    // An unlimited max loss / profit (±1e9) has no size of its own: it is drawn
+    // as large as the largest limited tile (set below), not a billion dollars.
+    const unlimited = (sizeMode === 'maxprofit' ? maxProfit : maxLoss) >= 1e9;
+    const size = unlimited ? 0 : (sizeMode === 'maxprofit' ? maxProfit : maxLoss);
+    if (!unlimited && (!isFinite(size) || size <= 0)) return;
 
     // Underlying today % change — from spot vs prev-close
     const prev = prevCloseMap[s.underlying];
@@ -3046,6 +3060,8 @@ function _phmBuildData(sizeMode, colorMode) {
       cvalMissing: (cval === null || cval === undefined || !isFinite(cval)),
     });
   });
+  const biggest = Math.max(1, ...items.map(it => it.size));
+  items.forEach(it => { if (!(it.size > 0)) it.size = biggest; });
   return items;
 }
 
@@ -3899,11 +3915,12 @@ function renderRiskView() {
   });
 
   // Compute totals (order-independent so use unsorted sum)
-  let totPnl = 0, tot1s = 0, tot2s = 0, totVar = 0, totCvar = 0, totMaxLoss = 0, totActualRisk = 0;
+  let totPnl = 0, tot1s = 0, tot2s = 0, totVar = 0, totCvar = 0, totMaxLoss = 0, totActualRisk = 0, nUnlimitedLoss = 0;
   let totMaxProfit = 0, totPnlBounded = 0, nUnbounded = 0, totEv = 0;
   rows.forEach(r => {
     totPnl += r.pnl; tot1s += r.worst1; tot2s += r.worst2;
-    totVar += r.var; totCvar += r.cvar; totMaxLoss += r.maxloss;
+    totVar += r.var; totCvar += r.cvar;
+    if (r.maxloss <= -1e9) nUnlimitedLoss++; else totMaxLoss += r.maxloss;
     totActualRisk += Math.abs(r.maxloss <= -1e9 ? 0 : r.maxloss);
     if (r.maxprofit != null && r.maxprofit > 0 && r.maxprofit < 1e9) { totMaxProfit += r.maxprofit; totPnlBounded += r.pnl; }
     else if (r.maxprofit >= 1e9) { nUnbounded++; }
@@ -3946,7 +3963,7 @@ function renderRiskView() {
     <div class="risk-summary-row"><span class="risk-summary-label">Tomorrow 2σ worst (~95% band, stress) &nbsp;<span style="color:var(--text2);font-weight:400">${tot2sPctNlv}% of NLV</span></span><span class="risk-summary-value" style="color:${col2(tot2s)}">${fmtSign(tot2s)}</span></div>
     <div class="risk-summary-row"><span class="risk-summary-label">VaR 95% (1-day)</span><span class="risk-summary-value" style="color:${col2(totVar)}">${fmtSign(totVar)}</span></div>
     <div class="risk-summary-row"><span class="risk-summary-label">CVaR 95% (1-day expected shortfall)</span><span class="risk-summary-value" style="color:${col2(totCvar)}">${fmtSign(totCvar)}</span></div>
-    <div class="risk-summary-row"><span class="risk-summary-label">Max theoretical loss &nbsp;<span style="color:var(--text2);font-weight:400">${riskPctNlv}% of NLV</span></span><span class="risk-summary-value" style="color:var(--red)">${fmtSign(totMaxLoss)}</span></div>
+    <div class="risk-summary-row"><span class="risk-summary-label">Max theoretical loss &nbsp;<span style="color:var(--text2);font-weight:400">${riskPctNlv}% of NLV</span></span><span class="risk-summary-value" style="color:var(--red)">${nUnlimitedLoss ? '&minus;∞' : fmtSign(totMaxLoss)}</span></div>
   `;
   const captured = totMaxProfit > 0 ? (totPnlBounded / totMaxProfit * 100) : 0;
   const remaining = totMaxProfit - totPnlBounded;
@@ -5816,11 +5833,11 @@ function renderSummary(strat, analysis) {
     </div>
     <div class="summary-item">
       <div class="summary-label">MAX LOSS</div>
-      <div class="summary-value" style="color:var(--red)">&#8600; $${Math.abs(analysis.maxLoss).toFixed(2)}</div>
+      <div class="summary-value" style="color:var(--red)">&#8600; ${analysis.maxLoss <= -1e9 ? '∞' : '$' + Math.abs(analysis.maxLoss).toFixed(2)}</div>
     </div>
     <div class="summary-item">
       <div class="summary-label">MAX PROFIT</div>
-      <div class="summary-value" style="color:var(--green)">&#8599; $${analysis.maxProfit.toFixed(2)}</div>
+      <div class="summary-value" style="color:var(--green)">&#8599; ${analysis.maxProfit >= 1e9 ? '∞' : '$' + analysis.maxProfit.toFixed(2)}</div>
     </div>
     <div class="summary-item">
       <div class="summary-label">CHANCE OF PROFIT</div>
