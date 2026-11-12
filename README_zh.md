@@ -19,16 +19,17 @@
 ## 目录
 
 - [🆕 新功能](#-新功能) · [写在前面](#写在前面) · [两种玩法](#两种玩法)
-- [🗺️ 功能全景](#️-功能全景)：[持仓](#️-持仓--指挥中心) · [纪律引擎](#-纪律引擎--真正帮你省钱的部分) · [选股](#-选股--找下一笔) · [模拟盘](#-模拟盘--先用假钱练手) · [市场判断](#-市场判断--大局观不带情绪) · [Digest](#-digest--四路新闻两种语言) · [事件](#-事件) · [交易日记](#-交易日记--照妖镜) · [三种界面语言](#-三种界面语言中文--双语--english) · [自带 AI](#-自带-ai)
+- [🗺️ 功能全景](#️-功能全景)：[持仓](#️-持仓--指挥中心) · [纪律引擎](#-纪律引擎--真正帮你省钱的部分) · [选股](#-选股--找下一笔) · [模拟盘](#-模拟盘--先用假钱练手) · [市场判断](#-市场判断--大局观不带情绪) · [Digest](#-digest--四路新闻两种语言) · [事件](#-事件) · [交易日记](#-交易日记--照妖镜) · [三种界面语言](#-三种界面语言中文--双语--english) · [自带 AI](#-自带-ai) · [接入智能体（MCP）](#-接入你自己的-ai-智能体mcp)
 - [📸 截图一览](#-截图一览) · [🚀 快速开始](#-快速开始) · [🔑 每一项设置能解锁什么](#-每一项设置能解锁什么) · [📄 手动交易：CSV 格式](#-手动交易csv-格式)
 - [🔒 隐私与安全](#-隐私与安全) · [🏗️ 架构](#️-架构) · [❓ 常见问题](#-常见问题) · [🤝 参与贡献](#-参与贡献) · [📜 许可证](#-许可证禁止商业使用)
 
 ## 🆕 新功能
 
-<sub>最新版本 **0.2.1**（2026-11-12）。完整的更新历史见[更新记录](CHANGELOG_zh.md)。</sub>
+<sub>最新版本 **0.3.0**（2026-11-12）。完整的更新历史见[更新记录](CHANGELOG_zh.md)。</sub>
 
-| | 0.2.1 和 0.2.0 新加入 |
+| | 0.3.0 和 0.2.x 新加入 |
 |---|---|
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🔌 接入你自己的 AI 智能体（MCP）**：Claude Code、Claude Desktop、通过 Codex 用的 GPT、Gemini CLI 或你自己写的智能体，都能读你的持仓、跑开单前体检、给价差估价、读新闻和交易日记；你允许的话还能下模拟单。ZEUS 本身就是一个本地 MCP 服务器，不需要 API key。[连接智能体 →](docs/USER_GUIDE_zh.md#18-ai-智能体mcp) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🟩 热力图**：选股页的热力图回来了，和 K 线墙一键切换。[怎么用 →](docs/USER_GUIDE_zh.md#69-热力图) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🧪 模拟盘**：在实时期权链上搭任何策略，期权腿和股票腿都能加，存成模拟单后跟踪盈亏。[怎么用 →](docs/USER_GUIDE_zh.md#8-模拟盘) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **📧 邮件提醒**：每条桌面提醒都能同时发到你的邮箱，macOS 和 Linux 都支持。[怎么配置 →](docs/USER_GUIDE_zh.md#123-邮件提醒) |
@@ -153,6 +154,9 @@ ZEUS Terminal（宙斯期权终端）是我给自己做的网站。前前后后�
 ### 🤖 自带 AI
 你有哪个就用哪个：**Claude Code CLI**（用你自己的 Claude 订阅）、**Anthropic API key**，或者**任何 OpenAI 兼容接口**（OpenAI、DeepSeek、OpenRouter、本地 Ollama……）。什么都不配也能用，只是没有 AI 按钮。
 
+### 🔌 接入你自己的 AI 智能体（MCP）
+反过来也行：ZEUS 本身就是一个 MCP 服务器。把 Claude Code、Claude Desktop、Codex（GPT）、Gemini CLI 或者你自己写的智能体指向 `http://127.0.0.1:8765/mcp`，它就有了 18 个工具，数字全是 ZEUS 自己算的：带精确最大盈亏、盈亏平衡点、希腊值和出场建议的持仓，任意策略的假设估价，四道关体检，流动性，新闻，事件，行业轮动，还有你的交易日记。然后直接问，比如 *「我哪些仓位该止盈？到期之前有哪些财报？」* 默认只读，你允许了才能下模拟单；只回应本机程序，碰不到任何真实订单。[连接智能体 →](docs/USER_GUIDE_zh.md#18-ai-智能体mcp)
+
 ---
 
 ## 📸 截图一览
@@ -177,7 +181,7 @@ ZEUS Terminal（宙斯期权终端）是我给自己做的网站。前前后后�
 <tr><td width="50%"><img src="docs/screenshots/journal_zh.png" alt="交易日记"><br><sub><b>交易日记</b> —— 胜率、盈亏比、月度目标、资金曲线</sub></td>
 <td width="50%"><img src="docs/screenshots/analysis_zh.png" alt="日记分析"><br><sub><b>日记分析</b> —— 从你自己的交易里看出什么有效、什么无效</sub></td></tr>
 <tr><td width="50%"><img src="docs/screenshots/settings_zh.png" alt="设置"><br><sub><b>设置</b> —— 所有信息都在网页里填，保存的密钥只写不读</sub></td>
-<td width="50%"></td></tr>
+<td width="50%"><img src="docs/screenshots/agents_zh.png" alt="AI 智能体（MCP）"><br><sub><b>AI 智能体（MCP）</b> —— 接入 Claude、GPT（Codex）、Gemini 或你自己的智能体，不要 API key</sub></td></tr>
 </table>
 
 ---
@@ -215,6 +219,7 @@ my.tastytrade.com → **Manage → API Access → OAuth Applications** → 新�
 | AI 提供方 | AI 总结、市场判断、AI 选股、AI 复盘、持仓点评 | 用你自己的 |
 | Barchart 账号 | Barchart 筛选器和信号榜单 | 需要 Barchart 账户 |
 | 邮件（SMTP） | 每条提醒同时发邮件，带测试按钮（macOS 和 Linux） | ✅ |
+| AI 智能体（MCP） | 你自己的智能体（Claude、通过 Codex 的 GPT、Gemini……）把 ZEUS 当工具用；默认开，智能体下模拟单默认关 | ✅ |
 
 ---
 
@@ -244,6 +249,7 @@ date,symbol,asset,side,effect,qty,price,fees,option_type,strike,expiration,multi
 - **代码文件夹里只有代码。** 终端运行时写的所有东西 —— 持仓快照、交易日记和截图、新闻存档、缓存、下载、日志 —— 都写到 `~/.zeus-terminal/runtime/`。代码里的那些运行目录只是指向那里的链接，git 会忽略它们。
 - **安全地分享。** 用 `git push` 发布，或者用 `tools/export_clean_zip.sh` 打一个 zip，两种方式都只包含代码。不要把整个文件夹直接拖进网页、也不要自己手动打包。`tools/install_git_hook.sh` 会装一个本地的提交前检查：链接、数据文件、任何像密钥或 token 的字符串、你自己的主目录路径、登录名和 git 身份，一律拒绝提交。
 - 保存过的密钥对浏览器**只写不读**：设置接口只告诉你「已设置 / 未设置」，从不把密钥回传。
+- 给 AI 智能体的 MCP 接口只回应本机程序，任何 MCP 工具都下不了真实订单、读不出已保存的密钥；智能体读到的内容会发给它背后的模型服务商。
 - 服务默认只监听 **127.0.0.1**，拒绝陌生的 `Host` 头（防 DNS 重绑定），跨域请求只接受本机来源，写操作需要一个其他网站发不出来的请求头。
 - 没有任何遥测。应用只连接你自己接入的服务，以及公开行情数据（Cboe 延迟行情、Yahoo Finance、SEC EDGAR、Finviz、道琼斯 RSS）。
 - 免费数据会避开限流：公司资料（行业、细分行业、市值）从 Finviz 每次批量查 20 只；Yahoo Finance 一旦限流，股票报价自动改用 Finviz；一整条期权链只向 Cboe 请求一次，不再按到期日逐个请求 Yahoo。

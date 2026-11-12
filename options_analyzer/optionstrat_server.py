@@ -231,6 +231,12 @@ import zeus_routes as _hroutes  # noqa: E402
 app.include_router(_hroutes.router)
 # --- /sec filings ---
 
+# --- MCP: AI agents on this computer read ZEUS at /mcp (zeus_mcp.py; bridge zeus_mcp_stdio.py) ---
+import zeus_mcp as _zeus_mcp  # noqa: E402
+_zeus_mcp.configure(app)
+app.include_router(_zeus_mcp.router)
+# --- /MCP ---
+
 # --- paper trade: same quotes as the Positions tab (fetch_* are defined further down) ---
 _pt_routes.configure(
     client=lambda: state.client,

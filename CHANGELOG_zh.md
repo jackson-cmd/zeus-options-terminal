@@ -4,6 +4,21 @@
 
 ZEUS Terminal 每个版本改了什么。新功能前面挂着 <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> 标记，括号里的数字是对应的 PR 编号。
 
+## 0.3.0 —— 2026-11-12
+
+### 新功能
+
+| | 功能 | 详细说明 |
+|---|---|---|
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🔌 AI 智能体（MCP）**：ZEUS 本身就是一个 MCP 服务器，地址 `http://127.0.0.1:8765/mcp`。Claude Code、Claude Desktop、Codex CLI（GPT）、Gemini CLI 和你自己写的智能体都能用上 18 个工具：持仓（ZEUS 自己算的盈亏、最大盈亏、盈亏平衡点、获利概率、希腊值、压力测试和出场建议）；按实时期权链估价的任意策略假设分析；开单前体检；价差推荐；流动性；报价和期权链；大盘概览；事件；新闻；行业轮动；交易点子；单票报告；交易日记；模拟盘（开仓平仓要你允许）。还有四个提示词：持仓复盘、开单前检查、早盘简报、交易日记教练。同时支持当前的无状态协议（2026-07-28）和更早的握手式版本；只回应本机程序；永远下不了真实订单。(#24) | [手册 §18](docs/USER_GUIDE_zh.md#18-ai-智能体mcp) |
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **⚙ 设置 → AI 智能体（MCP）**：开关接口，允许智能体下模拟单，复制每个智能体的接法，测试连接。(#24) | [手册 §18.2](docs/USER_GUIDE_zh.md#182-连接你的智能体) |
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **`zeus_mcp_stdio.py`**：给以命令方式启动工具的客户端（Claude Desktop）用的桥接脚本，只用 Python 标准库；`--check` 检查连接。(#24) | [手册 §18.2](docs/USER_GUIDE_zh.md#182-连接你的智能体) |
+
+### 项目
+
+- `zeus_payoff.py` 把页面上的期权计算移植到了 Python（最大盈亏、盈亏平衡点、获利概率、希腊值、压力测试和 VaR）。测试会把同一批策略交给它和页面自己的 JavaScript 各算一遍，要求结果一致。(#24)
+- 新增 65 个测试：新旧两代 MCP 协议、安全检查、每个工具对着假终端跑一遍，以及 stdio 桥接通过真实 HTTP 服务器的端到端测试。另外用官方的 MCP TypeScript 和 Python SDK 连运行中的终端，HTTP 和 stdio 两种方式都验证过。(#24)
+
 ## 0.2.1 —— 2026-11-12
 
 ### 新功能

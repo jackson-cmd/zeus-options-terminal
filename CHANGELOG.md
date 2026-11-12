@@ -4,6 +4,21 @@
 
 What changed in each version of ZEUS Terminal. New features carry the <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> badge. Numbers in parentheses are the pull requests.
 
+## 0.3.0 — 2026-11-12
+
+### New features
+
+| | Feature | Read more |
+|---|---|---|
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🔌 AI agents (MCP)**: ZEUS is an MCP server at `http://127.0.0.1:8765/mcp`. Claude Code, Claude Desktop, Codex CLI (GPT), Gemini CLI and agents you build get 18 tools: positions with ZEUS's own P/L, max profit and loss, breakevens, chance of profit, Greeks, stress and exit advice; what-if analysis of any strategy priced from the live chain; the pre-trade checkup; spread suggestions; liquidity; quotes and option chains; market overview; events; news; sector rotation; trade ideas; ticker reports; the trade journal; and Paper Trade, where opening and closing need your permission. There are also four prompts: portfolio review, pre-trade check, morning brief and journal coach. It speaks the current stateless protocol (2026-07-28) and the earlier handshake-based revisions, answers only programs on this computer, and can never place a real order. (#24) | [Manual §18](docs/USER_GUIDE.md#18-ai-agents-mcp) |
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **⚙ Settings → AI agents (MCP)**: switch the server on or off, allow paper trading by agents, copy the setup for each agent, and test the connection. (#24) | [Manual §18.2](docs/USER_GUIDE.md#182-connect-your-agent) |
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **`zeus_mcp_stdio.py`**: a bridge for clients that launch a command (Claude Desktop). It needs only the Python standard library; `--check` tests the connection. (#24) | [Manual §18.2](docs/USER_GUIDE.md#182-connect-your-agent) |
+
+### Project
+
+- `zeus_payoff.py` ports the page's option math to Python (max profit and loss, breakevens, chance of profit, Greeks, stress and VaR). Tests run it and the page's JavaScript on the same strategies and require the same numbers. (#24)
+- 65 new tests: the MCP protocol in both eras, the security checks, every tool against a fake terminal, and the stdio bridge end to end through a real HTTP server. The official MCP TypeScript and Python SDKs were checked against a running terminal over HTTP and stdio. (#24)
+
 ## 0.2.1 — 2026-11-12
 
 ### New features

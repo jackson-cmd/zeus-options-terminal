@@ -2,7 +2,7 @@
 
 [中文 → FEATURES_zh.md](FEATURES_zh.md) · [User manual](USER_GUIDE.md) · [What's new](../CHANGELOG.md) · [Back to README](../README.md)
 
-ZEUS does far more than the screenshots in the README show. There are 7 pages in the top bar, about 30 jobs that run by themselves in the background, and more than 200 API endpoints. This page lists every feature you can reach from the interface today. Pull requests are welcome, and new features may be added over time ([Contributing](../CONTRIBUTING.md)). Features marked <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> arrived in version 0.2.0 or 0.2.1 ([changelog](../CHANGELOG.md)); how to use each one is in the [user manual](USER_GUIDE.md).
+ZEUS does far more than the screenshots in the README show. There are 7 pages in the top bar, about 30 jobs that run by themselves in the background, and more than 200 API endpoints. This page lists every feature you can reach from the interface today. Pull requests are welcome, and new features may be added over time ([Contributing](../CONTRIBUTING.md)). Features marked <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> arrived in versions 0.2.0 to 0.3.0 ([changelog](../CHANGELOG.md)); how to use each one is in the [user manual](USER_GUIDE.md).
 
 **What each feature needs:**
 
@@ -22,7 +22,7 @@ ZEUS does far more than the screenshots in the README show. There are 7 pages in
 - [Top bar](#top-bar-on-every-page) · [⚔️ Positions](#️-positions) · [🔍 Strategy detail](#-strategy-detail-click-any-position) · [⚠ Risk view](#-risk-view)
 - [🩺 Discipline and alerts](#-discipline-and-alerts) · [🩺 Pre-trade checkup and liquidity](#-pre-trade-checkup-and-liquidity)
 - [🎯 Picker](#-picker) · [🔎 TA screener](#-ta-screener-ta) · [🧪 Paper Trade](#-paper-trade-)
-- [📋 Digest](#-digest) · [📅 Events](#-events) · [📓 Trade journal](#-trade-journal)
+- [📋 Digest](#-digest) · [📅 Events](#-events) · [📓 Trade journal](#-trade-journal) · [🔌 AI agents (MCP)](#-ai-agents-mcp-)
 - [⚙ Settings](#-settings) · [🔁 What runs by itself](#-what-runs-by-itself) · [🌍 Data sources](#-data-sources) · [🛠 For developers](#-for-developers)
 - [Not wired up yet: ideas for pull requests](#not-wired-up-yet--ideas-for-pull-requests)
 
@@ -190,6 +190,18 @@ ZEUS does far more than the screenshots in the README show. There are 7 pages in
 | ✅ | Daily review page | `/journal-review`: yesterday's opened and closed trades, rule checks, today's watchlist | Free |
 | ✅ | Sync | Hourly from tastytrade, or rebuilt instantly from your uploads | Free (sync with tastytrade) |
 
+## 🔌 AI agents (MCP) <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!">
+
+| ✓ | Feature | What it does | Needs |
+|---|---|---|---|
+| ✅ | MCP server | `http://127.0.0.1:8765/mcp` on the running terminal: Claude Code, Claude Desktop, Codex CLI (GPT), Gemini CLI and your own agents use ZEUS as tools; no API key and no extra process | Free |
+| ✅ | 18 tools | Status; positions with ZEUS's own P/L, max profit and loss, breakevens, chance of profit, Greeks, stress and exit advice; what-if analysis of any strategy; pre-trade checkup; spread suggestions; liquidity; quotes and option chains; market overview; events; news; sector rotation; trade ideas; ticker report; trade journal; paper trades | Free (each tool's data as usual) |
+| ✅ | 4 prompts | Portfolio review, pre-trade check, morning brief, journal coach: slash commands in Claude Code and Gemini CLI | Free |
+| ✅ | Paper trading by agents | Agents open and close simulated trades, only after you allow it in Settings | Free |
+| ✅ | stdio bridge | `zeus_mcp_stdio.py` for clients that launch a command (Claude Desktop); standard library only; `--check` tests the connection | Free |
+| ✅ | Old and new clients | The current stateless protocol (2026-07-28) and the handshake-based revisions (2025-11-25 and earlier) | Free |
+| ✅ | Local only | Answers only programs on this computer; no tool can place a real order or read a saved key | Free |
+
 ## ⚙ Settings
 
 | ✓ | Group | What you can set |
@@ -197,6 +209,7 @@ ZEUS does far more than the screenshots in the README show. There are 7 pages in
 | ✅ | Broker & trades | tastytrade client ID, client secret, refresh token, account number; or manual trades (CSV upload or form) and starting cash; connection test |
 | ✅ | News sources | Benzinga cookies, Benzinga data API key, Benzinga login, Finviz Elite token, which free sources to use, headline translation (Google / Bing / AI / off), Google translate key |
 | ✅ | AI | Provider, Claude CLI path, Anthropic or OpenAI-compatible key and URL, fast and smart models, answer language, scheduled AI jobs on / off |
+| ✅ | AI agents (MCP) | MCP server on / off, whether agents may place paper trades, the address and setup for each agent, a test button |
 | ✅ | Other data | Barchart login, Finviz "why is it moving" crawl on / off, SEC EDGAR User-Agent |
 | ✅ | E-mail alerts | From, to, app password, SMTP server and port; a button sends a test e-mail |
 | ✅ | General | Language, listen address, port, desktop notifications |
@@ -238,6 +251,7 @@ Saved secrets are write-only: the page shows *set* or *not set* and never sends 
 | ✓ | Feature | Notes |
 |---|---|---|
 | ✅ | REST API | More than 200 endpoints under `/api/...`, for example `/api/paper-trade`, `/api/digest`, `/api/checkup`, `/api/sec` |
+| ✅ | MCP server | `zeus_mcp.py` (add a tool with the `@tool` decorator); the option math agents read is in `zeus_payoff.py` and is tested against the page's own JavaScript |
 | ✅ | Configuration by environment | Any setting as `ZEUS_<KEY>`; move the settings folder with `ZEUS_HOME` |
 | ✅ | Tests | `python -m pytest` (offline; quotes are faked) |
 | ✅ | CI | Every pull request runs the tests on Linux, macOS and Windows (7 jobs); `main` only accepts green pull requests |

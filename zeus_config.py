@@ -26,6 +26,7 @@ from typing import Any
 
 APP_NAME = "ZEUS Terminal"
 APP_NAME_ZH = "宙斯期权终端"
+APP_VERSION = "0.3.0"
 APP_TAGLINE = "Self-hosted, all-in-one options trading terminal"
 APP_TAGLINE_ZH = "本地部署的全方位期权交易终端"
 REPO_ROOT = Path(__file__).resolve().parent
@@ -131,6 +132,16 @@ SCHEMA: dict[str, tuple] = {
     "ai_schedules": ("on", False, "ai", "Scheduled AI jobs", "定时 AI 任务",
                      "on / off. Morning digest summary, market brief, AI picks, position review.",
                      "on / off：早盘新闻总结、市场判断、AI 选股、持仓点评。"),
+    # ---- AI agents (MCP) ----
+    "mcp_server": ("on", False, "agents", "MCP server for AI agents", "给 AI 智能体的 MCP 接口",
+                   "on / off. Lets agents on this computer (Claude, GPT through Codex, Gemini, your own) read ZEUS "
+                   "at /mcp. Read-only: no agent can place a real order or see a saved key.",
+                   "on / off。让本机的智能体（Claude、通过 Codex 的 GPT、Gemini、你自己写的）通过 /mcp 读取 ZEUS。"
+                   "只读：任何智能体都下不了真实订单，也看不到已保存的密钥。"),
+    "mcp_paper_trades": ("off", False, "agents", "Agents may place paper trades", "允许智能体下模拟单",
+                         "on / off. Lets agents open and close trades in the Paper Trade tab. Simulated: nothing "
+                         "is ever sent to a broker.",
+                         "on / off。允许智能体在模拟盘里开仓、平仓。全是模拟，不会发给任何券商。"),
     # ---- other data ----
     "barchart_username": ("", True, "data", "Barchart username (optional)", "Barchart 账号（可选）",
                           "Enables the Barchart screener / signal lists.", "开启 Barchart 筛选和信号榜单。"),
@@ -161,6 +172,7 @@ GROUPS = [
     ("broker", "Broker & trades", "券商与交易"),
     ("news", "News sources", "新闻源"),
     ("ai", "AI", "AI"),
+    ("agents", "AI agents (MCP)", "AI 智能体（MCP）"),
     ("data", "Other data", "其他数据"),
     ("email", "E-mail alerts", "邮件提醒"),
     ("general", "General", "通用"),
@@ -304,6 +316,8 @@ def status() -> dict:
         "finviz_elite": bool(get("finviz_elite_token")),
         "barchart": has_barchart(),
         "ai": ai,
+        "mcp": get_bool("mcp_server"),
+        "mcp_paper_trades": get_bool("mcp_paper_trades"),
         "config_file": str(config_path()),
     }
 
