@@ -25,10 +25,11 @@
 
 ## 🆕 What's new
 
-<sub>Latest release **0.2.0** (2026-11-12). The full history is in the [changelog](CHANGELOG.md).</sub>
+<sub>Latest release **0.2.1** (2026-11-12). The full history is in the [changelog](CHANGELOG.md).</sub>
 
-| | New in 0.2.0 |
+| | New in 0.2.1 and 0.2.0 |
 |---|---|
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🟩 Heatmap**: the picker's heatmap is back, one click away from the K-line chart wall. [How to use it →](docs/USER_GUIDE.md#69-heatmap) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🧪 Paper Trade**: build any strategy on the live option chain with option *and* stock legs, save it as a simulated trade and follow its P/L. [How to use it →](docs/USER_GUIDE.md#8-paper-trade) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **📧 E-mail alerts**: every desktop alert can also arrive in your inbox, on macOS and on Linux. [How to set it up →](docs/USER_GUIDE.md#123-e-mail-alerts) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🔄 Sector rotation**: 80 industry groups ranked by momentum and trend, and **🎲 options sentiment** works out of the box. [How to use it →](docs/USER_GUIDE.md#66-sector-rotation) |

@@ -70,12 +70,15 @@ def _earnings_window() -> tuple[datetime, datetime]:
 
 # ─── Watchlist ──────────────────────────────────────────────────────────
 def load_watchlist() -> list[str]:
-    """Strip 'EXCH:' prefix, dedupe, drop ETFs."""
+    """Strip 'EXCH:' prefix, dedupe, drop ETFs. Tickers may be separated by commas
+    (the original format) or by line breaks (what ZEUS seeds into data/watchlist.txt);
+    reading only commas turned a one-per-line file into a single bogus ticker and left
+    the earnings calendar empty."""
     if not WATCHLIST_PATH.exists():
         return []
     raw = WATCHLIST_PATH.read_text(encoding="utf-8").strip()
     out, seen = [], set()
-    for tok in raw.split(","):
+    for tok in re.split(r"[,\s]+", raw):
         tok = tok.strip()
         if not tok:
             continue
@@ -149,10 +152,39 @@ def fetch_earnings(tickers: Optional[list[str]] = None) -> list[dict]:
                     "name": row.get("name"),
                     "fiscal_quarter": row.get("fiscalQuarterEnding"),
                 })
+    if not results:
+        results = _earnings_from_store(universe, start, end)
     # Order: date asc, BMO before AMC before --, ticker alpha
     _SORT = {"BMO": 0, "AMC": 1, "DMH": 2, "--": 3}
     results.sort(key=lambda e: (e["date"], _SORT.get(e["session"], 9), e["ticker"]))
     return results
+
+
+def _earnings_from_store(universe: set, start: datetime, end: datetime) -> list[dict]:
+    """Fallback when Nasdaq refuses the request (it answers 403 to many networks):
+    the per-ticker earnings dates the Picker keeps up to date (heatmap/earnings.py,
+    from tastytrade, yfinance or Finviz). Only confirmed dates, no estimates."""
+    try:
+        import sys as _sys
+        if str(_REPO_ROOT) not in _sys.path:
+            _sys.path.insert(0, str(_REPO_ROOT))
+        from heatmap import earnings as _store
+        records = _store.load()
+    except Exception:
+        return []
+    out = []
+    for sym in sorted(universe):
+        rec = records.get(sym) or {}
+        day = str(rec.get("date") or "")[:10]
+        try:
+            when = datetime.strptime(day, "%Y-%m-%d")
+        except ValueError:
+            continue
+        if start <= when <= end:
+            out.append({"ticker": sym, "date": day,
+                        "session": {"am": "BMO", "pm": "AMC"}.get(rec.get("time"), "--"),
+                        "eps_forecast": None, "name": None, "fiscal_quarter": None})
+    return out
 
 
 # ─── Econ events (multi-source: TradingView primary + Finviz backup) ────

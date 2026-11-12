@@ -230,6 +230,8 @@ Without AI, ZEUS works fully; AI buttons say that AI is not configured.
 | **👁** | Privacy blur for dollar amounts, for screen sharing and recording |
 | **LIVE** | Green while the live data connection is up |
 
+When the window is too narrow for all the tabs, the tabs scroll sideways (mouse wheel or trackpad) and the open one always stays in view. **Esc** closes the open pop-up (checkup, risk radar, alerts, liquidity, chart) or leaves a detail view, like the browser's Back button; switching to another tab closes pop-ups too.
+
 ---
 
 ## 4. Positions
@@ -352,7 +354,7 @@ A link such as `/pretrade-checkup?ticker=NVDA&direction=bull&dte=40` fills in th
 
 ## 6. Picker
 
-The picker has two sub-views at the top: **📈 K-line chart wall** and **🧭 Market brief**.
+The picker has three sub-views at the top: **📈 K-line chart wall**, **🟩 Heatmap** ([6.9](#69-heatmap)) and **🧭 Market brief**.
 
 ### 6.1 K-line chart wall
 
@@ -369,7 +371,7 @@ Toolbar:
 | Earnings | All, exclude near earnings, only near earnings |
 | 🚀 AI Picker | Opens [AI picks](#62-ai-picks) |
 | ⊕ Expand all | Expands every card's details |
-| 📊 Barchart ▾ | [Barchart lists](#63-barchart-lists) |
+| 📊 Barchart ▾ | [Barchart lists](#63-barchart-lists); shown once a Barchart login is saved |
 | Auto | Refresh the wall every 5 s to 1 h, or off |
 | Refresh | Reload now; use it after the close if the wall shows no quotes |
 | ▴ | Collapse the toolbar |
@@ -380,7 +382,7 @@ Toolbar:
 
 ### 6.3 Barchart lists
 
-With a Barchart login in Settings → Other data, **📊 Barchart ▾** lists your saved Barchart screeners and signal pages. Pick several and choose **Intersect** (tickers in all of them) or **Union** (tickers in any); **Clear** removes the filter. **Needs:** a Barchart account.
+Once a Barchart login is saved in Settings → Other data, the **📊 Barchart ▾** button appears on the chart wall and lists your saved Barchart screeners and signal pages (crawl them first from the 📊 Barchart menu on the TA screener page, `/ta/`). Pick several and choose **Intersect** (tickers in all of them) or **Union** (tickers in any); **Clear** removes the filter. **Needs:** a Barchart account.
 
 ### 6.4 Ticker detail
 
@@ -413,6 +415,10 @@ Opens from a chart card (🔎 depth) or from a ticker link:
 ### 6.8 After-close crawl
 
 **⚡ Crawl after the close now** (in the picker and on the TA page) downloads the day's closing data for the whole universe: candles, and option chains for the archive. **↻ Re-crawl** runs it again; a progress line shows the state.
+
+### 6.9 Heatmap
+
+**🟩 Heatmap** shows the same universe as tiles, grouped by sector and then by industry: the area is the market cap and the color is today's change, green up and red down. Hover a tile for its numbers and click it for the [ticker detail](#64-ticker-detail). The toolbar above it (auto refresh, earnings filter, **Refresh**) is shared with the chart wall, and the picker remembers which of the two you looked at last.
 
 ---
 
@@ -575,7 +581,7 @@ SPY and QQQ daily candles over their full history, with major turning points mar
 
 ### 10.1 Earnings calendar
 
-**📅 Earnings calendar** shows earnings for your universe and positions by day, before or after the market, plus high-impact macro dates (FOMC, CPI, jobs and the like). Click a company for its earnings history. **🔄 Refresh** reloads.
+**📅 Earnings calendar** shows earnings for your universe and positions by day, before or after the market, plus high-impact macro dates (FOMC, CPI, jobs and the like). Click a company for its earnings history. **🔄 Refresh** reloads. The dates come from Nasdaq's earnings calendar; when Nasdaq refuses the request, the calendar uses the earnings dates the picker keeps (from tastytrade, Yahoo or Finviz), with the before / after market label when it is known.
 
 ### 10.2 Corporate events
 

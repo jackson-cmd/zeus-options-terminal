@@ -78,12 +78,13 @@ HEATMAP_HTML = r"""
        2026-07-30 用户: 行业轮动/期权情绪只作为 AI context (后台仍算), 不显示给用户 -->
   <div id="hmSubNav" style="display:flex;gap:6px;padding:6px 14px;border-bottom:1px solid #30363d;background:#0d1117;flex-shrink:0">
     <button data-name="kline" onclick="hmSubView('kline')" class="hm-sub-pill active">📈 K线图墙</button>
+    <button data-name="heatmap" onclick="hmSubView('heatmap')" class="hm-sub-pill" title="热力图：按板块 → 行业排列，面积 = 市值，颜色 = 今日涨跌；点格子看单票详情">🟩 热力图</button>
     <button data-name="brief" onclick="hmSubView('brief')" class="hm-sub-pill">🧭 大盘判断</button>
   </div>
   <!-- host: reorgTabs 里 re-parent tab-mbrief 内容进来 -->
   <div id="hmSubMbriefHost" style="display:none;padding:14px 20px;overflow-y:auto;flex:1"></div>
   <div id="hmToolbar" style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 14px;border-bottom:1px solid #21262d">
-    <strong style="color:#e6edf3;font-size:13px">🎯 选股 · K线图墙</strong>
+    <strong id="hmTitle" style="color:#e6edf3;font-size:13px;white-space:nowrap">🎯 选股 · K线图墙</strong>
     <button id="hmCollapseBtn" class="hm-collapse-btn" onclick="hmToggleToolbar()" title="收起/展开设置控件(给热图腾地方)">▴ 收起</button>
     <!-- 数据模式选择(固定位置: 紧跟标题+收起按钮左对齐, 像顶部 PWA 导航;
          不随当前模式/状态文字/控件换行而跳位置 — 快速切换不会点错) -->
@@ -3010,6 +3011,8 @@ HEATMAP_JS = r"""
     const VIEWS = ['treemap', 'bar', 'graph', 'movernews'];
     const view = VIEWS.indexOf(mode) >= 0 ? mode : 'treemap';
     window.hmState.view = view;
+    const ttl = document.getElementById('hmTitle');
+    if (ttl) ttl.textContent = (view === 'treemap') ? '🎯 选股 · 热力图' : '🎯 选股 · K线图墙';
     const isGraph = (view === 'graph');
     const isMv    = (view === 'movernews');
     document.getElementById('hmCanvas').style.display = (isGraph || isMv) ? 'none' : '';
@@ -3088,7 +3091,7 @@ HEATMAP_JS = r"""
     if (!box) return;
     const scr = (_hmBcData && _hmBcData.screeners) || [];
     if (!scr.length) {
-      box.innerHTML = '<div style="color:#6e7681;font-size:11px;padding:8px">暂无榜单数据(先在 Barchart tab 爬取 saved screeners)</div>';
+      box.innerHTML = '<div style="color:#6e7681;font-size:11px;padding:8px">暂无榜单数据：先到 TA 扫描页(/ta/)的 📊 Barchart 菜单里爬取你保存的 screener</div>';
       return;
     }
     const cats = (_hmBcData && _hmBcData.categories) || {};
@@ -3189,7 +3192,13 @@ HEATMAP_JS = r"""
     if (!p) return;
     const open = (p.style.display === 'none' || !p.style.display);
     p.style.display = open ? 'block' : 'none';
-    if (open) { if (!_hmBcLoaded) hmLoadBarchartTagged(); else _hmBcRenderList(); }
+    if (open) {
+      // 按钮在工具栏右侧时, 左对齐的 320px 面板会伸出窗口 → 改成右对齐, 并且不超过窗口宽
+      p.style.maxWidth = 'calc(100vw - 24px)';
+      p.style.left = '0'; p.style.right = 'auto';
+      if (p.getBoundingClientRect().right > window.innerWidth - 8) { p.style.left = 'auto'; p.style.right = '0'; }
+      if (!_hmBcLoaded) hmLoadBarchartTagged(); else _hmBcRenderList();
+    }
   };
 
   // 点面板外 → 关闭(捕获冒泡; 点按钮/面板内部不关)
@@ -3831,6 +3840,8 @@ HEATMAP_JS = r"""
     const grid = document.getElementById('hmGraphGrid');
     if (!grid) return;
     await _hmEnsureScores();
+    // 记下这次画的时候行情到没到: 没到就是「0 票」, 行情一到要整墙重画(_hmGraphCatchUp)
+    window.hmState.graphDrawnWithData = !!(((window.hmState.lastData || {}).items) || []).length;
     const items = _hmGraphItems();
     const cnt = document.getElementById('hmGraphCount');
     // 空结果时原来把计数器置成空字符串 —— 而旁边 Barchart 面板还写着「·1选 交集 ·3票」
@@ -4381,6 +4392,14 @@ HEATMAP_JS = r"""
     else if (window.hmState.dataMode === 'stocks') startPolling();
   }
 
+  // 新行情到了: 图墙若是在行情到之前画的(显示「0 票」)就整墙重画, 否则只轻更新每张卡的价格。
+  // 以前只做轻更新 → 刚启动、或开盘前后第一次进选股时, 图墙会一直停在「0 票」。
+  function _hmGraphCatchUp() {
+    if (window.hmState.view !== 'graph') return;
+    if (!window.hmState.graphDrawnWithData) hmRenderGraph();
+    else _hmGraphUpdatePrices();
+  }
+
   // ── Data fetch ───────────────────────────────────────────────────────
   async function fetchAndRender(showLoading) {
     const status = document.getElementById('hmStatus');
@@ -4396,7 +4415,7 @@ HEATMAP_JS = r"""
       await render();
       // 2026-07-30 作者要求「K 线图墙价格实时」: render() 在 graph view 直接 return
       // 不重画整墙, 这里加轻更新只改每张卡 header 的 price + change_pct (不动 canvas).
-      if (window.hmState.view === 'graph') _hmGraphUpdatePrices();
+      _hmGraphCatchUp();
     } catch (e) {
       if (status) status.innerHTML = `<span style="color:#f85149">${e.message}</span>`;
     }
@@ -4475,7 +4494,7 @@ HEATMAP_JS = r"""
         const status = document.getElementById('hmStatus');
         if (status) status.innerHTML = _hmStatusHTML(payload);
         _hmManagePolling(payload);
-        return render();
+        return Promise.resolve(render()).then(_hmGraphCatchUp);
       })
       .catch(e => {
         const status = document.getElementById('hmStatus');
@@ -4513,6 +4532,7 @@ HEATMAP_JS = r"""
     if (status) status.innerHTML = _hmStatusHTML(payload);
     _hmManagePolling(payload);
     render();
+    if (!window.hmState.graphDrawnWithData) _hmGraphCatchUp();
   }
   function hmStartStream() {
     if (window.hmState.dataMode !== 'stocks') return;   // ETF / risk views are not real-time
@@ -4541,17 +4561,20 @@ HEATMAP_JS = r"""
   window.hmSubView = function (name) {
     // 首次点击时确保 reorgTabs 已 re-parent mbrief 3 sub 到 hmSubMbriefHost
     if (typeof window.reorgTabs === 'function') window.reorgTabs();
-    const isKline = (name === 'kline');
-    // K线图墙相关的容器 kline 时该显示. hmGraphView 需要 'flex' (它的 CSS 是 flex-direction:column,
-    // 内部 grid 靠 flex:1 撑高 + overflow-y:auto 才能滚 — 设 'block' 会 break 滚动 bug 作者实测).
-    const HIDE_MAP = { hmToolbar: '', hmGraphView: 'flex' };
-    Object.keys(HIDE_MAP).forEach(id => {
-      const e = document.getElementById(id);
-      if (e) e.style.display = isKline ? HIDE_MAP[id] : 'none';
-    });
+    // 'kline' = K线图墙, 'heatmap' = 热力图(treemap): 选股自己的两个视图, 共用 hmToolbar
+    const isKline = (name === 'kline' || name === 'heatmap');
+    const tb = document.getElementById('hmToolbar');
+    if (tb) tb.style.display = isKline ? '' : 'none';
     // dataMode 锁死 stocks 后, 这几个 panel 永不该显示 (bug: 之前给它们 display='' 会 fallback 到 CSS block)
-    const ALWAYS_HIDE = ['hmMoverNewsView', 'hmOptVolPanel', 'hmNarrativeView', 'hmCanvas'];
-    ALWAYS_HIDE.forEach(id => { const e = document.getElementById(id); if (e) e.style.display = 'none'; });
+    ['hmMoverNewsView', 'hmOptVolPanel', 'hmNarrativeView'].forEach(id => {
+      const e = document.getElementById(id); if (e) e.style.display = 'none';
+    });
+    if (isKline) {
+      // hmSetView 负责显示 hmGraphView(flex, 内部 grid 靠它撑高滚动)或 hmCanvas(热力图)并重画
+      window.hmSetView(name === 'heatmap' ? 'treemap' : 'graph');
+    } else {
+      ['hmGraphView', 'hmCanvas'].forEach(id => { const e = document.getElementById(id); if (e) e.style.display = 'none'; });
+    }
     const host = document.getElementById('hmSubMbriefHost');
     if (host) host.style.display = isKline ? 'none' : 'block';
     if (!isKline && typeof window.mbSub === 'function') window.mbSub(name);
@@ -4569,11 +4592,12 @@ HEATMAP_JS = r"""
   window.hmTabBecameActive = function () {
     _hmApplyToolbarCollapsed();   // 应用上次的工具栏收起/展开状态
     // 2026-07-30 轻量化: default view='graph' 只改了 state, DOM display 得走 hmSetView 才 sync.
-    // 每次切回来强制同步一次, 避免出现 view=graph 但 hmGraphView.style.display=none 的空白态.
-    if (window.hmSetView) window.hmSetView(window.hmState.view || 'graph');
-    // sub-view (kline / brief / rot / opt): 首次进 tab 默认 kline; 确保 mover/narrative/optvol 等
-    // 独立 panel 被 hmSubView 一起隐藏(它们 default = block, 需要显式 hide)
-    if (window.hmSubView && !window.hmState._subView) window.hmSubView('kline');
+    // 每次切回来强制同步一次(经 hmSubView → hmSetView), 避免 view=graph 但 hmGraphView 隐藏的空白态;
+    // 首次进 tab 默认 K线图墙; 停在大盘判断时保持不动(以前这里会把图墙叠在大盘判断上)。
+    // hmSubView 同时把 mover/narrative/optvol 等独立 panel 隐藏(它们 default = block, 需要显式 hide)
+    const _sv = window.hmState._subView;
+    if (window.hmSubView && (!_sv || _sv === 'kline' || _sv === 'heatmap'))
+      window.hmSubView(window.hmState.view === 'treemap' ? 'heatmap' : 'kline');
     if (window.hmState.dataMode === 'etf') {
       if (!window.hmState.etfData) _hmLoadEtf();
       else { render(); }

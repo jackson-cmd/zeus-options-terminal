@@ -725,7 +725,8 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', sans-serif;
   background: var(--bg);
   color: var(--text);
   height: 100vh;
@@ -1478,7 +1479,7 @@ input[type="range"]::-webkit-slider-thumb {
    padding/font so the extra "P/L" button fits on one line. Scoped to
    .dash-actions so plain Back buttons elsewhere keep their original size. */
 .dash-actions { gap: 5px; }
-.dash-actions .back-btn { padding: 2px 7px; font-size: 11px; gap: 3px; }
+.dash-actions .back-btn { padding: 2px 7px; font-size: 11px; gap: 3px; white-space: nowrap; flex-shrink: 0; }
 
 /* ── Modal ── */
 .modal-overlay {

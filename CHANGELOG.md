@@ -4,6 +4,27 @@
 
 What changed in each version of ZEUS Terminal. New features carry the <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> badge. Numbers in parentheses are the pull requests.
 
+## 0.2.1 — 2026-11-12
+
+### New features
+
+| | Feature | Read more |
+|---|---|---|
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🟩 Heatmap back in the Picker**: the universe as tiles by sector and industry, area = market cap, color = today's change; one click switches between it and the K-line chart wall. (#23) | [Manual §6.9](docs/USER_GUIDE.md#69-heatmap) |
+
+### Fixed
+
+- Top bar: in English and bilingual mode the tab labels wrapped onto two or three lines and were cut off; every label now stays on one line, and in a narrow window the tabs scroll sideways. (#23)
+- Positions toolbar: the 🤖 AI and 🔥/💲 buttons no longer break into two lines. (#23)
+- Fonts: without Roboto (on Linux, for example) the interface fell back to a monospace font; it now falls back to the system sans-serif and Chinese fonts. (#23)
+- Picker: the K-line chart wall could stay at "0 tickers" when it was drawn before the quotes arrived. (#23)
+- Picker: the 📊 Barchart menu ran off the right edge of the window, and the button showed even without a Barchart login; it now appears once a login is saved. (#23)
+- Events: the earnings calendar was empty. It read the watchlist as one long ticker, and Nasdaq refuses the request on many networks; it now reads the list correctly and falls back to the earnings dates the picker keeps. The pre-trade checkup's earnings gate uses the same dates and finds them again. (#23)
+- Events: macro events in the calendar were cut down to "⚡ 08…"; the months now sit three, two or one to a row depending on the window, and event names come before the time. (#23)
+- Pop-ups close with **Esc**, and switching to another tab closes them, instead of leaving the risk radar over the next page. (#23)
+- After an update, browsers could keep the old interface scripts for a while; they are now checked on every load. (#23)
+- Garbled English in a few places: the chart wall legend, the daily review headings, the checkup page subtitle. (#23)
+
 ## 0.2.0 — 2026-11-12
 
 ### New features
