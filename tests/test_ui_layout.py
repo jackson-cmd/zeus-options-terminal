@@ -193,4 +193,11 @@ def test_rotation_chart_labels_and_scale_stay_readable():
 
 def test_movers_toast_lets_clicks_through():
     toast = HEATMAP.split("function _hmPopupToast(slot)", 1)[1].split("\n  }", 1)[0]
-    assert "pointer-events:none" in toast
+    assert "pointer-events:none" in toast and "bottom:20px" in toast and "top:54px" not in toast
+
+
+def test_movers_popup_leaves_the_market_brief_properly():
+    for fn in ("window.hmOpenMoverNews = function", "window.hmOpenCompactPopup = function"):
+        body = HEATMAP.split(fn, 1)[1].split("\n  };", 1)[0]
+        assert "window.hmSubView('kline')" in body, fn
+        assert body.index("window.hmSubView('kline')") < body.index("window.hmSetView('graph')"), fn

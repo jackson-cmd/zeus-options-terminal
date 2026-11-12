@@ -12,6 +12,7 @@ What changed in each version of ZEUS Terminal. New features carry the <img src="
 - Picker → 🧭 Market Brief: the empty brief pointed to a 🔄 Re-analyze button that was not there. The brief's header (🔄 Re-analyze and the date) and its sub-tabs 🧭 Market brief · 🔄 Sector rotation · 🎲 Options sentiment now show in the Picker, as the [manual](docs/USER_GUIDE.md#65-market-brief) describes. (#26)
 - Sector rotation chart: labels no longer print over each other in a narrow window (every second or third bar is labelled instead), English group names are shortened to fit instead of running off the chart, the first labels stay inside it, and the ±% scale moved to the left margin, where the bars cannot cover it. (#26)
 - The movers notice in the top right corner no longer blocks clicks on the buttons under it while it is on screen. (#26)
+- The movers notice moved from the top right corner, where it covered the Market Brief's 🔄 Re-analyze button for a few seconds, to the bottom of the window. When it opened the chart wall while 🧭 Market Brief was showing, the two were stacked on one page; the Picker now switches over to the chart wall completely. (#28)
 
 ## 0.3.0 — 2026-11-12
 
