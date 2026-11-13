@@ -4,7 +4,7 @@ name: Docker
 #
 # A release builds the image for amd64 and arm64, starts the amd64 one and checks it
 # (tools/docker_smoke.sh), then pushes it as X.Y.Z, X.Y and latest with a signed build
-# provenance. Releases published by the Release workflow start this run themselves (its
+# provenance, pulls the pushed image back and checks it again as users get it. Releases published by the Release workflow start this run themselves (its
 # GITHUB_TOKEN cannot raise a release event for other workflows); a release published by hand
 # raises the event. Run by hand on a tag v<version> to rebuild that release's image; run on a
 # branch it only builds and checks. Pull requests that touch the image are built and checked
@@ -112,7 +112,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build amd64 + arm64${{ steps.v.outputs.push == 'true' && ' and push' || '' }}
+      - name: Build amd64 + arm64 (pushed on a release)
         id: build
         uses: docker/build-push-action@v7
         with:
@@ -133,6 +133,15 @@ jobs:
           subject-name: ${{ env.IMAGE }}
           subject-digest: ${{ steps.build.outputs.digest }}
           create-storage-record: false
+
+      - name: Pull the pushed image and check it as users get it
+        if: steps.v.outputs.push == 'true'
+        env:
+          PUSHED: ${{ env.IMAGE }}:${{ steps.v.outputs.version }}
+        run: |
+          docker rmi zeus-smoke:ci
+          docker pull "$PUSHED"
+          bash tools/docker_smoke.sh "$PUSHED"
 
       - name: Summary
         if: steps.v.outputs.push == 'true'
