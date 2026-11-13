@@ -8,10 +8,10 @@ ZEUS Terminal 每个版本改了什么。新功能前面挂着 <img src="https:/
 
 ### 安全
 
-- 别的网站上的页面可以让你的浏览器调用本机 ZEUS 的 `/api/stock_selector?today=…`，而 ZEUS 会把选股结果写到 `today` 给出的路径上。这样的页面能在 ZEUS 的文件夹以外新建或覆盖 `.json` 文件，还会触发一次选股。现在 `today` 必须是日期，否则直接报错，什么都不读也不写。(#PR)
-- 所有按日期、代码或名称命名的缓存文件，现在都自己检查传进来的值：AI 总结、转折点总结、新闻翻译、必读标记、AI 选股、新闻和 Finviz 存档、市场事件存档。日期按它说的那一天重新拼出来，路径符号一律替换，请求里的任何值都出不了它的文件夹，Windows 上也一样。(#PR)
-- 新闻链接只有在网址的主机确实是 wsj.com 或 marketwatch.com 时才去掉跟踪参数，不再是链接里随便哪里出现这几个字就去掉。(#PR)
-- 可选的 Benzinga 辅助脚本 `zeus/premarket` 改用 ws、tar-fs、basic-ftp、ip-address、js-yaml、brace-expansion 的已修复版本，并去掉了从没用到的 csv-parse；`npm run scrape` 现在运行实际存在的 `fetch.mjs`。如果你在用它，请在 `zeus/premarket` 里重新运行一次 `npm install`。(#PR)
+- 别的网站上的页面可以让你的浏览器调用本机 ZEUS 的 `/api/stock_selector?today=…`，而 ZEUS 会把选股结果写到 `today` 给出的路径上。这样的页面能在 ZEUS 的文件夹以外新建或覆盖 `.json` 文件，还会触发一次选股。现在 `today` 必须是日期，否则直接报错，什么都不读也不写。(#56)
+- 所有按日期、代码或名称命名的缓存文件，现在都自己检查传进来的值：AI 总结、转折点总结、新闻翻译、必读标记、AI 选股、新闻和 Finviz 存档、市场事件存档。日期按它说的那一天重新拼出来，路径符号一律替换，请求里的任何值都出不了它的文件夹，Windows 上也一样。(#56)
+- 新闻链接只有在网址的主机确实是 wsj.com 或 marketwatch.com 时才去掉跟踪参数，不再是链接里随便哪里出现这几个字就去掉。(#56)
+- 可选的 Benzinga 辅助脚本 `zeus/premarket` 改用 ws、tar-fs、basic-ftp、ip-address、js-yaml、brace-expansion 的已修复版本，并去掉了从没用到的 csv-parse；`npm run scrape` 现在运行实际存在的 `fetch.mjs`。如果你在用它，请在 `zeus/premarket` 里重新运行一次 `npm install`。(#56)
 
 ## 0.5.1 —— 2026-11-12
 
