@@ -537,14 +537,15 @@ def apply_notification_shims() -> None:
 
 def ensure_default_data() -> None:
     """First run: seed the ticker universe files every screen reads, including
-    the industry groups behind sector rotation and options sentiment. Your own
-    lists replace these any time (edit data/heatmap_universe.txt or
-    data/industry_universe.txt); existing files are never overwritten."""
+    the industry groups behind sector rotation and options sentiment and the list
+    the TA screener scans. Your own lists replace these any time (edit
+    data/heatmap_universe.txt, data/industry_universe.txt or
+    data/ta_screener_universe.txt); existing files are never overwritten."""
     src = REPO_ROOT / "defaults" / "heatmap_universe.txt"
     if not src.exists():
         return
     raw = src.read_text(encoding="utf-8")
-    tickers, seen = [], set()
+    tickers, exchange_tokens, seen = [], [], set()
     for tok in raw.replace("\n", ",").split(","):
         tok = tok.strip()
         if not tok or tok.startswith("###"):
@@ -553,6 +554,7 @@ def ensure_default_data() -> None:
         if sym and sym not in seen:
             seen.add(sym)
             tickers.append(sym)
+            exchange_tokens.append(tok)
     stocks = [t for t in tickers]
     etf_src = REPO_ROOT / "defaults" / "etf_trends.txt"
     ind_src = REPO_ROOT / "defaults" / "industry_universe.txt"
@@ -562,6 +564,9 @@ def ensure_default_data() -> None:
         data_dir() / "industry_universe.txt": ind_src.read_text(encoding="utf-8") if ind_src.exists() else "",
         data_dir() / "tickers.csv": "ticker\n" + "\n".join(stocks) + "\n",
         data_dir("options_vol") / "core_universe.txt": "\n".join(stocks) + "\n",
+        # The TA screener scans the whole core list: one line of EXCHANGE:TICKER, as
+        # options_vol/sync_consumers.py writes it; categories come from heatmap_universe.txt.
+        data_dir() / "ta_screener_universe.txt": ",".join(exchange_tokens),
         data_dir() / "oa_watchlist.txt": "\n".join(stocks) + "\n",
         data_dir() / "watchlist.txt": "\n".join(stocks) + "\n",
     }

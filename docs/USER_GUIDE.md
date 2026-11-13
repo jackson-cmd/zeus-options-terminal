@@ -536,6 +536,7 @@ The TA screener lives at `/ta/`. It also opens inside the picker when you click 
 - Scans run by themselves four times a trading day: 09:40, 10:30, 12:00 and 15:00 New York time.
 - **▶ Run scan** starts one now. The first scan takes 2–4 minutes.
 - The scan looks for MACD, RSI, volume and EMA breaks and for confluence of multi-timeframe support and resistance, and shows walk-forward win rates for each signal.
+- It scans the tickers in `zeus/data/ta_screener_universe.txt`. On the first start that file gets the same stocks and ETFs as `zeus/data/heatmap_universe.txt`; edit it to scan others.
 
 ### 7.2 Views
 
