@@ -14,6 +14,7 @@ What changed in each version of ZEUS Terminal. New features carry the <img src="
 
 ### Fixed
 
+- **Remove the sample** said it failed and left the sample in place: its request was taken by the route that deletes one trade by id. (#45)
 - When Cboe's free quotes answered "too many requests", the sample portfolio came out with only some of its positions. A failed Cboe request also stayed failed for 2 minutes. Cboe is now asked again after 15 s, and the sample prices from Yahoo Finance's option chains when Cboe is busy, using the last price when Yahoo has no bid or ask at night. (#45)
 
 ## 0.5.0 — 2026-11-12
