@@ -105,8 +105,8 @@ def _extract_sections(html: str) -> dict:
     """Extract MD&A and Risk Factors text from 10-Q HTML.
     Returns {mda: str, risk: str} with plain text (tags stripped)."""
     # Strip style/script, then all HTML tags → plain text
-    clean = re.sub(r'<style[^>]*>.*?</style>', '', html, flags=re.I | re.S)
-    clean = re.sub(r'<script[^>]*>.*?</script>', '', clean, flags=re.I | re.S)
+    clean = re.sub(r'<style\b[^>]*>.*?</style[^>]*>', '', html, flags=re.I | re.S)       # also </style >
+    clean = re.sub(r'<script\b[^>]*>.*?</script[^>]*>', '', clean, flags=re.I | re.S)  # also </script >
     clean = re.sub(r'<[^>]+>', ' ', clean)
     clean = re.sub(r'&[a-zA-Z]+;', ' ', clean)
     clean = re.sub(r'&#\d+;', ' ', clean)
