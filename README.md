@@ -77,10 +77,11 @@ Then open **http://localhost:8765**. Your settings, trades and caches stay in th
 
 ## 🆕 What's new
 
-<sub>Latest release **0.6.0** (2026-11-12). The full history is in the [changelog](CHANGELOG.md).</sub>
+<sub>Latest release **0.7.1** (2026-11-13). The full history is in the [changelog](CHANGELOG.md).</sub>
 
-| | New in 0.6.0, 0.5.x, 0.4.x, 0.3.x and 0.2.x |
+| | New in 0.7.x, 0.6.0, 0.5.x, 0.4.x, 0.3.x and 0.2.x |
 |---|---|
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🤖 In the official MCP Registry**: AI clients that install MCP servers from the registry can find ZEUS as `io.github.jackson-cmd/zeus-options-terminal` and start it themselves with `uvx zeus-options-terminal`, or from the Docker image. [Connect an agent →](docs/USER_GUIDE.md#182-connect-your-agent) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **📦 pip and pipx**: `pipx install zeus-options-terminal`, then `zeus`, installs and starts ZEUS without cloning the code; `pipx upgrade` keeps your settings and trades. [Install with pipx →](docs/USER_GUIDE.md#18-install-with-pipx) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🐳 Run with Docker**: one `docker run` starts ZEUS from GitHub Packages on Intel, AMD and ARM. Your settings and trades stay in a volume, the port stays on your own computer, and AI agents connect through `docker exec`. [How to run it →](docs/USER_GUIDE.md#17-run-with-docker) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🔌 Alpaca and Public**: connect an Alpaca account (free, paper trading included) or a Public account for live positions, fills, working orders and quotes with Greeks. Positions and quotes are separate choices, so you can also keep your uploaded trades and take quotes from Alpaca. ZEUS only reads; it never places an order. [Connect a broker →](docs/USER_GUIDE.md#22-connect-a-broker) |
@@ -214,7 +215,7 @@ This tour covers the highlights. ZEUS does far more than fits on one page: the *
 Use whichever you have: **Claude Code CLI** (your Claude subscription), an **Anthropic API key**, or **any OpenAI-compatible endpoint** (OpenAI, DeepSeek, OpenRouter, a local Ollama…). With nothing configured, ZEUS simply runs without the AI buttons.
 
 ### 🔌 Plug in your own agents (MCP)
-It works the other way round too: ZEUS is an MCP server. Point Claude Code, Claude Desktop, Codex (GPT), Gemini CLI or your own agent at `http://127.0.0.1:8765/mcp`. It gets 18 tools backed by ZEUS's own numbers: positions with exact max profit and loss, breakevens, Greeks and exit advice, what-if pricing of any strategy, the four-gate checkup, liquidity, news, events, sector rotation and your journal. Then ask something like *"which of my positions should I take profit on, and what earnings land before they expire?"* It is read-only unless you let agents paper trade, it answers only programs on this computer, and it never touches a real order. [Connect an agent →](docs/USER_GUIDE.md#18-ai-agents-mcp)
+It works the other way round too: ZEUS is an MCP server. Point Claude Code, Claude Desktop, Codex (GPT), Gemini CLI or your own agent at `http://127.0.0.1:8765/mcp`. It gets 18 tools backed by ZEUS's own numbers: positions with exact max profit and loss, breakevens, Greeks and exit advice, what-if pricing of any strategy, the four-gate checkup, liquidity, news, events, sector rotation and your journal. Then ask something like *"which of my positions should I take profit on, and what earnings land before they expire?"* It is read-only unless you let agents paper trade, it answers only programs on this computer, and it never touches a real order. It is also in the official MCP Registry as `io.github.jackson-cmd/zeus-options-terminal`, so clients that install servers from there can start it with `uvx zeus-options-terminal`. [Connect an agent →](docs/USER_GUIDE.md#18-ai-agents-mcp)
 
 ---
 

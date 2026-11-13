@@ -4,6 +4,21 @@
 
 ZEUS Terminal 每个版本改了什么。新功能前面挂着 <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> 标记，括号里的数字是对应的 PR 编号。
 
+## 0.7.1 —— 2026-11-13
+
+### 新功能
+
+| | 功能 | 详细说明 |
+|---|---|---|
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🤖 进了官方 MCP Registry**：ZEUS 在官方 MCP Registry 里的名字是 `io.github.jackson-cmd/zeus-options-terminal`。从这个目录安装 MCP 服务器的 AI 客户端能找到它，并自己把它启动起来：从 PyPI 用 `uvx zeus-options-terminal --no-browser --port 8765`，或者用 Docker 镜像，MCP 地址是 `http://localhost:8765/mcp`。`zeus-options-terminal` 现在也是 `zeus` 命令的另一个名字。(#64) | [连接智能体 →](docs/USER_GUIDE_zh.md#182-连接你的智能体) |
+
+### 项目
+
+- 每次发版，Docker 镜像推送完以后，这个版本会登记到 MCP Registry。Docker 工作流先验过发布工具的签名，再用 GitHub 的 OIDC 令牌登录，不存任何密钥；Registry 会核对 PyPI 包和镜像都属于这个仓库。(#64)
+- 加了 `CITATION.cff`，给 GitHub 的「引用此仓库」和 Zenodo 用，Zenodo 会给每个版本存档；加了 `glama.json`，给 Glama 的 MCP 目录用。(#64)
+- 网站加了 `llms.txt`，这是 AI 搜索工具读的纯文本地图；每次部署后会把页面告诉 IndexNow（Bing 等搜索引擎）。(#65)
+- 隐私检查钩子在 git worktree 里也能装，会保留你原来的 pre-commit 钩子，没有检查脚本的旧分支也能照常提交；`CONTRIBUTING.md` 挪进了 `.github/`。(#62、#63)
+
 ## 0.7.0 —— 2026-11-12
 
 ### 新功能

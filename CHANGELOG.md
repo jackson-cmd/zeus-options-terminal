@@ -4,6 +4,21 @@
 
 What changed in each version of ZEUS Terminal. New features carry the <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> badge. Numbers in parentheses are the pull requests.
 
+## 0.7.1 — 2026-11-13
+
+### New features
+
+| | Feature | Read more |
+|---|---|---|
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🤖 In the official MCP Registry**: ZEUS is listed as `io.github.jackson-cmd/zeus-options-terminal`, so AI clients that install MCP servers from the registry can find it and start it themselves, from PyPI with `uvx zeus-options-terminal --no-browser --port 8765` or from the Docker image, and reach MCP at `http://localhost:8765/mcp`. `zeus-options-terminal` is now a third name for the `zeus` command. (#64) | [Connect an agent →](docs/USER_GUIDE.md#182-connect-your-agent) |
+
+### Project
+
+- Each release is listed in the MCP Registry once its Docker image is pushed. The Docker workflow verifies the publisher tool's signature and logs in with GitHub's OIDC token, so no secret is stored; the registry checks that the PyPI package and the image belong to this repository. (#64)
+- `CITATION.cff` for GitHub's "Cite this repository" and for Zenodo, which archives each release; `glama.json` for the Glama MCP directory. (#64)
+- The website has `llms.txt`, the plain-text map that AI search tools read, and tells IndexNow (Bing and others) about its pages after each deploy. (#65)
+- The privacy hook installs from a git worktree, keeps a pre-commit hook you already had, and lets a checkout without the check commit; `CONTRIBUTING.md` moved into `.github/`. (#62, #63)
+
 ## 0.7.0 — 2026-11-12
 
 ### New features

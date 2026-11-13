@@ -977,6 +977,8 @@ Claude Desktop 以命令的方式启动本地工具，所以要用 ZEUS 自带�
 
 运行 `docker exec -i zeus python /app/zeus/zeus_mcp_stdio.py --check` 检查连接。想改用 HTTP 地址，启动容器时再加上 `-e ZEUS_MCP_FROM_HOST=1`：ZEUS 就也会回应经过发布端口进来的程序。只能和 `-p 127.0.0.1:…` 一起用，否则局域网里的机器也能用这些工具。
 
+**从 MCP Registry 安装。** ZEUS 在官方 MCP Registry 里的名字是 `io.github.jackson-cmd/zeus-options-terminal`。从这个目录安装服务器的客户端会自己把 ZEUS 启动起来：用 `uvx zeus-options-terminal --no-browser --port 8765`（从 PyPI 装，和 `zeus` 是同一个程序），或者用 Docker 镜像加 `-e ZEUS_MCP_FROM_HOST=1`，然后连 `http://localhost:8765/mcp`。用 uvx 启动时，设置和交易和 `zeus` 命令一样存在 `~/.zeus-terminal`。
+
 连上以后直接问就行，比如：「用 zeus 看看我的持仓，哪些该止盈？」「对 NVDA 跑一下开单前体检，再给一个 30 天的牛市看涨价差估价」「这个月有哪些财报落在我的到期日之前？」
 
 ### 18.3 你自己的智能体
