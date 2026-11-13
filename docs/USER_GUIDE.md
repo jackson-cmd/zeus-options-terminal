@@ -240,6 +240,7 @@ When the window is too narrow for all the tabs, the tabs scroll sideways (mouse 
 Every page explains itself:
 
 - **The small ? beside a column, a score or a card** opens a card in three parts: what it is, how it is calculated and how to use it. The ? beside the Picker's **Sort** menu, for example, takes the TA score apart piece by piece, and the ? on the Positions columns explains CoP, B/E %, max profit and loss, and Progress.
+- **The ⚠ risk view, the 🌊 liquidity scan and the 📡 risk radar** have cards of their own: the stress columns and totals, upside, Captured and → Max profit, the portfolio Greeks, the expiration ladder, the Theta runway and the Monte Carlo probabilities; the liquidity verdict and the cross-week table; the radar's two scores and its landmine calendar. While one of them is open, the guide lists its cards.
 - **The ? in the top bar** opens a guide to every button and number on the page you are on. The TA screener, the pre-trade checkup and the journal review have a round ? at the bottom right instead. Type in the guide's search box to find an item; **👉 Show me on the page** scrolls to it and outlines it.
 - Press **?** anywhere outside a text box to open the guide, and **Esc** to close it.
 - The cards follow the interface language: Chinese, bilingual (the English under the Chinese) or English. A switch at the top of the guide hides the small ? icons.
@@ -309,7 +310,7 @@ Open with **⚠**. Four tabs:
 | 🎯 Scenarios | Move the market and IV with sliders and see the whole book |
 | 📊 P/L probabilities | The probability distribution of the book's P/L |
 
-Click a column header to sort. **📊 Risk data & rules** opens the research notes behind the exit advice.
+Click a column header to sort. **📊 Risk data & rules** opens the research notes behind the exit advice. The **?** beside the stress columns, the totals, the upside block, the Greeks, the expiration ladder, the Theta runway and the Monte Carlo text explains how each one is calculated ([3.1](#31-help-on-every-page)).
 
 ### 4.6 AI position review
 
@@ -346,11 +347,11 @@ Open it with **🩺** in the Positions toolbar, or by clicking the red alert bar
 
 ### 5.3 Liquidity scan
 
-Press **🌊 Liquidity** in the checkup, then **Scan**. You get a grid of strikes (about −10 % to +15 % around the price) by expiration (up to about 50 days) for **Calls** or **Puts**, with bid/ask width, volume and open interest, a verdict for the ticker, and the same spread compared across weeks. Click a cell for details.
+Press **🌊 Liquidity** in the checkup, then **Scan**. You get a grid of strikes (about −10 % to +15 % around the price) by expiration (up to about 50 days) for **Calls** or **Puts**, with bid/ask width, volume and open interest, a verdict for the ticker, and the same spread compared across weeks. Click a cell for details. The **?** beside the verdict gives the rules for 🟢 🟡 🔴 and ★; the one on the cross-week table says how its debit and width are worked out.
 
 ### 5.4 Risk radar
 
-Open it from Events, or with the risk-radar button on any page. **📡 Live radar** shows today's news risk and the event density of the next 30 days as a landmine calendar. **📊 Why it moved** explains recent big moves. A risk-radar alert fires when risk jumps.
+Open it from Events, or with the risk-radar button on any page. **📡 Live radar** shows today's news risk and the event density of the next 30 days as a landmine calendar. **📊 Why it moved** explains recent big moves. A risk-radar alert fires when risk jumps. The **?** beside each score and the calendar explains how the score is built and what the lifts mean.
 
 ### 5.5 Four-gate pre-trade page
 
@@ -454,7 +455,7 @@ The TA screener lives at `/ta/`. It also opens inside the picker when you click 
 
 ### 7.3 Signals and recommended spreads
 
-Each signal comes with a bull call or bear put spread at a suitable expiration:
+A bullish ticker comes with a bull call spread 35–45 days out; a bearish one only shows the direction, with no spread to open:
 
 - **⚠️ Earnings** marks an earnings date before expiration.
 - **📋** copies the spread as an order ticket.

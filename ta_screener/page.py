@@ -581,7 +581,7 @@ function detailHtml(r) {
     '<canvas class="spark" id="spark" width="760" height="230"></canvas></div>' +
     '<div style="min-width:300px"><h4>S/R zones(' + (r.zones || []).length + ') ' + hIcon('srzones') + '</h4>' +
     '<table class="ztab"><tr><th>Conf</th><th>中枢</th><th>区间</th><th>周期</th><th>pivots</th><th>距离</th></tr>' + zrows + '</table></div>' +
-    '<div style="min-width:220px"><h4>关键位 ' + hIcon('srzones') + '</h4>' +
+    '<div style="min-width:220px"><h4>关键位 ' + hIcon('keylevels') + '</h4>' +
     '<div class="muted">52周位置:<b>' + r.pos52 + '%</b></div>' + srStatsLine(r) + '</div>' +
     setupDetail(r) +
     optDetail(r) +

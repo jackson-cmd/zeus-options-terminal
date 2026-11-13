@@ -26,7 +26,7 @@ from typing import Any
 
 APP_NAME = "ZEUS Terminal"
 APP_NAME_ZH = "宙斯期权终端"
-APP_VERSION = "0.4.0"
+APP_VERSION = "0.4.1"
 APP_TAGLINE = "Self-hosted, all-in-one options trading terminal"
 APP_TAGLINE_ZH = "本地部署的全方位期权交易终端"
 REPO_ROOT = Path(__file__).resolve().parent

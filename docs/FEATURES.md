@@ -2,7 +2,7 @@
 
 [中文 → FEATURES_zh.md](FEATURES_zh.md) · [User manual](USER_GUIDE.md) · [What's new](../CHANGELOG.md) · [Back to README](../README.md)
 
-ZEUS does far more than the screenshots in the README show. There are 7 pages in the top bar, about 30 jobs that run by themselves in the background, and more than 200 API endpoints. This page lists every feature you can reach from the interface today. Pull requests are welcome, and new features may be added over time ([Contributing](../CONTRIBUTING.md)). Features marked <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> arrived in versions 0.2.0 to 0.3.0 ([changelog](../CHANGELOG.md)); how to use each one is in the [user manual](USER_GUIDE.md).
+ZEUS does far more than the screenshots in the README show. There are 7 pages in the top bar, about 30 jobs that run by themselves in the background, and more than 200 API endpoints. This page lists every feature you can reach from the interface today. Pull requests are welcome, and new features may be added over time ([Contributing](../CONTRIBUTING.md)). Features marked <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> arrived in versions 0.2.0 to 0.4.1 ([changelog](../CHANGELOG.md)); how to use each one is in the [user manual](USER_GUIDE.md).
 
 **What each feature needs:**
 
@@ -32,7 +32,7 @@ ZEUS does far more than the screenshots in the README show. There are 7 pages in
 |---|---|---|---|
 | ✅ | Page tabs | Positions · 🎯 Picker · 📋 Digest · 📅 Events · Trade Journal · 🧪 Paper Trade; in a narrow window they scroll sideways instead of wrapping | Free |
 | ✅ | Language menu | 中文 · 双语 (bilingual) · English, switch any time | Free |
-| ✅ | ? Guide <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | Lists every button and number on the page you are on, with search and “show me”; small ? icons beside columns, scores and cards open a card: what it is, how it is calculated, how to use it. Chinese, bilingual or English | Free |
+| ✅ | ? Guide <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | Lists every button and number on the page you are on, with search and “show me”; small ? icons beside columns, scores and cards open a card: what it is, how it is calculated, how to use it. The risk view, the liquidity scan and the risk radar explain their numbers too. Chinese, bilingual or English | Free |
 | ✅ | ⚙ Settings | Opens the settings page; everything is configured in the browser. Hover ⚙ to see the mode (tastytrade, or ◐ manual with the number of manual trades); the first card in Settings shows it too | Free |
 | ✅ | AI pause | Pauses the scheduled AI jobs (picks, brief, summaries) with one click | AI |
 | ✅ | 🔔 Mute | Silences every notification: take-profit, movers, risk, AI position review | Free |
@@ -125,7 +125,7 @@ ZEUS does far more than the screenshots in the README show. There are 7 pages in
 |---|---|---|---|
 | ✅ | Daily scan | MACD, RSI, volume, EMA breaks and support / resistance confluence over the universe, with walk-forward win rates | Free |
 | ✅ | Table · Chart · Heatmap | Three views; the heatmap groups by sector or industry; sparklines over 3 months, 1 year or 2 years | Free |
-| ✅ | Recommended spreads | A bull call or bear put spread per signal, with ⚠️ earnings-before-expiration flags | Free |
+| ✅ | Recommended spreads | A bull call spread 35–45 days out for each bullish ticker (bearish ones show the direction only), with ⚠️ earnings-before-expiration flags | Free |
 | ✅ | 📋 Order ticket | Copy the spread as an order ticket | Free |
 | ✅ | ⚡ Paper Trade | Open the recommended spread in the Paper Trade builder (shortcut **B** on a ticker page) | Free |
 

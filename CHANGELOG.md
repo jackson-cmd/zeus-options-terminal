@@ -4,6 +4,23 @@
 
 What changed in each version of ZEUS Terminal. New features carry the <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> badge. Numbers in parentheses are the pull requests.
 
+## 0.4.1 — 2026-11-12
+
+### New features
+
+| | Feature | Read more |
+|---|---|---|
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **More ? cards**: the ⚠ risk view (stress columns and totals, upside, Captured and → Max profit, portfolio Greeks, expiration ladder, Theta runway, Monte Carlo), the 🌊 liquidity scan (the 🟢 🟡 🔴 rules and ★, the cross-week table), the 📡 risk radar (today's news risk, the 30-day event density, the landmine lifts), and on the TA screener the earnings column and the key-levels panel. Each card quotes the formulas and thresholds of the code that computes the number. While the risk view, the radar or the liquidity scan is open, the top bar's ? lists its cards. (#PRNUM) | [Manual §3.1](docs/USER_GUIDE.md#31-help-on-every-page) |
+
+### Fixed
+
+- Bilingual mode: a column header with a ? icon lost part of its English label, so "Signal win rate (SSP/MACD/RSI/Vol)" read "Signal win rate". The label now leaves the icon out. (#PRNUM)
+- The manual and the feature list said the TA screener suggests a bear put spread for bearish signals. It suggests bull call spreads only and shows the direction for bearish tickers; both now say so. (#PRNUM)
+
+### Project
+
+- `tests/test_help_numbers.py` compares the numbers the new cards quote with the analyzer, `checkup/risk_radar.py`, `checkup/liquidity.py` and `ta_screener/engine.py`, checks which page the guide lists while an overlay is open, and checks a bilingual header label with an icon inside. (#PRNUM)
+
 ## 0.4.0 — 2026-11-12
 
 ### New features

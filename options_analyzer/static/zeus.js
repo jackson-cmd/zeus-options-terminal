@@ -135,7 +135,7 @@
   // ---- Bilingual: keep Chinese, add English beside labels and inside tooltips
   function biLabel(el) {
     if (!el || el.nodeType !== 1 || skip(el)) return;
-    var txt = (el.textContent || '').trim();
+    var txt = labelText(el).trim();
     var en = '';
     if (txt && HAS_CJK.test(txt) && txt.length <= 26) {
       // a count badge after the label ("👀 今日重点关注(在仓) (10)") is not part of its key, and the
@@ -149,7 +149,7 @@
         // numbers or Latin words around the Chinese words stay in place ("7天", "近期≥2%跌",
         // "隐藏 ETF 组"); a label of Chinese words only, or one made of several elements (a
         // table header with the date over "0d·周"), is glossed word by word
-        if (/[A-Za-z0-9]/.test(txt.replace(RUN_RE, '')) && !(el.children && el.children.length)) en = trRuns(txt);
+        if (/[A-Za-z0-9]/.test(txt.replace(RUN_RE, '')) && !labelKids(el)) en = trRuns(txt);
         else {
           var parts = runs.map(runEn);
           if (parts.every(function (x) { return x; })) en = parts.join(' ');
@@ -160,6 +160,23 @@
     }
     if (en && !HAS_CJK.test(en)) { if (el.getAttribute('data-zs-en') !== en) el.setAttribute('data-zs-en', en); }
     else if (el.hasAttribute('data-zs-en')) el.removeAttribute('data-zs-en');
+  }
+  // A label's own text and child elements, leaving out what it holds that is not interface text
+  // (the ? help icon in a column header)
+  function noI18n(n) { return !!(n && n.nodeType === 1 && n.hasAttribute && n.hasAttribute('data-no-i18n')); }
+  function labelText(el) {
+    if (!el.querySelector || !el.querySelector('[data-no-i18n]')) return el.textContent || '';
+    var s = '', w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null), n, p;
+    while ((n = w.nextNode())) {
+      for (p = n.parentNode; p && p !== el && !noI18n(p); p = p.parentNode) {}
+      if (p === el) s += n.nodeValue;
+    }
+    return s;
+  }
+  function labelKids(el) {
+    var c = el.children || [], k = 0;
+    for (var i = 0; i < c.length; i++) if (!noI18n(c[i])) k++;
+    return k;
   }
   function biTitle(el) {
     var t = el.getAttribute && el.getAttribute('title');

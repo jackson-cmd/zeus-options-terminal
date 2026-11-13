@@ -31,7 +31,8 @@
     'picker:rot': ['选股 · 行业轮动', 'Picker · Sector rotation'], 'picker:opt': ['选股 · 期权情绪', 'Picker · Options sentiment'],
     'digest': ['Digest 新闻', 'Digest'], 'events': ['Events 事件', 'Events'], 'journal': ['交易日记', 'Trade Journal'],
     'paper': ['模拟盘', 'Paper Trade'], 'ta': ['TA 扫描', 'TA scanner'], 'checkup': ['开单前体检', 'Pre-trade checkup'],
-    'review': ['日记复盘', 'Journal review'], 'top': ['顶栏', 'Top bar']
+    'review': ['日记复盘', 'Journal review'], 'top': ['顶栏', 'Top bar'],
+    'positions:risk': ['持仓 · 风险视图', 'Positions · Risk view'], 'liquidity': ['流动性扫描', 'Liquidity scan']
   };
 
   // ================================================================== groups
@@ -40,6 +41,10 @@
   G('positions', 'exit', '出场状态', 'Exit status');
   G('positions', 'tools', '工具栏', 'Toolbar');
   G('positions', 'cols', '持仓表的列', 'Table columns');
+  G('positions:risk', 'stress', '⚠ 压测', '⚠ Stress');
+  G('positions:risk', 'time', '📅 到期', '📅 Expiry');
+  G('positions:risk', 'prob', '📊 盈亏概率', '📊 P/L probabilities');
+  G('liquidity', 'liq', '流动性扫描', 'Liquidity scan');
   G('*', 'views', '视图', 'Views');
   G('*', 'tools', '工具栏', 'Toolbar');
   G('*', 'score', '评分', 'Score');
@@ -52,6 +57,7 @@
   G('digest', 'filters', '筛选', 'Filters');
   G('digest', 'actions', '操作', 'Actions');
   G('events', 'ev', '事件', 'Events');
+  G('events', 'radar', '📡 风险雷达', '📡 Risk radar');
   G('journal', 'stats', '顶部统计', 'Headline numbers');
   G('journal', 'tabs', '日记的标签页', 'Journal tabs');
   G('paper', 'pt', '模拟盘', 'Paper Trade');
@@ -485,6 +491,119 @@
     ['日记复盘（开盘前 5 分钟）', '每天开盘前花 5 分钟看的一页：顶上是关键数字和一句提示，下面是 📉 昨天平掉的单子、📊 昨天开的单子、👀 今天要重点盯的持仓、🚨 本周违反了哪些开单规则，最后是快速链接（跑今日体检、看今日选股、全时段砍单复盘）。', '只读本地的日记和缓存，不发新的行情请求。', '先看「本周规则违反」：同一条规则反复违反，说明纪律要收紧。'],
     ['Journal review (5 minutes before the open)', 'A page for the five minutes before each open: key numbers and one insight at the top, then 📉 trades closed yesterday, 📊 trades opened yesterday, 👀 positions to watch today, 🚨 the trading rules broken this week, and quick links (run today’s checkup, see today’s picks, the all-time cut review).', 'It reads only the local journal and caches and sends no new quote requests.', 'Start with the rules broken this week: one rule broken again and again means the discipline needs tightening.']);
 
+  // ================================================================== positions: risk view (⚠)
+  E('positions:risk', 'stress', 'risk.stress', '#riskTable th[data-rsort="move"], #riskTable th[data-rsort="worst1"], #riskTable th[data-rsort="worst2"], #riskTable th[data-rsort="var"], #riskTable th[data-rsort="cvar"]',
+    ['压测：1σ / 2σ / VaR / CVaR', '如果明天标的大涨或大跌，每个仓最差会亏多少。',
+     '<ul><li><b>1σ 波动</b> = 股价 × 隐含波动率 × √(1/365)，大约 68% 的交易日在这个范围内。</li><li><b>1σ / 2σ 最差</b>：把股价往上、往下各移动 1 个和 2 个 σ，按明天（剩余时间少 1 天）用 Black-Scholes 重新估值，取较差的一边。</li><li><b>VaR 95%</b>：同样的算法，移动 1.645σ。</li><li><b>CVaR 95%</b>：在 1.645σ 到 3.5σ 之间取 12 个点，求较差一边的平均，也就是最坏 5% 情况下的平均亏损。</li></ul>',
+     '2σ 最差和 CVaR 大约是「很糟的一天」会亏多少；某个仓的数字太大，就减它的仓。注意：只看一天，每个标的单独移动、隐含波动率不变；隔夜跳空和波动率暴涨时会更差。'],
+    ['Stress test: 1σ / 2σ / VaR / CVaR', 'How much each position could lose tomorrow on a big move up or down.',
+     '<ul><li><b>1σ move</b> = price × implied volatility × √(1/365); about 68% of trading days stay inside it.</li><li><b>1σ / 2σ worst</b>: the price is moved 1 and 2 σ up and down, the position is revalued with Black-Scholes for tomorrow (one day less to expiration), and the worse side is kept.</li><li><b>VaR 95%</b>: the same with a 1.645σ move.</li><li><b>CVaR 95%</b>: the average of the worse side at 12 points between 1.645σ and 3.5σ, the average loss in the worst 5% of days.</li></ul>',
+     'The 2σ worst case and CVaR are roughly what a very bad day would cost; cut a position whose numbers are too big. Note: one day only, each underlying moving on its own, implied volatility unchanged; overnight gaps and volatility spikes would be worse.'], true);
+  E('positions:risk', 'stress', 'risk.total', '#riskTotalsLabel',
+    ['账户合计', '把每个仓的压测结果加起来：整个账户明天最差会怎样，以及全部持有到期最多亏多少。',
+     '1σ、2σ 最差、VaR 和 CVaR 都是把每个仓的最差值直接相加，不考虑仓与仓之间的相关性，所以偏保守；2σ 旁边是它占账户净值（NLV）的百分比。<b>理论最大亏损</b> = Σ 每个仓的最大亏损；只要有一个仓亏损没有下限就显示 −∞，百分比只算有下限的那些。',
+     '2σ 合计超过你能接受的单日亏损就减仓；理论最大亏损占 NLV 太多说明仓位太重。注意：各个仓很少同时出现最差情况，实际亏损通常比合计小。'],
+    ['Account totals', 'The stress results of all positions added up: how the whole account could fare tomorrow, and the most it can lose if everything is held to expiration.',
+     'The 1σ and 2σ worst cases, VaR and CVaR are the positions’ worst values added up, with no correlation between positions, so they err on the safe side; beside the 2σ figure is its share of net liquidating value (NLV). <b>Max theoretical loss</b> = Σ each position’s max loss; it shows −∞ when any position has an unlimited loss, and the percentage counts only the limited ones.',
+     'Cut size when the 2σ total is more than you would accept to lose in a day; a max theoretical loss that is a large share of NLV means the book is heavy. Note: positions rarely hit their worst case together, so the real loss is usually smaller than the total.'], true);
+  E('positions:risk', 'stress', 'risk.upside', '#riskUpsideLabel',
+    ['上行空间：理想最大盈利和期望', '整个账户还剩多少上行空间：全部持有到期最多赚多少、按概率算的期望是多少、已经吃到了多少。',
+     '<ul><li><b>理想最大盈利</b> = Σ 每个仓的最大利润；最大利润没有上限的仓不算，括号里注明有几个。</li><li><b>概率加权期望</b> = Σ 每个仓到期盈亏的期望值：在现价的 2% 到 4 倍之间取 600 个价格，按隐含波动率的对数正态分布、以无风险利率为漂移积分，没有方向假设。</li><li><b>已吃到</b> = 这些仓的浮动盈亏 ÷ 理想最大盈利；<b>还能赚到顶</b> = 两者之差。</li><li><b>软止盈线</b> = 理想最大盈利 × 当前止盈带的软止盈比例（牛市 70%、震荡 50%、中性 65%，可以在 🔔 提醒设置里改）。</li></ul>',
+     '已吃到的比例接近软止盈线时，整体落袋通常比继续等更划算。注意：期望值跟着隐含波动率走，市场情绪一变它就变。'],
+    ['Upside: ideal max profit and expectation', 'How much upside the whole account has left: the most it can make if everything is held to expiration, the probability-weighted expectation, and how much is already earned.',
+     '<ul><li><b>Ideal max profit</b> = Σ each position’s max profit; positions with unlimited profit are left out and counted in brackets.</li><li><b>Probability-weighted expectation</b> = Σ each position’s expected P/L at expiration, integrated over 600 prices from 2% to 4 times the price, log-normal at implied volatility with the risk-free rate as drift: no directional view.</li><li><b>Captured</b> = those positions’ unrealized P/L ÷ the ideal max profit; <b>left to earn</b> = the difference.</li><li><b>Soft take-profit line</b> = ideal max profit × the current soft take-profit share (70% in a bull market, 50% when choppy, 65% neutral; change it in 🔔 Alerts).</li></ul>',
+     'When the captured share nears the soft line, banking the book usually beats waiting. Note: the expectation follows implied volatility and moves with market mood.'], true);
+  E('positions:risk', 'stress', 'risk.captured', '#riskTable th[data-rsort="captured"], #riskTable th[data-rsort="pmax"]',
+    ['已吃到 / →满利', '每个仓已经吃到最大利润的几成，以及到期拿满最大利润的概率。',
+     '<b>已吃到</b> = 浮动盈亏 ÷ 最大利润（最大利润没有上限时显示 ∞）；到软止盈线标绿，到软止盈线 − 10 标黄。<b>→满利</b> = 到期盈亏达到最大利润（差距不超过 1%，至少 $1）的概率，按隐含波动率的对数正态分布算；≥ 50% 标绿。',
+     '已吃到接近止盈线、→满利又不高的仓，提前落袋更划算。注意：两个数都按到期算，提前平仓还取决于剩下的时间价值。'],
+    ['Captured / → Max profit', 'How much of each position’s max profit is already earned, and the chance of earning all of it by expiration.',
+     '<b>Captured</b> = unrealized P/L ÷ max profit (∞ when the profit has no limit); green from the soft take-profit line, yellow from 10 points below it. <b>→ Max profit</b> = the chance that the P/L at expiration reaches the max profit (within 1%, and at least $1), from a log-normal spread at implied volatility; green at 50% or more.',
+     'A position near the take-profit line with a low chance of reaching its max profit is worth banking early. Note: both are measured at expiration; closing earlier also depends on the time value left.'], true);
+  E('positions:risk', 'stress', 'risk.greeks', '#pfGreeksTitle',
+    ['组合希腊值（β 加权）', '所有仓合在一起看：相当于持有多少美元的 SPY，每天收或付多少时间价值，对波动率和大盘涨跌有多敏感。',
+     '<ul><li><b>β 加权 Delta</b> = Σ（策略 Delta × 标的价格 × 该标的对 SPY 的 β），即相当于多少美元的 SPY；除以 SPY 价格就是股数；SPY 每涨 1%，组合大约变化这个数的 1%。拿不到 β 的标的按 1.0。</li><li><b>净 Theta / 天</b> = Σ 每个仓的 Theta，正数 = 每天收时间价值。</li><li><b>净 Vega</b>：隐含波动率每升 1 个点，组合变化多少美元；正数 = 做多波动率。</li><li><b>净 Gamma</b>：Delta 随价格变化的快慢。</li></ul>每个仓的希腊值用每条腿自己的隐含波动率按 Black-Scholes 算。下面的曲线把 SPY 从 −6% 到 +6%（每 0.25% 一点）的移动按 β 传给每个标的，逐个重新估值，只看价格冲击。',
+     'β 加权 Delta 超过 NLV 的一半说明方向押得很重（≥ 25% 算中等）；净 Vega 为负时，恐慌（波动率上升）会让你亏钱。注意：β 来自历史，危机时各股的相关性会升高；线性的数字只适合小幅移动，大幅移动看曲线。'],
+    ['Portfolio Greeks (β-weighted)', 'All positions taken together: how many dollars of SPY they amount to, how much time value they earn or pay a day, and how much volatility and market moves affect them.',
+     '<ul><li><b>β-weighted Delta</b> = Σ (strategy Delta × the underlying’s price × its β to SPY), the dollars of SPY you effectively hold; divided by SPY’s price it is a share count; each +1% in SPY moves the book by about 1% of it. A missing β counts as 1.0.</li><li><b>Net Theta / day</b> = Σ each position’s Theta; positive = you collect time value every day.</li><li><b>Net Vega</b>: the dollars the book gains or loses per +1 point of implied volatility; positive = long volatility.</li><li><b>Net Gamma</b>: how fast Delta changes with the price.</li></ul>Each position’s Greeks come from Black-Scholes at each leg’s own implied volatility. The curve below passes SPY moves from −6% to +6% (every 0.25%) to each underlying through its β and revalues every position, price shock only.',
+     'A β-weighted Delta above half of NLV is a heavy directional bet (25% or more counts as moderate); a negative net Vega loses money when fear (volatility) rises. Note: β comes from history, and correlations rise in a crisis; the linear figures fit small moves only, so read the curve for big ones.'], true);
+  E('positions:risk', 'time', 'risk.ladder', '#expLadderTitle',
+    ['到期阶梯', '按到期日分组：每个到期日有几个仓、压着多少风险。',
+     '每个到期日一行：剩余天数、仓数、合计最大亏损（亏损没有下限的仓不计入）、未实现盈亏、净 Theta / 天和标的。7 天内到期的行标红并带 ⚠。',
+     '别让太多仓挤在同一天到期；红色的行要提前决定是平仓还是拿到到期。注意：合计最大亏损按到期算。'],
+    ['Expiration ladder', 'Positions grouped by expiration date: how many expire on each date and how much risk they carry.',
+     'One row per expiration date: days left, the number of positions, their total max loss (positions with an unlimited loss are left out), unrealized P/L, net Theta per day and the underlyings. Dates within 7 days are red with ⚠.',
+     'Avoid stacking many positions on one date; for a red row, decide early whether to close or hold to expiration. Note: the total max loss is measured at expiration.'], true);
+  E('positions:risk', 'time', 'risk.runway', '#thetaRunwayTitle',
+    ['Theta 跑道', '如果接下来 14 天大盘横着走，时间价值的流逝会让你赚多少或亏多少。',
+     '股价和隐含波动率都不动，每过一天剩余时间少 1 天，用 Black-Scholes 重新估值所有仓，画出第 0 到 14 天的累计盈亏。上面写着第 7 天（和它占 NLV 的比例）、第 14 天的数字和净 Theta / 天；下面列出 Theta 最大的 8 个仓。',
+     '跑道向上 = 横盘也在赚钱（收时间价值）；向下 = 你在付时间价值，需要标的动起来。注意：横盘只是一种情景，财报前后隐含波动率不变的假设不成立。'],
+    ['Theta runway', 'If the market goes sideways for the next 14 days, how much time decay earns or costs you.',
+     'With prices and implied volatility held still, every position is revalued with Black-Scholes one day closer to expiration at a time, and the cumulative P/L is drawn for days 0 to 14. The note gives the day-7 figure (with its share of NLV), the day-14 figure and net Theta per day; the table lists the 8 positions with the most Theta.',
+     'A rising runway means you earn even if nothing moves (you collect time value); a falling one means you pay it and need the underlyings to move. Note: sideways is one scenario, and holding implied volatility still is wrong around earnings.'], true);
+  E('positions:risk', 'prob', 'risk.mc', '#probDesc',
+    ['盈亏概率（蒙特卡洛）', '整个账户持有到期时，盈亏的概率分布。',
+     '模拟 8,000 次。每个标的走到它自己的到期日，价格按隐含波动率服从对数正态；各标的通过 β 和 SPY 相关：相关系数 ρ = β × SPY 波动率 ÷ 该标的隐含波动率（限制在 ±0.95），SPY 波动率取实时 VIX，没有时按 16%。每次模拟把各条腿的到期内在价值减去开仓价相加。表里 P5、P25、P50、P75、P95 是分位数，期望是平均值，盈利概率 = 到期为正的比例，「扛到期 &gt; 现在」= 到期结果好于现在浮动盈亏的比例。每小时自动重算，点 🔄 立即重算。',
+     'P5 大约是最坏 5% 的情况会亏多少；「扛到期 &gt; 现在」低于 50% 时，现在落袋比扛到期划算。注意：只有一个大盘因子，不含跳空和波动率变化；每次模拟的结果会略有不同。'],
+    ['P/L probabilities (Monte Carlo)', 'The probability distribution of the whole account’s P/L if everything is held to expiration.',
+     '8,000 runs. Each underlying moves to its own expiration date, log-normal at its implied volatility, and the underlyings move together with SPY through β: correlation ρ = β × SPY volatility ÷ the underlying’s implied volatility (kept within ±0.95), with SPY volatility from the live VIX (16% without it). Each run adds up every leg’s intrinsic value at expiration minus its entry price. In the table P5, P25, P50, P75 and P95 are percentiles, the expected value is the mean, the probability of profit is the share of positive outcomes, and “Hold to expiration &gt; close now” is the share of outcomes better than today’s unrealized P/L. It recomputes every hour, or at once with 🔄.',
+     'P5 is roughly what the worst 5% of outcomes lose; when “Hold to expiration &gt; close now” is under 50%, banking now beats holding. Note: one market factor only, with no gaps and no change in volatility; each run gives slightly different numbers.'], true);
+
+  // ================================================================== events: the risk radar
+  E('events', 'radar', 'radar.news', '#radarNewsTitle',
+    ['今日新闻风险（0–100）', '今天的新闻里，历史上和大跌有关的话题有多「热」。',
+     '数今天 digest 新闻里命中各风险话题关键词的条数（美债收益率、关税、疫情、美联储、通胀、就业等 20 类）。一个话题算「偏高」要同时满足：条数 ≥ 4，不低于它过去 250 个交易日的 P90（至少 3），并且占今天新闻的 1.5% 以上；条数到 P95（至少 5）且占比 ≥ 4% 算「饱和」。分数 = min(100, 100 × Σ 程度 × (lift − 1) ÷ 1.8)，程度：饱和 1.0、偏高 0.6；lift = 这个话题饱和的日子里 SPY 跌 ≥ 1% 的概率是平时的几倍（美债收益率 3.29、疫情 3.21、关税 2.39 等）。lift ≤ 1 的话题（例如 AI 泡沫的说法）只列出、不计分。≥ 60 高危，≥ 30 偏高，其余平静。',
+     '高危的日子别加仓、别满仓，看是哪个话题在主导、它的 lift 有多高；分数 ≥ 60 时开单前体检的第 4 关不过。注意：开盘前新闻少，分数偏低；关键词匹配会误判。它提示的是高危窗口，不预测哪天跌。'],
+    ['Today’s news risk (0–100)', 'How hot the topics that history ties to big drops are in today’s news.',
+     'Today’s digest stories are matched against keywords for 20 risk topics (Treasury yields, tariffs, pandemic, the Fed, inflation, jobs and more). A topic is elevated when it has at least 4 stories, no fewer than its 90th percentile over the last 250 trading days (3 at least), and more than 1.5% of today’s news; at its 95th percentile (5 at least) and 4% or more of the news it is saturated. Score = min(100, 100 × Σ weight × (lift − 1) ÷ 1.8), with weight 1.0 when saturated and 0.6 when elevated; lift = how many times more likely a drop of 1% or more in SPY is on days when the topic is saturated (Treasury yields 3.29, pandemic 3.21, tariffs 2.39 and so on). Topics with a lift of 1 or less (AI-bubble talk, say) are listed but not scored. 60 or more is high, 30 or more elevated, the rest calm.',
+     'On a high day do not add or go all in; check which topic leads and how high its lift is. At 60 or more, gate 4 of the pre-trade checkup fails. Note: before the open there is little news and the score reads low, and keyword matching can misfire. It flags a dangerous window and does not predict the day of a drop.'], true);
+  E('events', 'radar', 'radar.density', '#radarDensityTitle',
+    ['未来 30 天事件密度（0–100）', '未来 30 天里，历史上会推高大跌概率的事件有多密集。',
+     '取未来 30 天日历上的宏观事件（FOMC、CPI、非农、GDP 等）和龙头财报，每个事件贡献 min(1, lift − 1)，分数 = min(100, 100 × 合计 ÷ 6)。≥ 60 高危，≥ 30 偏高。最挤的一周有 3 个或更多事件时提示扎堆。',
+     '密度高的月份开新仓更保守，别在大事件前一天满仓。注意：只算日历上已知的事件，突发冲击不在里面。'],
+    ['Event density, next 30 days (0–100)', 'How crowded the next 30 days are with events that history ties to a higher chance of a big drop.',
+     'Macro events on the calendar (FOMC, CPI, payrolls, GDP and others) and bellwether earnings in the next 30 days each add min(1, lift − 1); score = min(100, 100 × total ÷ 6). 60 or more is high, 30 or more elevated. When the busiest week holds 3 or more events, the radar says they crowd together.',
+     'In a crowded month open new trades more carefully, and do not go all in the day before a big event. Note: only events already on the calendar count; sudden shocks are not in it.'], true);
+  E('events', 'radar', 'radar.lift', '#radarLmTitle',
+    ['Landmine 日历和 lift', '未来 30 天的高危事件；每个事件后面的 1.5× 之类的数字是 lift：这类日子 SPY（或板块）跌 ≥ 1% 的概率是平时的几倍。',
+     'lift 来自研究里的回测：FOMC 1.78×、CPI 1.5×、非农 1.43×、GDP 1.16×、其它宏观事件 1.1×；芯片龙头财报 2.2×（坏财报当天 SOXX 跌 ≥ 1% 的占 55%）、大盘股龙头和 AI 基建龙头财报 1.8×、你持有的个股财报 1.2×；其它个股财报不列出。红点 = 你持仓的财报；黄点 = FOMC、CPI（含 PCE、PPI）、非农和龙头财报；蓝点 = GDP 和其它宏观事件。',
+     'lift 越高的日子越要留现金，别在前一天开新仓。注意：lift 是历史平均，单个事件可能完全没反应。'],
+    ['Landmine calendar and lift', 'High-risk events in the next 30 days; the number after each one, such as 1.5×, is its lift: how many times more likely a drop of 1% or more in SPY (or the sector) is on such days.',
+     'Lifts come from backtests in the research: FOMC 1.78×, CPI 1.5×, payrolls 1.43×, GDP 1.16×, other macro events 1.1×; chip bellwether earnings 2.2× (SOXX fell 1% or more on 55% of bad-report days), megacap and AI-infrastructure bellwether earnings 1.8×, earnings of a stock you hold 1.2×; other single-stock reports are not listed. Red dot = earnings of a stock you hold; yellow = FOMC, CPI (with PCE and PPI), payrolls and bellwether earnings; blue = GDP and other macro events.',
+     'The higher the lift, the more cash to keep and the less to open the day before. Note: a lift is a historical average; a single event may bring no reaction at all.'], true);
+
+  // ================================================================== liquidity scan (from the checkup)
+  E('liquidity', 'liq', 'liq.verdict', '#liqVerdictTitle',
+    ['流动性判断：🟢 🟡 🔴', '这只票的期权好不好成交：🟢 好成交，🟡 能开但要磨价，🔴 难成交。网格里每格是这个行权价、这个到期的买卖价差百分比。',
+     '<ul><li><b>每条腿</b>：没有双边报价 → 🔴；价差 ≥ 25% 且 ≥ $0.30 → 🔴（极宽）；否则价差 ≥ 10% 且 ≥ $0.20（宽）、未平仓量 &lt; 10（极薄）或 &lt; 50（薄）、当日成交 1–9 张（量低）任一条 → 🟡；都没有 → 🟢。价差% = (卖价 − 买价) ÷ 中间价。</li><li><b>整只票</b>：取 28–45 天到期（没有就取最接近 35 天的）平值行权价，看涨和看跌里较差的一个。</li><li><b>★</b>：每一行（同一个行权价）里价差百分比最小、又不是 🔴 的那个到期。</li></ul>',
+     '🔴 的票或格子别指望按中间价成交；🟡 的在中间价附近慢慢磨。注意：盘后报价常常只有一边，很多格子会变 🔴，以开盘时为准。'],
+    ['Liquidity verdict: 🟢 🟡 🔴', 'How easily this ticker’s options fill: 🟢 easily, 🟡 tradable but work the price, 🔴 hard. Each grid cell is the bid-ask spread in percent for that strike and expiration.',
+     '<ul><li><b>Each leg</b>: no two-sided quote → 🔴; a spread of 25% or more and at least $0.30 → 🔴 (very wide); otherwise any of a spread of 10% or more and at least $0.20 (wide), open interest under 10 (very thin) or under 50 (thin), or 1–9 contracts traded today (low volume) → 🟡; none of them → 🟢. Spread % = (ask − bid) ÷ mid.</li><li><b>The ticker</b>: the at-the-money strike 28–45 days out (or the expiration nearest 35 days), the worse of its call and put.</li><li><b>★</b>: in each row (one strike), the expiration with the narrowest spread in percent that is not 🔴.</li></ul>',
+     'Do not count on a mid-price fill in a 🔴 ticker or cell; work 🟡 ones slowly around the mid. Note: after hours, quotes are often one-sided and many cells turn 🔴; go by the quotes at the open.'], true);
+  E('liquidity', 'liq', 'liq.crossweek', '#liqCrossTitle',
+    ['同一价差跨周对比', '同一个看涨价差（平值买入、现价 +10% 卖出）放在不同到期周：哪周最便宜、最好成交。',
+     '每个到期周把两条腿对齐到最接近的真实行权价：<b>净付 debit</b> = 买腿中间价 − 卖腿中间价，<b>net 买卖差</b> = 两条腿买卖价差之和；★ = 借记最低的那周。',
+     '借记越低越划算，买卖差越小越容易按中间价成交；和 35–45 天的开仓习惯一起挑到期。注意：中间价不一定能成交；到期越远，借记越高，时间价值衰减越慢。'],
+    ['The same spread across weeks', 'One bull call spread (long at the money, short at the price +10%) placed in different expiration weeks: which week is cheapest and fills best.',
+     'For each week both legs snap to the nearest real strikes: <b>net debit</b> = long leg mid − short leg mid, <b>net width</b> = the sum of the two legs’ bid-ask spreads; ★ = the week with the lowest debit.',
+     'A lower debit is a better price and a smaller net width an easier mid fill; choose the week together with the 35–45-day habit for opening. Note: the mid may not fill; further expirations cost more and decay more slowly.'], true);
+
+  // ================================================================== TA scanner: more columns and details
+  E('ta', 'cols', 'ta.c.earn', '#hdr th[onclick="headSort(\'_earn\')"]',
+    ['财报', '下一次财报的日期，括号里是还有几天。',
+     '显示 📅 月/日（N 天）。7 天内标红，14 天内标橙；鼠标停在上面能看到具体日期和盘前、盘后。「财报」下拉框可以排除、或只看 14 天内有财报的票。日期来自扫描时读到的财报日历。',
+     '财报前后常有跳空，隐含波动率财报前抬高、财报后回落；推荐价差到期前有财报时会标 ⚠️，不想赌财报就用下拉框排除。注意：公司改期、或日历还没收录时会不准。'],
+    ['Earnings', 'The date of the next earnings report, with the days left in brackets.',
+     'Shown as 📅 month/day (N days): red within 7 days, orange within 14; hover for the exact date and whether it is before or after the market. The Earnings menu hides, or shows only, tickers with a report within 14 days. Dates come from the earnings calendar the scan reads.',
+     'Prices often gap around earnings, and implied volatility rises before the report and falls after it; a suggested spread with earnings before its expiration carries ⚠️, so use the menu to leave earnings out. Note: wrong when a company moves its date or the calendar does not list it yet.'], true);
+  E('ta', 'det', 'ta.keylevels', '',
+    ['关键位：52 周位置和 S/R 触及历史', '现价在一年高低点之间的位置，以及这只票过去碰到支撑、阻力以后走得怎样。',
+     '<ul><li><b>52周位置</b> = (收盘 − 52 周最低) ÷ (52 周最高 − 52 周最低)：0% 贴着一年最低，100% 贴着一年最高。</li><li><b>支撑→4周+5%</b>：过去每次测试支撑（昨收在带上方、今天打进带里）以后，4 周内任一周最高价比入场价高 5% 的比例。<b>阻力→1周−1%</b>：每次测试阻力以后，当周最低价比入场价低 1% 的比例。</li><li>只用当时已经确认的拐点建价格带（walk-forward，不偷看未来）；同一边 5 个交易日内连续碰到只算一次。n = 次数。</li><li><b>达标</b>（加粗，带 edge+）= 至少 12 次、胜率 ≥ 60%，而且比每天都入场的基线高至少 10 个百分点；没达标时括号里显示 lift = 胜率 − 基线。</li></ul>',
+     '支撑那一项达标，说明这只票碰到支撑后常反弹，评分的支撑阻力块会多给 5 分；52 周位置低、又在测试支撑，是抄底的候选。注意：次数少时胜率不稳；过去反弹过，不保证这次也反弹。'],
+    ['Key levels: 52-week position and S/R touch history', 'Where the price sits between its one-year high and low, and what this ticker did after past tests of support and resistance.',
+     '<ul><li><b>52-week position</b> = (close − 52-week low) ÷ (52-week high − 52-week low): 0% sits on the year’s low, 100% on its high.</li><li><b>Support → 4 weeks +5%</b>: of past support tests (yesterday’s close above a zone, today’s bar reaching into it), the share where any week’s high within 4 weeks was 5% above the entry. <b>Resistance → 1 week −1%</b>: of past resistance tests, the share where that week’s low was 1% below the entry.</li><li>Zones are built only from pivots already confirmed at the time (walk-forward, no look-ahead), and touches on the same side within 5 trading days count once. n = the number of tests.</li><li><b>Passing</b> (bold, with edge+) = at least 12 tests, a win rate of 60% or more, and at least 10 points above the base rate of entering every day; otherwise the brackets show lift = win rate − base rate.</li></ul>',
+     'A passing support figure means this ticker tends to bounce off support, and the score’s S/R part adds 5; a low 52-week position while testing support makes a dip-buy candidate. Note: rates are shaky with few tests, and past bounces do not promise the next one.']);
+
   // ================================================================== engine
   function lang() {
     try { if (window.zeusLang) return window.zeusLang(); } catch (e) {}
@@ -538,6 +657,9 @@
         : (visible(document.getElementById('mbOptPane')) ? 'picker:opt' : 'picker:brief');
       else out = (window.hmState && window.hmState.view === 'treemap') ? 'picker:heatmap' : 'picker:kline';
     } else out = t || 'positions';
+    if (out === 'positions' && visible(document.getElementById('riskView'))) out = 'positions:risk';
+    if (visible(document.getElementById('riskRadarOverlay'))) out = 'events';
+    if (visible(document.getElementById('liquidityOverlay'))) out = 'liquidity';
     return [out, 'top'];
   }
 
@@ -741,6 +863,7 @@
   window.zeusHelp = {
     open: open, guide: guide, close: close,
     has: function (id) { return !!REG[id]; },
+    pages: function () { return pagesNow(); },
     entries: function () { return LIST.map(function (e) { return { id: e.id, pages: e.pages, group: e.group, at: e.at, q: e.q, zh: e.zh, en: e.en }; }); },
     groups: function () { return GROUPS; }
   };
