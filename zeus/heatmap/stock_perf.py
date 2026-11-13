@@ -7,12 +7,10 @@ Mirrors etf_trends.py.
 """
 from __future__ import annotations
 
-import json
 import time
 from pathlib import Path
-from typing import Optional
 
-from . import metadata
+from . import metadata, table_cache
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 _CACHE = _REPO_ROOT / "data" / "heatmap" / "stock_perf.json"
@@ -22,8 +20,7 @@ _CACHE_TTL = 24 * 60 * 60  # 1 day — "一天一更新"
 _PERIODS = [("3天", "r3d", 3), ("1周", "r1w", 5), ("1月", "r1mo", 21),
             ("3月", "r3mo", 63), ("1年", "r1yr", 252)]
 
-_mem: Optional[dict] = None
-_mem_at: float = 0.0
+_state: dict = {}   # in-memory cache, see table_cache
 
 
 def _compute() -> dict:
@@ -79,25 +76,7 @@ def _compute() -> dict:
 
 
 def get(force: bool = False) -> dict:
-    """Cached payload; recompute if forced, missing, or stale (>1 day)."""
-    global _mem, _mem_at
-    now = time.time()
-    if not force and _mem is not None and (now - _mem_at) < _CACHE_TTL:
-        return _mem
-    if not force and _CACHE.exists():
-        try:
-            disk = json.loads(_CACHE.read_text())
-            if (now - disk.get("_ts", 0)) < _CACHE_TTL:
-                _mem, _mem_at = disk, now
-                return disk
-        except Exception:
-            pass
-    payload = _compute()
-    payload["_ts"] = now
-    try:
-        _CACHE.parent.mkdir(parents=True, exist_ok=True)
-        _CACHE.write_text(json.dumps(payload))
-    except Exception:
-        pass
-    _mem, _mem_at = payload, now
-    return payload
+    """Cached payload; recompute if forced, missing, or stale (>1 day). A refresh
+    that brings back no data keeps the last good table (see table_cache)."""
+    return table_cache.get(_state, _CACHE, _CACHE_TTL, _compute, force=force,
+                           tag="heatmap.stock_perf")
