@@ -9,7 +9,7 @@ This manual explains every page, button and setting of ZEUS Terminal: what it do
 ## Contents
 
 1. [Install and start](#1-install-and-start)
-   - [1.1 Requirements](#11-requirements) · [1.2 First start](#12-first-start) · [1.3 Stop, restart, change the port](#13-stop-restart-change-the-port) · [1.4 Install as an app](#14-install-as-an-app) · [1.5 Update](#15-update) · [1.6 Uninstall](#16-uninstall)
+   - [1.1 Requirements](#11-requirements) · [1.2 First start](#12-first-start) · [1.3 Stop, restart, change the port](#13-stop-restart-change-the-port) · [1.4 Install as an app](#14-install-as-an-app) · [1.5 Update](#15-update) · [1.6 Uninstall](#16-uninstall) · [1.7 Run with Docker](#17-run-with-docker)
 2. [First-time setup](#2-first-time-setup)
    - [2.1 Choose how your positions get in](#21-choose-how-your-positions-get-in) · [2.2 Connect a broker](#22-connect-a-broker) · [2.3 Free mode: your trades from a CSV](#23-free-mode-your-trades-from-a-csv) · [2.4 News sources](#24-news-sources) · [2.5 AI](#25-ai) · [2.6 Notifications and e-mail](#26-notifications-and-e-mail) · [2.7 Every setting](#27-every-setting)
 3. [The top bar](#3-the-top-bar)
@@ -49,7 +49,7 @@ This manual explains every page, button and setting of ZEUS Terminal: what it do
 
 ### 1.1 Requirements
 
-- Python 3.10 or newer.
+- Python 3.10 or newer, or Docker instead ([1.7](#17-run-with-docker)).
 - macOS, Linux or Windows. Desktop notifications need macOS; e-mail alerts work on macOS and Linux.
 - A recent Chrome, Edge, Safari or Firefox.
 - No accounts are needed to start. A tastytrade account, a Benzinga Pro login and an AI provider each unlock more (see [2.7](#27-every-setting)).
@@ -89,6 +89,51 @@ On Windows the second command is `.venv\Scripts\python -m pip install -r require
 ### 1.6 Uninstall
 
 Delete the code folder. Delete `~/.zeus-terminal/` too if you also want to remove your settings, trades and caches.
+
+### 1.7 Run with Docker
+
+ZEUS also comes as a container image on GitHub Packages, `ghcr.io/jackson-cmd/zeus-options-terminal`, for Intel and AMD (`amd64`) and for ARM (`arm64`: Apple silicon, a Raspberry Pi with a 64-bit system). You need Docker (Docker Desktop on macOS and Windows) and no Python.
+
+```bash
+docker run -d --name zeus --restart unless-stopped \
+  -p 127.0.0.1:8765:8765 -v zeus-data:/data \
+  -e TZ=America/New_York \
+  ghcr.io/jackson-cmd/zeus-options-terminal:latest
+```
+
+Open **http://localhost:8765**. The first start takes about half a minute; then the Positions page offers the sample, a broker or your trades ([2.1](#21-choose-how-your-positions-get-in)). The browser does not open by itself as it does with `./start.sh`, and installing ZEUS as an app ([1.4](#14-install-as-an-app)) works the same.
+
+- **Keep `127.0.0.1:` in `-p`.** ZEUS has no login: anyone who reaches the port sees your positions and can change your settings. With `127.0.0.1:` only programs on this computer reach it. For another port on your computer, change the first number, as in `-p 127.0.0.1:8790:8765`. Inside the container ZEUS always listens on 8765, so the port in ⚙ Settings has no effect there.
+- **On a server or a NAS**, keep `127.0.0.1:` as well and reach ZEUS through an SSH tunnel from your own computer: `ssh -L 8765:localhost:8765 you@server`, then open http://localhost:8765. Opened by an IP address or a host name, ZEUS answers `host not allowed`: that is its protection against DNS rebinding.
+- **Your data** lives in the `zeus-data` volume, which is `/data` in the container: `config.json` with your settings and keys, your uploaded trades, and everything under `runtime/`. It outlasts updates and `docker rm`. A new volume starts with empty settings. To keep the files in a folder instead, use `-v ~/zeus-data:/data`; on Linux, first make the folder writable for user 1000, the user ZEUS runs as (`sudo chown 1000 ~/zeus-data`).
+- **Your clock.** Jobs that run at a time of day (the 8:30 AI news summary, the 9:00 market brief, the AI position review) follow the container's clock. It is New York time; set `TZ` to your own zone, such as `America/Chicago` or `Asia/Shanghai`, to run them on your clock.
+- **Update:** `docker pull ghcr.io/jackson-cmd/zeus-options-terminal:latest`, then `docker rm -f zeus` and the same `docker run`. The volume keeps everything. To stay on a version, use its tag: `:0.6.0`, or `:0.6` to take only its fixes.
+- **Stop, start, logs:** `docker stop zeus`, `docker start zeus`, `docker logs -f zeus`. With `--restart unless-stopped` ZEUS also comes back after Docker or the computer restarts.
+- **Remove:** `docker rm -f zeus`; add `docker volume rm zeus-data` to delete your settings and data too.
+- **AI agents (MCP)** start ZEUS's bridge inside the container with `docker exec`; ⚙ Settings → AI agents shows the command for each agent ([18.2](#182-connect-your-agent)).
+- **A model on this computer** (Ollama, LM Studio): inside the container `localhost` is the container itself, and this computer is `host.docker.internal`. Set the OpenAI-compatible base URL to `http://host.docker.internal:11434/v1`; no key is needed. On Linux, also add `--add-host=host.docker.internal:host-gateway` to `docker run`, and let the model server accept connections from Docker's network. The Claude Code CLI provider is not in the image: use an Anthropic or OpenAI-compatible key.
+- **Not in the image:** desktop notifications (macOS only; e-mail alerts and the browser's own notifications work), the Barchart lists and the Benzinga cookie export, which need Playwright and Chromium, and the Benzinga auto re-login helper, which needs Node.js. Pasting Benzinga Pro cookies in Settings works as usual. If you need these, run ZEUS with `./start.sh`.
+
+With Docker Compose the same setup is this `compose.yaml`. `docker compose up -d` starts it, and `docker compose pull` followed by `docker compose up -d` updates it:
+
+```yaml
+services:
+  zeus:
+    image: ghcr.io/jackson-cmd/zeus-options-terminal:latest
+    container_name: zeus
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8765:8765"
+    volumes:
+      - zeus-data:/data
+    environment:
+      TZ: America/New_York
+volumes:
+  zeus-data:
+    name: zeus-data
+```
+
+To build the image yourself, run `docker build -f zeus/Dockerfile -t zeus-terminal .` at the top of the code folder, and use `zeus-terminal` in place of the ghcr.io name.
 
 ---
 
@@ -783,6 +828,7 @@ Fills are replayed in time order, first in, first out. Expired options settle at
 | `~/.zeus-terminal/runtime/` | Everything the terminal writes: position snapshots, the journal and its screenshots, paper trades, news archives, caches, downloads, logs |
 | `~/.zeus-terminal/mail_state.json` | Which alerts were mailed recently (for repeats and the hourly cap) |
 | `zeus/data/` and the other runtime folders in the code | Links into `~/.zeus-terminal/runtime/`, ignored by git |
+| `/data` in Docker | The same files, in the container's `zeus-data` volume ([1.7](#17-run-with-docker)) |
 
 The code folder never holds your data, so `git pull` and `git push` cannot touch it.
 
@@ -791,12 +837,14 @@ The code folder never holds your data, so `git pull` and `git push` cannot touch
 - Any setting can come from the environment as `ZEUS_<KEY>`, for example `ZEUS_TT_REFRESH_TOKEN`, `ZEUS_ALPACA_KEY_ID`, `ZEUS_PUBLIC_SECRET_KEY` or `ZEUS_PORT`.
 - `ZEUS_HOME=/path` moves the settings folder.
 - `PORT=8790` overrides the port for one start.
+- In Docker the image sets `ZEUS_HOME=/data` and `ZEUS_PORT=8765`, listens on every interface inside the container (`HOST=0.0.0.0`) and runs on New York time (`TZ`). `-e ZEUS_MCP_FROM_HOST=1` lets programs on this computer use MCP over HTTP too ([18.2](#182-connect-your-agent)).
 
 ### 15.3 Back up, move, reset
 
 - **Back up:** copy `~/.zeus-terminal/`.
 - **Move to another computer:** copy the folder there, or start with `ZEUS_HOME` pointing at it.
 - **Reset everything:** stop the terminal and delete `~/.zeus-terminal/`.
+- **In Docker:** `docker cp zeus:/data ./zeus-backup` copies everything out; `docker rm -f zeus` and then `docker volume rm zeus-data` reset it.
 
 ### 15.4 What goes over the network
 
@@ -821,6 +869,8 @@ ZEUS has no telemetry. It talks only to the services you connect (tastytrade, Al
 | Problem | What to do |
 |---|---|
 | The page does not open | Look at the window where the terminal runs. Is another program on 8765? Start with `PORT=8790 ./start.sh`. |
+| Docker: the page does not open | `docker ps` shows whether the container runs, and `docker logs zeus` why not. Open the port on the left of `-p` on this computer: http://localhost:8765. |
+| Docker: the page says `host not allowed` | You opened ZEUS by an IP address or a host name. Open http://localhost:8765; from another computer, use an SSH tunnel ([1.7](#17-run-with-docker)). |
 | The picker shows 0 quotes after the close | Press **Refresh** in the picker; the last session's closing prices fill in within seconds. |
 | Quotes stop updating in free mode | Yahoo Finance is throttling; ZEUS switches stock quotes to Finviz by itself. Wait a minute and refresh. |
 | Positions are empty in free mode | Upload your trades in Settings → Broker & data, and check that the CSV columns match [section 14](#14-manual-trades-the-csv-format). To look around first, press **Load the sample** on the Positions page. |
@@ -836,7 +886,7 @@ ZEUS has no telemetry. It talks only to the services you connect (tastytrade, Al
 | Sector rotation or options sentiment is empty | Press **🔄 Reload data** for rotation. Options sentiment needs a few weeks of after-close crawls. |
 | Paper Trade says "No market data yet" | The terminal is still loading after start; wait a few seconds. With tastytrade, press Test connection in Settings. |
 | The page looks old after an update | Reload with Cmd+Shift+R (Ctrl+Shift+R). |
-| An AI agent cannot connect | ZEUS must be running, and Settings → AI agents (MCP) → MCP server must be on. Run `python3 zeus/zeus_mcp_stdio.py --check` in the ZEUS folder; use `127.0.0.1`, not `localhost`. |
+| An AI agent cannot connect | ZEUS must be running, and Settings → AI agents (MCP) → MCP server must be on. Run `python3 zeus/zeus_mcp_stdio.py --check` in the ZEUS folder (in Docker: `docker exec -i zeus python /app/zeus/zeus_mcp_stdio.py --check`); use `127.0.0.1`, not `localhost`. |
 | An agent says it may not paper trade | Turn on Settings → AI agents (MCP) → Agents may place paper trades. |
 
 Still stuck? [Open an issue](https://github.com/jackson-cmd/zeus-options-terminal/issues) with what you did and what you saw (leave out tokens, cookies and account numbers).
@@ -899,6 +949,16 @@ Claude Desktop starts local tools as a command, so it uses the bridge that ships
 ```
 
 The Settings page fills in the real paths for this computer. To check the connection at any time, run `python3 zeus/zeus_mcp_stdio.py --check` in the ZEUS folder.
+
+**ZEUS in Docker** ([1.7](#17-run-with-docker)). Through Docker's port mapping, a request from your computer reaches the container from Docker's own network address, so MCP over HTTP refuses it, as it refuses other machines. Agents start the bridge inside the container with `docker exec` instead, and ⚙ Settings → AI agents then shows these commands (`zeus` is the container's `--name`):
+
+| Agent | How |
+|---|---|
+| Claude Code | `claude mcp add --scope user zeus -- docker exec -i zeus python /app/zeus/zeus_mcp_stdio.py` |
+| Codex CLI | `codex mcp add zeus -- docker exec -i zeus python /app/zeus/zeus_mcp_stdio.py` |
+| Claude Desktop, Gemini CLI | `"zeus": {"command": "docker", "args": ["exec", "-i", "zeus", "python", "/app/zeus/zeus_mcp_stdio.py"]}` under `mcpServers` in `claude_desktop_config.json` or `~/.gemini/settings.json` |
+
+`docker exec -i zeus python /app/zeus/zeus_mcp_stdio.py --check` tests the connection. To use the HTTP address instead, start the container with `-e ZEUS_MCP_FROM_HOST=1` as well: ZEUS then also answers programs that come in through the published port. Use it only with `-p 127.0.0.1:…`, or machines on your network could reach the tools too.
 
 Then just ask, for example: "Use zeus: which of my positions should I take profit on?", "Run the pre-trade checkup on NVDA and price a 30-day bull call spread", "Which earnings land before my expirations this month?"
 

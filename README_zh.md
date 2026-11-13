@@ -32,6 +32,18 @@ cd zeus-options-terminal
 
 8765 端口被占用？用 `PORT=8790 ./start.sh`。各家券商的 key 去哪拿，见[连接券商](#-连接券商)。
 
+### 🐳 用 Docker 运行
+
+不用装 Python。镜像发布在 GitHub Packages 上，支持 Intel 和 AMD（`amd64`），也支持 ARM（`arm64`，比如 Apple 芯片的 Mac 和树莓派）：
+
+```bash
+docker run -d --name zeus --restart unless-stopped \
+  -p 127.0.0.1:8765:8765 -v zeus-data:/data \
+  ghcr.io/jackson-cmd/zeus-options-terminal:latest
+```
+
+然后打开 **<http://localhost:8765>**。设置、交易和缓存都存在 `zeus-data` 卷里。更新时先运行 `docker pull ghcr.io/jackson-cmd/zeus-options-terminal:latest` 和 `docker rm -f zeus`，再运行同一条 `docker run`，数据不会丢。`-p` 里的 `127.0.0.1:` 不要去掉：ZEUS 没有登录，端口只能留在你自己的电脑上。时区、AI 智能体、Compose 写法和镜像里没有的功能，见[手册 §1.7](docs/USER_GUIDE_zh.md#17-用-docker-运行)。
+
 ## 适合你吗？
 
 - 你做**期权**：垂直价差、铁鹰、日历、备兑、卖看跌，想在一个屏幕上看清每个持仓的盈亏、希腊值和风险。
@@ -46,17 +58,18 @@ cd zeus-options-terminal
 
 ## 目录
 
-- [🚀 快速开始](#-快速开始) · [适合你吗？](#适合你吗) · [🆕 新功能](#-新功能) · [写在前面](#写在前面) · [四种接入方式](#四种接入方式)
+- [🚀 快速开始](#-快速开始) · [🐳 用 Docker 运行](#-用-docker-运行) · [适合你吗？](#适合你吗) · [🆕 新功能](#-新功能) · [写在前面](#写在前面) · [四种接入方式](#四种接入方式)
 - [🗺️ 功能全景](#️-功能全景)：[持仓](#️-持仓--指挥中心) · [纪律引擎](#-纪律引擎--真正帮你省钱的部分) · [选股](#-选股--找下一笔) · [模拟盘](#-模拟盘--先用假钱练手) · [市场判断](#-市场判断--大局观不带情绪) · [Digest](#-digest--四路新闻两种语言) · [事件](#-事件) · [交易日记](#-交易日记--照妖镜) · [三种界面语言](#-三种界面语言中文--双语--english) · [自带 AI](#-自带-ai) · [接入智能体（MCP）](#-接入你自己的-ai-智能体mcp)
 - [📸 截图一览](#-截图一览) · [🔌 连接券商](#-连接券商) · [🔑 每一项设置能解锁什么](#-每一项设置能解锁什么) · [📄 手动交易：CSV 格式](#-手动交易csv-格式)
 - [🔒 隐私与安全](#-隐私与安全) · [🏗️ 架构](#️-架构) · [❓ 常见问题](#-常见问题) · [🤝 参与贡献](#-参与贡献) · [📜 许可证](#-许可证禁止商业使用)
 
 ## 🆕 新功能
 
-<sub>最新版本 **0.5.1**（2026-11-12）。完整的更新历史见[更新记录](CHANGELOG_zh.md)。</sub>
+<sub>最新版本 **0.6.0**（2026-11-12）。完整的更新历史见[更新记录](CHANGELOG_zh.md)。</sub>
 
-| | 0.5.0、0.4.x、0.3.x 和 0.2.x 新加入 |
+| | 0.6.0、0.5.x、0.4.x、0.3.x 和 0.2.x 新加入 |
 |---|---|
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🐳 用 Docker 运行**：一条 `docker run` 就能从 GitHub Packages 拉起 ZEUS，Intel、AMD、ARM 都能跑。设置和交易存在卷里，端口只留在你自己的电脑上，AI 智能体通过 `docker exec` 连进来。[怎么运行 →](docs/USER_GUIDE_zh.md#17-用-docker-运行) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🔌 Alpaca 和 Public**：连上 Alpaca（免费，自带模拟盘）或 Public 账户，就有实时持仓、成交、在途订单和带希腊值的报价。持仓和行情分开选，也可以照样上传自己的交易、行情改用 Alpaca。ZEUS 只读，从不下单。[连接券商 →](docs/USER_GUIDE_zh.md#22-连接券商) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🧪 示例组合**：新装好以后点一下，就载入 6 个持仓和 1 笔已平仓交易，价格取自当天的真实期权报价，什么都不连也能把每个页面试一遍。一键清除。[怎么开始 →](docs/USER_GUIDE_zh.md#21-先选持仓从哪来) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **❓ 每个页面都有说明**：表头、分数、卡片旁边的小 ? 用大白话讲清这一项是什么、怎么算、怎么用；顶栏的 ? 列出这个页面上的每个按钮和数字。[怎么用 →](docs/USER_GUIDE_zh.md#31-每个页面的说明) |
@@ -276,8 +289,9 @@ date,symbol,asset,side,effect,qty,price,fees,option_type,strike,expiration,multi
 - **代码文件夹里只有代码。** 终端运行时写的所有东西 —— 持仓快照、交易日记和截图、新闻存档、缓存、下载、日志 —— 都写到 `~/.zeus-terminal/runtime/`。代码里的那些运行目录只是指向那里的链接，git 会忽略它们。
 - **安全地分享。** 用 `git push` 发布，或者用 `tools/export_clean_zip.sh` 打一个 zip，两种方式都只包含代码。不要把整个文件夹直接拖进网页、也不要自己手动打包。`tools/install_git_hook.sh` 会装一个本地的提交前检查：链接、数据文件、任何像密钥或 token 的字符串、你自己的主目录路径、登录名和 git 身份，一律拒绝提交。
 - 保存过的密钥对浏览器**只写不读**：设置接口只告诉你「已设置 / 未设置」，从不把密钥回传。
-- 给 AI 智能体的 MCP 接口只回应本机程序，任何 MCP 工具都下不了真实订单、读不出已保存的密钥；智能体读到的内容会发给它背后的模型服务商。
+- 给 AI 智能体的 MCP 接口只回应本机程序（用 Docker 时通过 `docker exec` 连进容器），任何 MCP 工具都下不了真实订单、读不出已保存的密钥；智能体读到的内容会发给它背后的模型服务商。
 - 服务默认只监听 **127.0.0.1**，拒绝陌生的 `Host` 头（防 DNS 重绑定），跨域请求只接受本机来源，写操作需要一个其他网站发不出来的请求头。
+- **用 Docker 时**，程序以普通用户身份运行，改不了自己的代码；你的数据留在 `/data` 卷里；文档里的命令只把端口发布在 127.0.0.1 上。本机检查（`Host` 头、跨域）和不用 Docker 时完全一样。
 - 没有任何遥测。应用只连接你自己接入的服务，以及公开行情数据（Cboe 延迟行情、Yahoo Finance、SEC EDGAR、Finviz、道琼斯 RSS）。
 - 免费数据会避开限流：公司资料（行业、细分行业、市值）从 Finviz 每次批量查 20 只；Yahoo Finance 一旦限流，股票报价自动改用 Finviz；一整条期权链只向 Cboe 请求一次，不再按到期日逐个请求 Yahoo。
 - **发现安全问题？** 请按 [SECURITY.md](.github/SECURITY.md) 私下报告，不要公开发 Issue。
@@ -296,11 +310,12 @@ zeus-options-terminal/
 │   ├── benzinga_digest/ · news_radar/ · market_brief/ · sec_filings/ …        新闻、市场判断、事件
 │   ├── trade_journal/ · journal_review/ · journal_expiry_whatif/              交易日记
 │   ├── zeus_*.py · local_broker.py    设置、券商（Alpaca、Public）、AI、新闻、MCP、邮件
+│   ├── Dockerfile          ghcr.io 上的容器镜像（还有 Dockerfile.dockerignore）
 │   └── defaults/           第一次启动时放进去的股票清单
 ├── docs/                 使用手册、功能清单、截图、README 用的图
 ├── site/                 项目网站（GitHub Pages）
 ├── tests/                离线测试：python -m pytest
-├── tools/                隐私检查钩子、干净打包脚本
+├── tools/                隐私检查钩子、干净打包脚本、发版说明、Docker 镜像检查
 ├── examples/             手动交易的 CSV 模板
 └── start.sh · start.command · start.bat · requirements.txt
 ```
@@ -341,7 +356,9 @@ FastAPI 服务 ── options_analyzer/optionstrat_server.py
 
 **Windows / Linux 能用吗？** 核心功能都能用。桌面通知只支持 macOS，Linux 上可以改用邮件提醒。
 
-**我的设置存在哪？** `~/.zeus-terminal/config.json`。删掉这个文件夹就什么都忘了。
+**能用 Docker 跑吗？** 能，见[用 Docker 运行](#-用-docker-运行)。镜像支持 Intel、AMD 和 ARM。镜像里没有桌面通知，邮件提醒可以用。
+
+**我的设置存在哪？** `~/.zeus-terminal/config.json`（用 Docker 时在 `zeus-data` 卷里）。删掉这个文件夹就什么都忘了。
 
 **收盘后第一次打开，选股页显示 0 只报价？** 点一下选股页的 **Refresh**，几秒钟就会补上最近一个交易日的收盘价。
 

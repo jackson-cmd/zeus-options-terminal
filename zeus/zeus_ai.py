@@ -58,9 +58,15 @@ def provider() -> str:
         return "off"
     if p == "anthropic" and not hc.get("anthropic_api_key"):
         return "off"
-    if p == "openai" and not hc.get("openai_api_key") and "localhost" not in (hc.get("openai_base_url") or ""):
+    if p == "openai" and not hc.get("openai_api_key") and not _local_endpoint(hc.get("openai_base_url") or ""):
         return "off"
     return p
+
+
+def _local_endpoint(url: str) -> bool:
+    """A model server on this computer (Ollama, LM Studio, …) needs no key. From the Docker
+    image the computer is host.docker.internal."""
+    return any(h in url for h in ("localhost", "127.0.0.1", "host.docker.internal"))
 
 
 def available() -> bool:

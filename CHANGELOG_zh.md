@@ -4,6 +4,25 @@
 
 ZEUS Terminal 每个版本改了什么。新功能前面挂着 <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> 标记，括号里的数字是对应的 PR 编号。
 
+## 0.6.0 —— 2026-11-12
+
+### 新功能
+
+| | 功能 | 详见 |
+|---|---|---|
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🐳 用 Docker 运行**：`docker run -d --name zeus --restart unless-stopped -p 127.0.0.1:8765:8765 -v zeus-data:/data ghcr.io/jackson-cmd/zeus-options-terminal:latest` 一条命令启动 ZEUS，不用装 Python，Intel、AMD、ARM 都能跑。设置、交易和缓存存在 `zeus-data` 卷里，更新也不会丢；ZEUS 以普通用户身份运行，改不了自己的代码；端口只留在 127.0.0.1 上。镜像默认是纽约时间，用 `-e TZ=` 换成你自己的时区。(#59) | [手册 §1.7](docs/USER_GUIDE_zh.md#17-用-docker-运行) |
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **AI 智能体和 Docker**：本机的智能体用 `docker exec` 在容器里启动 ZEUS 的 MCP 桥接脚本；ZEUS 跑在 Docker 里时，⚙ 设置 → AI 智能体 列出的就是这些命令。容器里的 MCP HTTP 接口只有在启动时加了 `-e ZEUS_MCP_FROM_HOST=1` 才回应本机。(#59) | [手册 §18.2](docs/USER_GUIDE_zh.md#182-连接你的智能体) |
+
+### 修复
+
+- 本机上地址是 `127.0.0.1` 的模型服务，以及从容器里看是 `host.docker.internal` 的模型服务，现在不填 API key 也能用，和 `localhost` 一样。(#59)
+- 代码文件夹只读、`zeus/` 下的运行数据链接改不了时，ZEUS 现在会在启动时说明是哪个文件夹，不再直接报错退出。(#59)
+
+### 项目
+
+- 每次发版都会构建 amd64 和 arm64 两种镜像，启动后检查页面、状态接口、本机检查、示例组合、MCP 和重启（`tools/docker_smoke.sh`），全部通过才推送到 GitHub Packages，标签是 `0.6.0`、`0.6` 和 `latest`，并附上签名的构建来源证明。改到镜像的 PR 也会做同样的检查，只是不推送。(#59)
+- Dockerfile 和它的忽略文件放在 `zeus/` 里，仓库最上层仍然是 20 项。(#59)
+
 ## 0.5.2 —— 2026-11-12
 
 ### 安全

@@ -9,7 +9,7 @@
 ## 目录
 
 1. [安装和启动](#1-安装和启动)
-   - [1.1 环境要求](#11-环境要求) · [1.2 第一次启动](#12-第一次启动) · [1.3 停止 重启 换端口](#13-停止-重启-换端口) · [1.4 装成应用](#14-装成应用) · [1.5 更新](#15-更新) · [1.6 卸载](#16-卸载)
+   - [1.1 环境要求](#11-环境要求) · [1.2 第一次启动](#12-第一次启动) · [1.3 停止 重启 换端口](#13-停止-重启-换端口) · [1.4 装成应用](#14-装成应用) · [1.5 更新](#15-更新) · [1.6 卸载](#16-卸载) · [1.7 用 Docker 运行](#17-用-docker-运行)
 2. [第一次设置](#2-第一次设置)
    - [2.1 先选持仓从哪来](#21-先选持仓从哪来) · [2.2 连接券商](#22-连接券商) · [2.3 免费模式 用 CSV 导入交易](#23-免费模式-用-csv-导入交易) · [2.4 新闻源](#24-新闻源) · [2.5 AI](#25-ai) · [2.6 通知和邮件](#26-通知和邮件) · [2.7 全部设置项](#27-全部设置项)
 3. [顶栏](#3-顶栏)
@@ -49,7 +49,7 @@
 
 ### 1.1 环境要求
 
-- Python 3.10 或更新的版本。
+- Python 3.10 或更新的版本；也可以不装 Python，改用 Docker（见 [1.7](#17-用-docker-运行)）。
 - macOS、Linux、Windows 都可以。桌面通知只支持 macOS；邮件提醒支持 macOS 和 Linux。
 - 新一点的 Chrome、Edge、Safari 或 Firefox。
 - 开始用不需要任何账户。tastytrade 账户、Benzinga Pro 登录和 AI 各自能解锁更多功能（见 [2.7](#27-全部设置项)）。
@@ -89,6 +89,51 @@ Windows 上第二条命令是 `.venv\Scripts\python -m pip install -r requiremen
 ### 1.6 卸载
 
 删掉代码文件夹。如果连设置、交易和缓存也不要了，再删掉 `~/.zeus-terminal/`。
+
+### 1.7 用 Docker 运行
+
+ZEUS 也有容器镜像，发布在 GitHub Packages 上：`ghcr.io/jackson-cmd/zeus-options-terminal`，支持 Intel 和 AMD（`amd64`），也支持 ARM（`arm64`：Apple 芯片的 Mac、装 64 位系统的树莓派）。要装 Docker（macOS 和 Windows 用 Docker Desktop），不用装 Python。
+
+```bash
+docker run -d --name zeus --restart unless-stopped \
+  -p 127.0.0.1:8765:8765 -v zeus-data:/data \
+  -e TZ=America/New_York \
+  ghcr.io/jackson-cmd/zeus-options-terminal:latest
+```
+
+然后打开 **<http://localhost:8765>**。第一次启动大约要半分钟，之后持仓页会给出示例组合、连接券商、上传交易三种开局方式（见 [2.1](#21-先选持仓从哪来)）。浏览器不会像 `./start.sh` 那样自己打开；装成应用（[1.4](#14-装成应用)）照样可以。
+
+- **`-p` 里的 `127.0.0.1:` 不要去掉。** ZEUS 没有登录：谁能连上这个端口，谁就能看你的持仓、改你的设置。带上 `127.0.0.1:`，只有本机的程序连得上。想在本机用别的端口，改第一个数字，比如 `-p 127.0.0.1:8790:8765`。容器里 ZEUS 固定监听 8765，所以在 ⚙ 设置里改端口不起作用。
+- **装在服务器或 NAS 上**，同样保留 `127.0.0.1:`，从你自己的电脑用 SSH 隧道连过去：`ssh -L 8765:localhost:8765 you@server`，然后打开 http://localhost:8765。用 IP 地址或主机名打开时，ZEUS 会回答 `host not allowed`，这是它防 DNS 重绑定的保护。
+- **你的数据**存在 `zeus-data` 卷里，也就是容器里的 `/data`：存设置和密钥的 `config.json`、你上传的交易，以及 `runtime/` 下的所有东西。更新和 `docker rm` 都不会动它。新建的卷里设置是空的。想把文件放在一个文件夹里，改用 `-v ~/zeus-data:/data`；在 Linux 上要先让用户 1000（ZEUS 用的就是这个用户）能写这个文件夹：`sudo chown 1000 ~/zeus-data`。
+- **时区。** 按钟点跑的任务（8:30 的 AI 新闻总结、9:00 的市场判断、AI 持仓点评）看的是容器的时钟。默认是纽约时间；把 `TZ` 换成你自己的时区，比如 `America/Chicago` 或 `Asia/Shanghai`，它们就按你的钟点跑。
+- **更新**：`docker pull ghcr.io/jackson-cmd/zeus-options-terminal:latest`，然后 `docker rm -f zeus`，再运行同一条 `docker run`。卷里的东西都还在。想停在某个版本，就用它的标签：`:0.6.0`，或者 `:0.6`，只接收这个版本的修复。
+- **停止、启动、看日志**：`docker stop zeus`、`docker start zeus`、`docker logs -f zeus`。带了 `--restart unless-stopped`，Docker 或电脑重启后 ZEUS 也会自己起来。
+- **删除**：`docker rm -f zeus`；连设置和数据也不要了，再运行 `docker volume rm zeus-data`。
+- **AI 智能体（MCP）**用 `docker exec` 在容器里启动 ZEUS 的桥接脚本；⚙ 设置 → AI 智能体 会列出每个智能体的命令（见 [18.2](#182-连接你的智能体)）。
+- **本机上的模型**（Ollama、LM Studio）：在容器里，`localhost` 指的是容器自己，本机要写成 `host.docker.internal`。把 OpenAI 兼容 Base URL 设成 `http://host.docker.internal:11434/v1`，不用填 key。在 Linux 上，还要在 `docker run` 里加 `--add-host=host.docker.internal:host-gateway`，并让模型服务接受来自 Docker 网络的连接。镜像里没有 Claude Code CLI，请改用 Anthropic 或 OpenAI 兼容的 key。
+- **镜像里没有的**：桌面通知（只支持 macOS；邮件提醒和浏览器自己的通知照常能用），要 Playwright 和 Chromium 的 Barchart 榜单和 Benzinga cookie 导出，以及要 Node.js 的 Benzinga 自动续登脚本。在设置里粘贴 Benzinga Pro 的 cookie 照常能用。需要这些功能，就用 `./start.sh` 运行 ZEUS。
+
+用 Docker Compose 的话，同样的配置写成下面这个 `compose.yaml`。`docker compose up -d` 启动；先 `docker compose pull`、再 `docker compose up -d` 就是更新：
+
+```yaml
+services:
+  zeus:
+    image: ghcr.io/jackson-cmd/zeus-options-terminal:latest
+    container_name: zeus
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8765:8765"
+    volumes:
+      - zeus-data:/data
+    environment:
+      TZ: America/New_York
+volumes:
+  zeus-data:
+    name: zeus-data
+```
+
+想自己构建镜像，在代码文件夹最上层运行 `docker build -f zeus/Dockerfile -t zeus-terminal .`，之后把命令里的 ghcr.io 镜像名换成 `zeus-terminal`。
 
 ---
 
@@ -783,6 +828,7 @@ date,symbol,asset,side,effect,qty,price,fees,option_type,strike,expiration,multi
 | `~/.zeus-terminal/runtime/` | 终端运行时写的所有东西：持仓快照、交易日记和截图、模拟单、新闻存档、缓存、下载、日志 |
 | `~/.zeus-terminal/mail_state.json` | 最近发过哪些邮件提醒（用来去重和限制每小时数量） |
 | 代码里的 `zeus/data/` 等运行目录 | 指向 `~/.zeus-terminal/runtime/` 的链接，git 会忽略 |
+| Docker 里的 `/data` | 同样这些文件，放在容器的 `zeus-data` 卷里（见 [1.7](#17-用-docker-运行)） |
 
 代码文件夹里从来不放你的数据，所以 `git pull`、`git push` 都碰不到它。
 
@@ -791,12 +837,14 @@ date,symbol,asset,side,effect,qty,price,fees,option_type,strike,expiration,multi
 - 任何设置都能写成环境变量 `ZEUS_<KEY>`，比如 `ZEUS_TT_REFRESH_TOKEN`、`ZEUS_ALPACA_KEY_ID`、`ZEUS_PUBLIC_SECRET_KEY`、`ZEUS_PORT`。
 - `ZEUS_HOME=/路径` 换设置文件夹的位置。
 - `PORT=8790` 只对这一次启动改端口。
+- 用 Docker 时，镜像设好了 `ZEUS_HOME=/data` 和 `ZEUS_PORT=8765`，在容器里监听所有网卡（`HOST=0.0.0.0`），时钟是纽约时间（`TZ`）。加上 `-e ZEUS_MCP_FROM_HOST=1`，本机的程序也能通过 HTTP 用 MCP（见 [18.2](#182-连接你的智能体)）。
 
 ### 15.3 备份 迁移 重置
 
 - **备份**：复制 `~/.zeus-terminal/`。
 - **换电脑**：把这个文件夹复制过去，或者启动时用 `ZEUS_HOME` 指向它。
 - **从头来过**：停掉终端，删掉 `~/.zeus-terminal/`。
+- **用 Docker 时**：`docker cp zeus:/data ./zeus-backup` 把所有东西复制出来；先 `docker rm -f zeus`、再 `docker volume rm zeus-data` 就是从头来过。
 
 ### 15.4 会连哪些网络服务
 
@@ -821,6 +869,8 @@ ZEUS 没有任何遥测。它只连你自己接入的服务（tastytrade、Alpac
 | 问题 | 怎么办 |
 |---|---|
 | 页面打不开 | 看终端运行的那个命令行窗口有没有报错。是不是别的程序占了 8765？用 `PORT=8790 ./start.sh` 启动。 |
+| Docker：页面打不开 | `docker ps` 看容器在不在跑，`docker logs zeus` 看为什么没起来。在本机打开 `-p` 左边的端口：http://localhost:8765。 |
+| Docker：页面显示 `host not allowed` | 你是用 IP 地址或主机名打开的。请打开 http://localhost:8765；从别的电脑访问，用 SSH 隧道（见 [1.7](#17-用-docker-运行)）。 |
 | 收盘后选股页显示 0 只报价 | 点选股页的 **Refresh**，几秒钟就会补上最近一个交易日的收盘价。 |
 | 免费模式下报价不动了 | Yahoo Finance 在限流，ZEUS 会自动把股票报价切到 Finviz。等一分钟再刷新。 |
 | 免费模式下持仓是空的 | 到 设置 → 券商与行情 上传交易，并检查 CSV 的列是否和[第 14 节](#14-手动交易-csv-格式)一致。想先看看效果，就在持仓页点 **载入示例组合**。 |
@@ -836,7 +886,7 @@ ZEUS 没有任何遥测。它只连你自己接入的服务（tastytrade、Alpac
 | 行业轮动或期权情绪是空的 | 行业轮动点 **🔄 重拉数据**。期权情绪要攒几周盘后爬取的数据。 |
 | 模拟盘提示 "No market data yet" | 终端刚启动还在加载，等几秒。用 tastytrade 的话，到设置里点测试连接。 |
 | 更新之后页面还是旧的 | 按 Cmd+Shift+R（Ctrl+Shift+R）强制刷新。 |
-| AI 智能体连不上 | ZEUS 要开着，并且 设置 → AI 智能体（MCP）→ MCP 接口 要是 on。在 ZEUS 文件夹里运行 `python3 zeus/zeus_mcp_stdio.py --check`；地址用 `127.0.0.1`，别用 `localhost`。 |
+| AI 智能体连不上 | ZEUS 要开着，并且 设置 → AI 智能体（MCP）→ MCP 接口 要是 on。在 ZEUS 文件夹里运行 `python3 zeus/zeus_mcp_stdio.py --check`（用 Docker 时运行 `docker exec -i zeus python /app/zeus/zeus_mcp_stdio.py --check`）；地址用 `127.0.0.1`，别用 `localhost`。 |
 | 智能体说不能下模拟单 | 打开 设置 → AI 智能体（MCP）→ 允许智能体下模拟单。 |
 
 还是解决不了？[提一个 Issue](https://github.com/jackson-cmd/zeus-options-terminal/issues)，写清楚你做了什么、看到了什么（别贴 token、cookie 和账户号）。
@@ -899,6 +949,16 @@ Claude Desktop 以命令的方式启动本地工具，所以要用 ZEUS 自带�
 ```
 
 设置页会帮你填好本机的真实路径。随时可以在 ZEUS 文件夹里运行 `python3 zeus/zeus_mcp_stdio.py --check` 检查连接。
+
+**ZEUS 跑在 Docker 里时**（见 [1.7](#17-用-docker-运行)）：经过 Docker 的端口映射，本机发出的请求是从 Docker 自己的网络地址进到容器的，所以 MCP 的 HTTP 接口会像拒绝别的电脑一样拒绝它。智能体改用 `docker exec` 在容器里启动桥接脚本，⚙ 设置 → AI 智能体 这时列出的就是下面这些命令（`zeus` 是容器的 `--name`）：
+
+| 智能体 | 怎么接 |
+|---|---|
+| Claude Code | `claude mcp add --scope user zeus -- docker exec -i zeus python /app/zeus/zeus_mcp_stdio.py` |
+| Codex CLI | `codex mcp add zeus -- docker exec -i zeus python /app/zeus/zeus_mcp_stdio.py` |
+| Claude Desktop、Gemini CLI | 在 `claude_desktop_config.json` 或 `~/.gemini/settings.json` 的 `mcpServers` 里加上 `"zeus": {"command": "docker", "args": ["exec", "-i", "zeus", "python", "/app/zeus/zeus_mcp_stdio.py"]}` |
+
+运行 `docker exec -i zeus python /app/zeus/zeus_mcp_stdio.py --check` 检查连接。想改用 HTTP 地址，启动容器时再加上 `-e ZEUS_MCP_FROM_HOST=1`：ZEUS 就也会回应经过发布端口进来的程序。只能和 `-p 127.0.0.1:…` 一起用，否则局域网里的机器也能用这些工具。
 
 连上以后直接问就行，比如：「用 zeus 看看我的持仓，哪些该止盈？」「对 NVDA 跑一下开单前体检，再给一个 30 天的牛市看涨价差估价」「这个月有哪些财报落在我的到期日之前？」
 

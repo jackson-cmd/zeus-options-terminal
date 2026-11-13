@@ -4,7 +4,9 @@ name: Release
 # and publish a GitHub release whose notes are that version's sections of CHANGELOG.md and
 # CHANGELOG_zh.md (tools/release_notes.py). main only takes pull requests whose tests pass,
 # so the release is a tested commit. Run it by hand to see the notes in the run summary; it
-# publishes nothing when the version already has its tag.
+# publishes nothing when the version already has its tag. A release made with GITHUB_TOKEN
+# raises no event for other workflows, so this run starts the Docker image build for the new
+# tag itself (.github/workflows/docker.yml).
 on:
   push:
     branches: [main]
@@ -13,6 +15,7 @@ on:
 
 permissions:
   contents: write
+  actions: write     # start the Docker workflow for the new tag
 
 concurrency:
   group: release
@@ -50,3 +53,9 @@ jobs:
           gh release create "v$VERSION" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
             --title "ZEUS Terminal $VERSION" --notes-file "$RUNNER_TEMP/notes.md"
           echo "Published https://github.com/$GITHUB_REPOSITORY/releases/tag/v$VERSION" | tee -a "$GITHUB_STEP_SUMMARY"
+          for attempt in 1 2 3; do   # the new tag can take a moment to be visible
+            gh workflow run docker.yml --repo "$GITHUB_REPOSITORY" --ref "v$VERSION" && break
+            [ "$attempt" = 3 ] && exit 1
+            sleep 10
+          done
+          echo "Started the Docker image build for v$VERSION: https://github.com/$GITHUB_REPOSITORY/actions/workflows/docker.yml" | tee -a "$GITHUB_STEP_SUMMARY"

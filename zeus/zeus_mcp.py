@@ -20,7 +20,9 @@ sees exactly what the pages show. Every tool is read-only except paper_trade_ope
 and paper_trade_close, which need Settings → AI agents → "Agents may place paper
 trades" = on. No tool can place a real order or read a stored secret or a file path.
 Only programs on this computer get an answer; a foreign Origin or Host header is
-refused (DNS rebinding) and only JSON bodies are read.
+refused (DNS rebinding) and only JSON bodies are read. In the Docker image, programs on
+the host come in through the stdio bridge (docker exec), or over HTTP from the container's
+gateway when the container was started with -e ZEUS_MCP_FROM_HOST=1.
 """
 from __future__ import annotations
 
@@ -29,6 +31,7 @@ import base64
 import datetime as _dt
 import json
 import math
+import os
 import re
 import sys
 from pathlib import Path
@@ -1523,11 +1526,30 @@ def _host_only(value: str) -> str:
     return v.rsplit(":", 1)[0] if v.count(":") == 1 else v
 
 
+def _host_peer() -> str:
+    """Inside the ZEUS image started with -e ZEUS_MCP_FROM_HOST=1: the container's gateway, the
+    address programs on the host arrive from through the published port. Empty everywhere else."""
+    if os.environ.get("ZEUS_MCP_FROM_HOST") != "1" or not hc.in_container():
+        return ""
+    return hc.container_gateway()
+
+
+def stdio_command() -> list[str]:
+    """In the Docker image: how an agent on the host starts the stdio bridge inside the container
+    ("zeus" is the --name the manual gives the container)."""
+    return ["docker", "exec", "-i", "zeus", "python", str(_ROOT / "zeus_mcp_stdio.py")]
+
+
 def _local_request(request: Request) -> str | None:
     """Why this request may not use MCP, or None when it may."""
     client = request.client.host if request.client else ""
     if client not in _LOCAL_HOSTS and not client.startswith("127.") and client != "::ffff:127.0.0.1":
-        return "MCP answers only programs on this computer"
+        peer = _host_peer()
+        if not (peer and client == peer):
+            if hc.in_container():
+                return ("ZEUS runs in a container: connect with " + " ".join(stdio_command())
+                        + ", or start the container with -e ZEUS_MCP_FROM_HOST=1")
+            return "MCP answers only programs on this computer"
     host = _host_only(request.headers.get("host", ""))
     if host and host not in _LOCAL_HOSTS:
         return "Host header must be localhost or 127.0.0.1"
@@ -1596,6 +1618,8 @@ async def mcp_info(request: Request):
     return {"enabled": enabled(), "paper_trades": paper_allowed(),
             "url": f"http://127.0.0.1:{port}/mcp",
             "python": sys.executable, "bridge": str(_ROOT / "zeus_mcp_stdio.py"),
+            # in the Docker image the bridge runs inside the container, through docker exec
+            "container": {"stdio": stdio_command(), "http": bool(_host_peer())} if hc.in_container() else None,
             "protocol_versions": list(SUPPORTED),
             "tools": [{"name": n, "title": t["def"]["title"], "write": not t["def"]["annotations"]["readOnlyHint"]}
                       for n, t in TOOLS.items()],
