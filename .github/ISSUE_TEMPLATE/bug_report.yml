@@ -1,0 +1,80 @@
+name: Bug report · 报告 bug
+description: Something does not work as described · 有功能不正常
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Do not paste tokens, cookies, API keys or account numbers. A security problem goes to a [private report](https://github.com/jackson-cmd/zeus-options-terminal/security/advisories/new) instead.
+        谢谢反馈。不要贴 token、cookie、API key 和账户号。安全问题请走[私下报告](https://github.com/jackson-cmd/zeus-options-terminal/security/advisories/new)，不要公开发。
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened · 发生了什么
+      description: What you clicked or ran, and what you saw. A screenshot helps. · 你点了什么、运行了什么，看到了什么。附截图更好。
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected · 本来应该怎样
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: How to reproduce · 怎么复现
+      placeholder: |
+        1. Open … · 打开……
+        2. Click … · 点……
+  - type: input
+    id: version
+    attributes:
+      label: ZEUS version · 版本
+      description: Run `git describe --tags` in the ZEUS folder, or look at `APP_VERSION` in `zeus/zeus_config.py`. · 在 ZEUS 文件夹里运行 `git describe --tags`，或者看 `zeus/zeus_config.py` 里的 `APP_VERSION`。
+      placeholder: v0.5.1
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: System · 系统
+      options:
+        - macOS
+        - Windows
+        - Linux
+    validations:
+      required: true
+  - type: dropdown
+    id: positions
+    attributes:
+      label: Positions from · 持仓来源
+      options:
+        - tastytrade
+        - Alpaca
+        - Public
+        - Uploaded CSV / manual · 上传 CSV / 手动
+        - Sample portfolio · 示例组合
+  - type: dropdown
+    id: quotes
+    attributes:
+      label: Quotes from · 行情来源
+      options:
+        - Free (Cboe + Yahoo) · 免费
+        - tastytrade
+        - Alpaca
+        - Public
+  - type: dropdown
+    id: language
+    attributes:
+      label: Interface language · 界面语言
+      options:
+        - 中文
+        - 双语 · Bilingual
+        - English
+  - type: textarea
+    id: log
+    attributes:
+      label: Error messages · 报错信息
+      description: From the terminal window that runs ZEUS or from the browser console. Remove anything personal first. · 运行 ZEUS 的终端窗口或浏览器控制台里的报错。先删掉个人信息。
+      render: text

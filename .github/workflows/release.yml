@@ -1,0 +1,52 @@
+name: Release
+
+# When a merge to main raises APP_VERSION in zeus/zeus_config.py, tag that commit v<version>
+# and publish a GitHub release whose notes are that version's sections of CHANGELOG.md and
+# CHANGELOG_zh.md (tools/release_notes.py). main only takes pull requests whose tests pass,
+# so the release is a tested commit. Run it by hand to see the notes in the run summary; it
+# publishes nothing when the version already has its tag.
+on:
+  push:
+    branches: [main]
+    paths: ["zeus/zeus_config.py", "CHANGELOG.md", "CHANGELOG_zh.md", "tools/release_notes.py", ".github/workflows/release.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Version and notes
+        id: notes
+        run: |
+          version="$(python tools/release_notes.py version)"
+          python tools/release_notes.py notes > "$RUNNER_TEMP/notes.md"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          { echo "## Notes for v$version"; echo; cat "$RUNNER_TEMP/notes.md"; } >> "$GITHUB_STEP_SUMMARY"
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.notes.outputs.version }}
+        run: |
+          if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+            echo "Not on main; nothing published." | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          if git ls-remote --exit-code --tags origin "refs/tags/v$VERSION" > /dev/null; then
+            echo "v$VERSION is already tagged; nothing published." | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          gh release create "v$VERSION" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
+            --title "ZEUS Terminal $VERSION" --notes-file "$RUNNER_TEMP/notes.md"
+          echo "Published https://github.com/$GITHUB_REPOSITORY/releases/tag/v$VERSION" | tee -a "$GITHUB_STEP_SUMMARY"

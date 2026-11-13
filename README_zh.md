@@ -8,7 +8,7 @@
 
 [🌐 网站](https://jackson-cmd.github.io/zeus-options-terminal/zh/) · [English → README.md](README.md) · [🚀 快速开始](#-快速开始) · [新功能](#-新功能) · [全部功能](docs/FEATURES_zh.md) · [使用手册](docs/USER_GUIDE_zh.md) · [参与贡献](#-参与贡献)
 
-[![CI](https://github.com/jackson-cmd/zeus-options-terminal/actions/workflows/ci.yml/badge.svg)](https://github.com/jackson-cmd/zeus-options-terminal/actions/workflows/ci.yml) ![Python](https://img.shields.io/badge/python-3.10%2B-3776ab) ![本地部署](https://img.shields.io/badge/100%25-本地部署-2ea043) ![界面语言](https://img.shields.io/badge/界面-中文%20%7C%20双语%20%7C%20English-e3b341) ![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial-b31b1b)
+[![CI](https://github.com/jackson-cmd/zeus-options-terminal/actions/workflows/ci.yml/badge.svg)](https://github.com/jackson-cmd/zeus-options-terminal/actions/workflows/ci.yml) [![版本](https://img.shields.io/github/v/release/jackson-cmd/zeus-options-terminal?label=版本)](https://github.com/jackson-cmd/zeus-options-terminal/releases) ![Python](https://img.shields.io/badge/python-3.10%2B-3776ab) ![本地部署](https://img.shields.io/badge/100%25-本地部署-2ea043) ![界面语言](https://img.shields.io/badge/界面-中文%20%7C%20双语%20%7C%20English-e3b341) ![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial-b31b1b)
 
 <img src="docs/assets/demo_zh.gif" alt="宙斯期权终端 14 秒演示：持仓总览、策略盈亏表、风险视图、K 线图墙、新闻和交易日记" width="100%">
 
@@ -280,6 +280,7 @@ date,symbol,asset,side,effect,qty,price,fees,option_type,strike,expiration,multi
 - 服务默认只监听 **127.0.0.1**，拒绝陌生的 `Host` 头（防 DNS 重绑定），跨域请求只接受本机来源，写操作需要一个其他网站发不出来的请求头。
 - 没有任何遥测。应用只连接你自己接入的服务，以及公开行情数据（Cboe 延迟行情、Yahoo Finance、SEC EDGAR、Finviz、道琼斯 RSS）。
 - 免费数据会避开限流：公司资料（行业、细分行业、市值）从 Finviz 每次批量查 20 只；Yahoo Finance 一旦限流，股票报价自动改用 Finviz；一整条期权链只向 Cboe 请求一次，不再按到期日逐个请求 Yahoo。
+- **发现安全问题？** 请按 [SECURITY.md](SECURITY.md) 私下报告，不要公开发 Issue。
 
 ---
 
@@ -349,6 +350,8 @@ FastAPI 服务 ── options_analyzer/optionstrat_server.py
 ## 🤝 参与贡献
 
 ZEUS 的功能远比这一页能写下的多，而且还在长，以后也可能加新功能。**欢迎提 PR**：修 bug、接新的数据源或券商、改翻译、补文档，或者把[还没接上的部分](docs/FEATURES_zh.md#还没接上的部分欢迎-pr)接起来都可以。动手前先看 [CONTRIBUTING.md](CONTRIBUTING.md)。每个 PR 都会在 Linux、macOS、Windows 上跑一遍测试，`main` 只接受测试全部通过的 PR。
+
+提问和讨论去 [Discussions](https://github.com/jackson-cmd/zeus-options-terminal/discussions)，bug 走 [Issues](https://github.com/jackson-cmd/zeus-options-terminal/issues/new/choose)，安全问题请私下报告（[SECURITY.md](SECURITY.md)）。大家都遵守[行为准则](CODE_OF_CONDUCT.md)。
 
 ---
 
