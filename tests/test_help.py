@@ -47,7 +47,7 @@ process.stdout.write(JSON.stringify({ entries: box.zeusHelp.entries(), groups: b
 def registry():
     if shutil.which("node") is None:
         pytest.skip("node is not installed")
-    run = subprocess.run(["node", "-e", LOADER, str(HELP)], capture_output=True, text=True, timeout=60)
+    run = subprocess.run(["node", "-e", LOADER, str(HELP)], capture_output=True, encoding="utf-8", timeout=60)
     assert run.returncode == 0, run.stderr
     return json.loads(run.stdout)
 
@@ -55,7 +55,7 @@ def registry():
 @needs_node
 def test_help_file_parses():
     run = subprocess.run(["node", "-e", "new Function(require('fs').readFileSync(process.argv[1], 'utf8'))", str(HELP)],
-                         capture_output=True, text=True, timeout=30)
+                         capture_output=True, encoding="utf-8", timeout=30)
     assert run.returncode == 0, run.stderr
 
 
