@@ -12,6 +12,10 @@ ZEUS Terminal 每个版本改了什么。新功能前面挂着 <img src="https:/
 - 启动方式不变（`./start.sh`、`start.command`、`start.bat`），`~/.zeus-terminal` 里的设置和数据不受影响。`git pull` 之后下一次启动，会在 `zeus/` 下建好运行数据的链接，并删掉最上层留下的旧链接。只删指向 `~/.zeus-terminal/runtime` 的链接，文件夹和别的链接一概不碰。(#45)
 - 如果你通过 stdio 桥接连了 Claude Desktop，请到 设置 → AI 智能体 重新复制一次配置：桥接脚本现在是 `zeus/zeus_mcp_stdio.py`。(#45)
 
+### 修复
+
+- Cboe 免费行情回「请求太多」时，示例组合只能生成一部分持仓；而且 Cboe 一次请求失败后，2 分钟内都不再重试。现在 15 秒后就会再问 Cboe；Cboe 忙的时候，示例组合改用 Yahoo Finance 的期权链定价，夜里 Yahoo 没有买卖价时用最新成交价。(#45)
+
 ## 0.5.0 —— 2026-11-12
 
 ### 新功能

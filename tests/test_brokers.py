@@ -413,8 +413,40 @@ def test_sample_portfolio_load_and_remove(monkeypatch):
 
 def test_sample_needs_quotes(monkeypatch):
     monkeypatch.setattr(lb, "_cboe_book", lambda und: None)
+    monkeypatch.setattr(lb, "_yahoo_book", lambda und: None)
     with pytest.raises(lb.LocalModeError):
         lb.sample_trades()
+
+
+def test_sample_uses_yahoo_when_cboe_is_busy(monkeypatch):
+    """Cboe answers 429 under load; the sample then prices from Yahoo's chains, whose bid/ask may be
+    blank at night (the last price is used then)."""
+    spots = {"SPY": 700.0, "QQQ": 600.0, "AAPL": 350.0, "NVDA": 170.0, "MSFT": 520.0, "TSLA": 400.0}
+
+    def night_book(und):
+        b = fake_book(und, spots[und])
+        b["rows"] = {k: (0.0, 0.0, v[2]) + v[3:] for k, v in b["rows"].items()}     # no bid/ask, last only
+        return b
+    monkeypatch.setattr(lb, "_cboe_book", lambda und: None)
+    monkeypatch.setattr(lb, "_yahoo_book", night_book)
+    monkeypatch.setattr(lb, "_free_equity_quote", lambda s: {"last": 200.0, "prev_close": 199.0})
+    trades = lb.sample_trades()
+    assert len(trades) == 13 and all(t["price"] > 0 for t in trades)
+
+
+def test_a_cboe_failure_is_retried_soon(monkeypatch):
+    calls = []
+
+    def down(sym):
+        calls.append(sym)
+        raise OSError("429")
+    monkeypatch.setattr(lb, "_cboe_json", down)
+    lb._cache.pop(("cboe", "ZZZ"), None)
+    assert lb._cboe_book("ZZZ") is None and lb._cboe_book("ZZZ") is None
+    assert len(calls) == 1                                  # not hammered right away …
+    lb._cache[("cboe", "ZZZ")] = (lb._cache[("cboe", "ZZZ")][0] - 16, None)
+    lb._cboe_book("ZZZ")
+    assert len(calls) == 2                                  # … but asked again after 15 s, not 2 min
 
 
 # --------------------------------------------------------------------------- pages
