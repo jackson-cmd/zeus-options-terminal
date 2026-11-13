@@ -12,7 +12,7 @@
 
 <sub>If you were looking for a self-hosted options trading dashboard, an options profit calculator with live Greeks, a tastytrade, Alpaca or Public portfolio tracker, an options trading journal, a paper-trading simulator for spreads, a stock screener with support and resistance, or a bilingual US stock market news desk: it is all here, in one app.</sub>
 
-[中文说明 → README_zh.md](README_zh.md) · [What's new](#-whats-new) · [All features](docs/FEATURES.md) · [User manual](docs/USER_GUIDE.md) · [Quick start](#-quick-start) · [Contributing](#-contributing) · [License](#-license-non-commercial)
+[🌐 Website](https://jackson-cmd.github.io/zeus-options-terminal/) · [中文说明 → README_zh.md](README_zh.md) · [What's new](#-whats-new) · [All features](docs/FEATURES.md) · [User manual](docs/USER_GUIDE.md) · [Quick start](#-quick-start) · [Contributing](#-contributing) · [License](#-license-non-commercial)
 
 ![Python](https://img.shields.io/badge/python-3.10%2B-3776ab) ![Self-hosted](https://img.shields.io/badge/self--hosted-100%25%20local-2ea043) ![Languages](https://img.shields.io/badge/UI-中文%20%7C%20双语%20%7C%20English-e3b341) ![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial-b31b1b)
 

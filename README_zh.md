@@ -12,7 +12,7 @@
 
 <sub>如果你在找：本地部署的美股期权交易终端、带实时希腊值的期权盈亏计算器、tastytrade / Alpaca / Public 持仓管理、期权交易日记、期权价差和股票的模拟盘、带支撑阻力的美股选股器、中英双语美股新闻 —— 都在这一个应用里。</sub>
 
-[English → README.md](README.md) · [新功能](#-新功能) · [全部功能](docs/FEATURES_zh.md) · [使用手册](docs/USER_GUIDE_zh.md) · [快速开始](#-快速开始) · [参与贡献](#-参与贡献) · [许可证](#-许可证禁止商业使用)
+[🌐 网站](https://jackson-cmd.github.io/zeus-options-terminal/zh/) · [English → README.md](README.md) · [新功能](#-新功能) · [全部功能](docs/FEATURES_zh.md) · [使用手册](docs/USER_GUIDE_zh.md) · [快速开始](#-快速开始) · [参与贡献](#-参与贡献) · [许可证](#-许可证禁止商业使用)
 
 ![Python](https://img.shields.io/badge/python-3.10%2B-3776ab) ![本地部署](https://img.shields.io/badge/100%25-本地部署-2ea043) ![界面语言](https://img.shields.io/badge/界面-中文%20%7C%20双语%20%7C%20English-e3b341) ![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial-b31b1b)
 

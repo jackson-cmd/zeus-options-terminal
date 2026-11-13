@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>宙斯期权终端 ZEUS Terminal：本地部署的美股期权交易终端（支持 tastytrade、Alpaca、Public）</title>
+<meta name="description" content="免费、本地部署的美股期权交易终端：实时持仓和希腊值、盈亏与风险、模拟盘、选股、中英双语美股新闻、交易日记，一个应用全搞定。支持 tastytrade、Alpaca、Public，或任何券商导出的 CSV。">
+<meta name="keywords" content="期权交易终端, 美股期权, 期权分析, 期权盈亏计算器, 希腊值, 隐含波动率, 期权风险管理, 模拟盘, 模拟交易, 交易日记, 选股器, 持仓管理, 美股新闻, 本地部署, 开源, tastytrade, Alpaca, Public, options trading terminal">
+<meta name="theme-color" content="#0d1117">
+<link rel="canonical" href="https://jackson-cmd.github.io/zeus-options-terminal/zh/">
+<link rel="alternate" hreflang="en" href="https://jackson-cmd.github.io/zeus-options-terminal/">
+<link rel="alternate" hreflang="zh-Hans" href="https://jackson-cmd.github.io/zeus-options-terminal/zh/">
+<link rel="alternate" hreflang="x-default" href="https://jackson-cmd.github.io/zeus-options-terminal/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="宙斯期权终端 ZEUS Terminal">
+<meta property="og:title" content="宙斯期权终端：本地部署的美股期权交易终端">
+<meta property="og:description" content="做期权要开十个网页才看得全的东西，一个终端全搞定：持仓和希腊值、风险、模拟盘、选股、新闻和交易日记。支持 tastytrade、Alpaca、Public 或 CSV。">
+<meta property="og:url" content="https://jackson-cmd.github.io/zeus-options-terminal/zh/">
+<meta property="og:image" content="https://jackson-cmd.github.io/zeus-options-terminal/screenshots/positions_zh.png">
+<meta property="og:image:width" content="1440">
+<meta property="og:image:height" content="900">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:locale:alternate" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="宙斯期权终端：本地部署的美股期权交易终端">
+<meta name="twitter:description" content="持仓和希腊值、风险、模拟盘、选股、新闻和交易日记，都在你自己电脑上的一个应用里。">
+<meta name="twitter:image" content="https://jackson-cmd.github.io/zeus-options-terminal/screenshots/positions_zh.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9A%A1%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="../style.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "宙斯期权终端",
+  "alternateName": "ZEUS Terminal",
+  "description": "本地部署的全方位美股期权交易终端：实时持仓和希腊值、盈亏与风险、出场纪律、模拟盘、选股、中英双语新闻、财报和 SEC 文件、交易日记。可以连 tastytrade、Alpaca 或 Public，也可以读任何券商导出的 CSV。",
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "macOS, Linux, Windows",
+  "url": "https://jackson-cmd.github.io/zeus-options-terminal/zh/",
+  "downloadUrl": "https://github.com/jackson-cmd/zeus-options-terminal",
+  "sameAs": ["https://github.com/jackson-cmd/zeus-options-terminal"],
+  "screenshot": "https://jackson-cmd.github.io/zeus-options-terminal/screenshots/positions_zh.png",
+  "license": "https://polyformproject.org/licenses/noncommercial/1.0.0/",
+  "inLanguage": ["zh", "en"],
+  "isAccessibleForFree": true,
+  "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
+  "featureList": [
+    "实时期权持仓和希腊值，自动识别策略",
+    "盈亏、最大盈亏、盈利概率；风险视图带压力测试和蒙特卡洛",
+    "出场提醒、漏挂止盈单提醒、开单前体检",
+    "期权和股票都能下的模拟盘",
+    "选股：带支撑阻力的 K 线图墙、TA 评分、热力图、行业轮动",
+    "Finviz、华尔街日报、MarketWatch、Benzinga 新闻，中英双语",
+    "财报日历、企业事件和 SEC 文件",
+    "交易日记：胜率、盈亏比和 AI 复盘",
+    "给 AI 智能体用的 MCP 接口",
+    "券商：tastytrade、Alpaca、Public，或任何券商的 CSV"
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type": "Question", "name": "宙斯期权终端免费吗？",
+     "acceptedAnswer": {"@type": "Answer", "text": "个人、非商业使用免费（PolyForm Noncommercial 许可证）。它跑在你自己的电脑上，不用订阅，也不用注册账号。"}},
+    {"@type": "Question", "name": "一定要有 tastytrade 账户吗？",
+     "acceptedAnswer": {"@type": "Answer", "text": "不用。可以连 tastytrade、Alpaca（免费，自带模拟盘）或 Public，也可以上传任何券商导出的交易 CSV。没有券商行情时用免费源：Cboe 期权（约延迟 15 分钟）和 Yahoo Finance 股票。还有一个示例组合，可以先把每个页面试一遍。"}},
+    {"@type": "Question", "name": "它会帮我下单吗？",
+     "acceptedAnswer": {"@type": "Answer", "text": "不会。它只从券商读取持仓和行情。模拟盘里的交易只是练手，不会发给任何券商。"}},
+    {"@type": "Question", "name": "我的数据存在哪里？",
+     "acceptedAnswer": {"@type": "Answer", "text": "只存在你自己的电脑上（~/.zeus-terminal）。密钥、交易和设置都不会离开这台电脑，只在请求你自己接入的券商或服务时发给对方。没有任何遥测。"}},
+    {"@type": "Question", "name": "能在哪些系统上用？",
+     "acceptedAnswer": {"@type": "Answer", "text": "macOS、Linux 和 Windows，需要 Python 3.10 或更新。桌面通知只支持 macOS；邮件提醒支持 macOS 和 Linux。"}},
+    {"@type": "Question", "name": "有中文界面吗？",
+     "acceptedAnswer": {"@type": "Answer", "text": "有。界面随时在中文、双语和英文之间切换，新闻标题也可以中英对照显示。"}}
+  ]
+}
+</script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="brand" href="./">⚡ 宙斯期权终端<span>ZEUS Terminal</span></a>
+  <nav class="links" aria-label="页面导航">
+    <a href="#features">功能</a>
+    <a href="#brokers">券商</a>
+    <a href="#screenshots">截图</a>
+    <a href="#start">快速开始</a>
+    <a href="#faq">常见问题</a>
+    <a class="lang" href="../" hreflang="en" lang="en">English</a>
+    <a class="gh" href="https://github.com/jackson-cmd/zeus-options-terminal">GitHub</a>
+  </nav>
+</div></header>
+
+<main>
+<div class="wrap hero">
+  <p class="kicker">驾驭希腊值 · RULE THE GREEKS</p>
+  <h1>本地部署的美股期权交易终端</h1>
+  <p class="lead">做期权要开十个网页才看得全的东西，一个终端全搞定：实时持仓和希腊值、盈亏与风险、出场提醒、模拟盘、选股、美股新闻、财报和 SEC 文件，还有不说假话的交易日记。它跑在你自己的电脑上，可以连 tastytrade、Alpaca、Public，也可以用任何券商导出的 CSV。</p>
+  <div class="cta">
+    <a class="btn primary" href="https://github.com/jackson-cmd/zeus-options-terminal">去 GitHub 下载</a>
+    <a class="btn" href="#start">快速开始</a>
+    <a class="btn" href="https://github.com/jackson-cmd/zeus-options-terminal/blob/main/docs/USER_GUIDE_zh.md">使用手册</a>
+  </div>
+  <ul class="chips">
+    <li>个人使用免费</li><li>100% 本地运行</li><li>中文 · 双语 · English</li><li>macOS · Linux · Windows</li>
+  </ul>
+  <div class="shot"><img src="../screenshots/positions_zh.png" width="1440" height="900" alt="宙斯期权终端持仓页：各个期权策略的总盈亏和当日盈亏、盈亏平衡距离、最大盈亏、盈利概率和到期天数"></div>
+</div>
+
+<section id="features"><div class="wrap">
+  <h2>一个终端，全都有</h2>
+  <p class="sub">一个做期权的人给自己天天用的工具，用了很久以后开放出来。每个页面都有 ?，讲清楚每个按钮、每个数字是什么、怎么算、怎么用。</p>
+  <div class="grid">
+    <div class="card"><h3>⚔️ 持仓和希腊值</h3><p>每条腿按市价实时计算，自动识别策略：垂直价差、铁鹰、日历、对角、备兑和股票。当日和累计盈亏、离盈亏平衡多远、最大盈亏、盈利概率、到期天数。</p></div>
+    <div class="card"><h3>⚠ 风险视图</h3><p>大盘涨跌的压力测试、组合希腊值、到期阶梯、Theta 能撑多久，以及整个组合的蒙特卡洛盈亏概率。</p></div>
+    <div class="card"><h3>🩺 出场纪律</h3><p>止盈和深亏指示灯、价差没挂平仓单的提醒、开单前四道关体检、流动性扫描和事件风险雷达。</p></div>
+    <div class="card"><h3>🧪 模拟盘</h3><p>在实时期权链上搭任何策略，期权腿和股票腿都行，然后跟踪盈亏，像一个会记账的期权盈亏计算器。</p></div>
+    <div class="card"><h3>🎯 选股</h3><p>带支撑阻力和 EMA 50/200 的 K 线图墙、TA 评分、热力图、行业轮动和期权情绪，还有会推荐价差的 TA 扫描。</p></div>
+    <div class="card"><h3>📋 新闻台</h3><p>Finviz、华尔街日报、MarketWatch，可选 Benzinga，合在一个列表里；标题中英对照，可以只看持仓和自选股的新闻。</p></div>
+    <div class="card"><h3>📅 财报和公告</h3><p>财报和宏观日历、企业事件、SEC EDGAR 文件阅读器，和你的持仓放在一起。</p></div>
+    <div class="card"><h3>📓 交易日记</h3><p>胜率、盈亏比、盈亏日历、月度目标、假设分析和 AI 复盘，按你的成交自动重算。</p></div>
+    <div class="card"><h3>🤖 你自己的 AI 和智能体</h3><p>接 Claude、OpenAI 兼容接口或本地模型。MCP 接口让 AI 智能体读取持仓、跑体检、给价差估价。</p></div>
+  </div>
+</div></section>
+
+<section id="brokers"><div class="wrap">
+  <h2>tastytrade、Alpaca、Public，或者不用券商</h2>
+  <p class="sub">ZEUS 对券商只读，从不下单。持仓和行情分开选；券商没有的数据走免费源。</p>
+  <div class="tablewrap"><table class="cmp">
+    <thead><tr><th></th><th>tastytrade</th><th>Alpaca</th><th>Public</th><th>免费模式</th></tr></thead>
+    <tbody>
+      <tr><th>持仓</th><td>从你的账户实时拉取</td><td>从你的模拟盘或实盘实时拉取</td><td>从你的账户实时拉取</td><td>上传 CSV 或手动录入</td></tr>
+      <tr><th>行情</th><td>实时推送</td><td>免费：股票 IEX 实时，期权带希腊值和隐波</td><td>实时报价、期权链和希腊值</td><td>Cboe 期权和 Yahoo 股票，约延迟 15 分钟</td></tr>
+      <tr><th>需要什么</th><td>tastytrade 账户</td><td>免费注册；模拟盘不用入金</td><td>Public 账户</td><td>什么都不用</td></tr>
+    </tbody>
+  </table></div>
+</div></section>
+
+<section id="screenshots"><div class="wrap">
+  <h2>截图</h2>
+  <p class="sub">截图里的交易是编的；报价、新闻和公告是截图当天真实的公开数据。</p>
+  <div class="gallery">
+    <figure><img loading="lazy" src="../screenshots/detail_zh.png" width="1440" height="900" alt="期权策略详情：不同价格和日期下的盈亏图和希腊值"><figcaption><b>策略详情</b>：不同价格和日期下的盈亏、希腊值、盈利概率</figcaption></figure>
+    <figure><img loading="lazy" src="../screenshots/risk_zh.png" width="1440" height="900" alt="组合风险视图：压力测试、到期阶梯和蒙特卡洛"><figcaption><b>风险视图</b>：压力测试、到期阶梯、蒙特卡洛</figcaption></figure>
+    <figure><img loading="lazy" src="../screenshots/picker_zh.png" width="1440" height="900" alt="选股 K 线图墙，标出支撑阻力和均线"><figcaption><b>选股</b>：带支撑阻力和 EMA 50/200 的 K 线图墙</figcaption></figure>
+    <figure><img loading="lazy" src="../screenshots/paper_builder_zh.png" width="1440" height="900" alt="在实时期权链上搭策略的模拟盘"><figcaption><b>模拟盘</b>：在实时期权链上搭策略</figcaption></figure>
+    <figure><img loading="lazy" src="../screenshots/digest_zh.png" width="1440" height="900" alt="中英双语美股新闻：Finviz、华尔街日报、MarketWatch"><figcaption><b>Digest 新闻</b>：四路新闻源，中英对照</figcaption></figure>
+    <figure><img loading="lazy" src="../screenshots/journal_zh.png" width="1440" height="900" alt="期权交易日记：胜率、盈亏比和资金曲线"><figcaption><b>交易日记</b>：胜率、盈亏比、月度目标</figcaption></figure>
+  </div>
+</div></section>
+
+<section id="start"><div class="wrap">
+  <h2>快速开始</h2>
+  <p class="sub">需要 Python 3.10 或更新。第一次启动会自己建虚拟环境、装好依赖。</p>
+<pre><code>git clone https://github.com/jackson-cmd/zeus-options-terminal
+cd zeus-options-terminal
+./start.sh          # macOS / Linux（Windows 双击 start.bat）</code></pre>
+  <ol class="steps">
+    <li>浏览器会自己打开 <code>http://localhost:8765</code>。</li>
+    <li>点 <b>载入示例组合</b>，用按当天报价生成的示例组合四处看看。</li>
+    <li>然后在 ⚙ 设置里连 tastytrade、Alpaca 或 Public，或者上传你的交易 CSV。</li>
+  </ol>
+</div></section>
+
+<section id="faq" class="faq"><div class="wrap">
+  <h2>常见问题</h2>
+  <details open><summary>宙斯期权终端免费吗？</summary><p>个人、非商业使用免费（PolyForm Noncommercial 许可证）。它跑在你自己的电脑上，不用订阅，也不用注册账号。</p></details>
+  <details><summary>一定要有 tastytrade 账户吗？</summary><p>不用。可以连 tastytrade、Alpaca（免费，自带模拟盘）或 Public，也可以上传任何券商导出的交易 CSV。没有券商行情时用免费源：Cboe 期权（约延迟 15 分钟）和 Yahoo Finance 股票。还有一个示例组合，可以先把每个页面试一遍。</p></details>
+  <details><summary>它会帮我下单吗？</summary><p>不会。它只从券商读取持仓和行情。模拟盘里的交易只是练手，不会发给任何券商。</p></details>
+  <details><summary>我的数据存在哪里？</summary><p>只存在你自己的电脑上（~/.zeus-terminal）。密钥、交易和设置都不会离开这台电脑，只在请求你自己接入的券商或服务时发给对方。没有任何遥测。</p></details>
+  <details><summary>能在哪些系统上用？</summary><p>macOS、Linux 和 Windows，需要 Python 3.10 或更新。桌面通知只支持 macOS；邮件提醒支持 macOS 和 Linux。</p></details>
+  <details><summary>有中文界面吗？</summary><p>有。界面随时在中文、双语和英文之间切换，新闻标题也可以中英对照显示。</p></details>
+</div></section>
+</main>
+
+<footer><div class="wrap">
+  <span>宙斯期权终端 · ZEUS Terminal · <a href="https://github.com/jackson-cmd/zeus-options-terminal">GitHub</a> · <a href="https://github.com/jackson-cmd/zeus-options-terminal/blob/main/docs/FEATURES_zh.md">全部功能</a> · <a href="https://github.com/jackson-cmd/zeus-options-terminal/blob/main/CHANGELOG_zh.md">更新记录</a></span>
+  <span>PolyForm Noncommercial 1.0.0 · 不构成投资建议</span>
+</div></footer>
+</body>
+</html>
