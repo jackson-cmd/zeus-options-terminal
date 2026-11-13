@@ -328,4 +328,4 @@ ZEUS Terminal（宙斯期权终端）以 **[PolyForm Noncommercial License 1.0.0
 
 **权利人请注意：** 如果你认为本仓库的任何内容侵犯了你的权利（商标、数据、服务条款或其他），**直接提 Issue**，相关内容会尽快移除。
 
-**免责声明。** 这是一个按原样分享的个人工具，不提供任何担保，**不构成任何投资建议**。期权交易有很大亏损风险，你要为自己的交易负责，也要遵守你接入的每个数据源和券商的服务条款。ZEUS Terminal 与 tastytrade、Benzinga、Cboe、Finviz、道琼斯 / 华尔街日报 / MarketWatch、Barchart、Yahoo、Anthropic 均无关联，也未获其认可；所有名称归各自所有者。
+**免责声明。** 这是一个按原样分享的个人工具，不提供任何担保，**不构成任何投资建议**。期权交易有很大亏损风险，你要为自己的交易负责，也要遵守你接入的每个数据源和券商的服务条款。ZEUS Terminal 与 tastytrade、Alpaca、Public、Benzinga、Cboe、Finviz、道琼斯 / 华尔街日报 / MarketWatch、Barchart、Yahoo、Anthropic 均无关联，也未获其认可；所有名称归各自所有者。
