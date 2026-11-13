@@ -3,9 +3,6 @@ contact_links:
   - name: Question or idea · 提问、讨论
     url: https://github.com/jackson-cmd/zeus-options-terminal/discussions
     about: How do I …, does ZEUS support …, show how you use it · 怎么用、支不支持、晒晒你的用法
-  - name: Security problem · 安全问题
-    url: https://github.com/jackson-cmd/zeus-options-terminal/security/advisories/new
-    about: Report it privately, not in a public issue · 私下报告，不要公开发 Issue
   - name: User manual · 使用手册
     url: https://github.com/jackson-cmd/zeus-options-terminal/blob/main/docs/USER_GUIDE.md
     about: Most "how do I" answers are here · 大多数「怎么用」的答案都在这里
