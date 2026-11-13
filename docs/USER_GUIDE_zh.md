@@ -9,7 +9,7 @@
 ## 目录
 
 1. [安装和启动](#1-安装和启动)
-   - [1.1 环境要求](#11-环境要求) · [1.2 第一次启动](#12-第一次启动) · [1.3 停止 重启 换端口](#13-停止-重启-换端口) · [1.4 装成应用](#14-装成应用) · [1.5 更新](#15-更新) · [1.6 卸载](#16-卸载) · [1.7 用 Docker 运行](#17-用-docker-运行)
+   - [1.1 环境要求](#11-环境要求) · [1.2 第一次启动](#12-第一次启动) · [1.3 停止 重启 换端口](#13-停止-重启-换端口) · [1.4 装成应用](#14-装成应用) · [1.5 更新](#15-更新) · [1.6 卸载](#16-卸载) · [1.7 用 Docker 运行](#17-用-docker-运行) · [1.8 用 pipx 安装](#18-用-pipx-安装)
 2. [第一次设置](#2-第一次设置)
    - [2.1 先选持仓从哪来](#21-先选持仓从哪来) · [2.2 连接券商](#22-连接券商) · [2.3 免费模式 用 CSV 导入交易](#23-免费模式-用-csv-导入交易) · [2.4 新闻源](#24-新闻源) · [2.5 AI](#25-ai) · [2.6 通知和邮件](#26-通知和邮件) · [2.7 全部设置项](#27-全部设置项)
 3. [顶栏](#3-顶栏)
@@ -49,7 +49,7 @@
 
 ### 1.1 环境要求
 
-- Python 3.10 或更新的版本；也可以不装 Python，改用 Docker（见 [1.7](#17-用-docker-运行)）。
+- Python 3.10 或更新的版本；也可以不装 Python，改用 Docker（见 [1.7](#17-用-docker-运行)）。用 pipx 安装就不需要下载代码（见 [1.8](#18-用-pipx-安装)）。
 - macOS、Linux、Windows 都可以。桌面通知只支持 macOS；邮件提醒支持 macOS 和 Linux。
 - 新一点的 Chrome、Edge、Safari 或 Firefox。
 - 开始用不需要任何账户。tastytrade 账户、Benzinga Pro 登录和 AI 各自能解锁更多功能（见 [2.7](#27-全部设置项)）。
@@ -134,6 +134,23 @@ volumes:
 ```
 
 想自己构建镜像，在代码文件夹最上层运行 `docker build -f zeus/Dockerfile -t zeus-terminal .`，之后把命令里的 ghcr.io 镜像名换成 `zeus-terminal`。
+
+### 1.8 用 pipx 安装
+
+ZEUS 也发布在 PyPI 上，包名是 `zeus-options-terminal`。[pipx](https://pipx.pypa.io/) 会把它装进单独的环境，既不用下载代码，也不用自己建虚拟环境（macOS 用 `brew install pipx`，其他系统用 `python3 -m pip install --user pipx`）：
+
+```bash
+pipx install zeus-options-terminal
+zeus
+```
+
+`zeus` 启动的服务器和 `./start.sh` 完全一样，等它能响应了就打开 **<http://localhost:8765>**；持仓页会让你选示例组合、连券商或上传交易（见 [2.1](#21-先选持仓从哪来)）。
+
+- **参数：** `zeus --port 8790` 换端口，`zeus --no-browser` 启动时不打开浏览器，`zeus --version` 看版本。`zeus-terminal` 是同一个命令，万一别的程序已经叫 `zeus` 可以用它。按 Ctrl+C 停止。
+- **你的数据** 和用 `./start.sh` 时一样，都在 `~/.zeus-terminal`（或者 `ZEUS_HOME` 指定的文件夹）。
+- **更新：** `pipx upgrade zeus-options-terminal`，设置和交易都保留。**卸载：** `pipx uninstall zeus-options-terminal`；设置文件夹会留着，要删自己删。
+- **AI 智能体（MCP）**：⚙ 设置 → AI 智能体 里给出的命令，用的就是这次安装的路径（见 [18.2](#182-连接你的智能体)）。
+- **不包含：** Barchart 清单和 Benzinga cookie 导出（要 Playwright 和 Chromium）、离线翻译标题、Benzinga 自动续登脚本（要 Node.js）。需要这些就从代码用 `./start.sh` 加 `requirements-optional.txt` 运行。
 
 ---
 

@@ -9,7 +9,7 @@ This manual explains every page, button and setting of ZEUS Terminal: what it do
 ## Contents
 
 1. [Install and start](#1-install-and-start)
-   - [1.1 Requirements](#11-requirements) · [1.2 First start](#12-first-start) · [1.3 Stop, restart, change the port](#13-stop-restart-change-the-port) · [1.4 Install as an app](#14-install-as-an-app) · [1.5 Update](#15-update) · [1.6 Uninstall](#16-uninstall) · [1.7 Run with Docker](#17-run-with-docker)
+   - [1.1 Requirements](#11-requirements) · [1.2 First start](#12-first-start) · [1.3 Stop, restart, change the port](#13-stop-restart-change-the-port) · [1.4 Install as an app](#14-install-as-an-app) · [1.5 Update](#15-update) · [1.6 Uninstall](#16-uninstall) · [1.7 Run with Docker](#17-run-with-docker) · [1.8 Install with pipx](#18-install-with-pipx)
 2. [First-time setup](#2-first-time-setup)
    - [2.1 Choose how your positions get in](#21-choose-how-your-positions-get-in) · [2.2 Connect a broker](#22-connect-a-broker) · [2.3 Free mode: your trades from a CSV](#23-free-mode-your-trades-from-a-csv) · [2.4 News sources](#24-news-sources) · [2.5 AI](#25-ai) · [2.6 Notifications and e-mail](#26-notifications-and-e-mail) · [2.7 Every setting](#27-every-setting)
 3. [The top bar](#3-the-top-bar)
@@ -49,7 +49,7 @@ This manual explains every page, button and setting of ZEUS Terminal: what it do
 
 ### 1.1 Requirements
 
-- Python 3.10 or newer, or Docker instead ([1.7](#17-run-with-docker)).
+- Python 3.10 or newer, or Docker instead ([1.7](#17-run-with-docker)). With pipx you need no copy of the code ([1.8](#18-install-with-pipx)).
 - macOS, Linux or Windows. Desktop notifications need macOS; e-mail alerts work on macOS and Linux.
 - A recent Chrome, Edge, Safari or Firefox.
 - No accounts are needed to start. A tastytrade account, a Benzinga Pro login and an AI provider each unlock more (see [2.7](#27-every-setting)).
@@ -134,6 +134,23 @@ volumes:
 ```
 
 To build the image yourself, run `docker build -f zeus/Dockerfile -t zeus-terminal .` at the top of the code folder, and use `zeus-terminal` in place of the ghcr.io name.
+
+### 1.8 Install with pipx
+
+ZEUS is also on PyPI as `zeus-options-terminal`. [pipx](https://pipx.pypa.io/) installs it in an environment of its own, so you need neither a copy of the code nor a virtual environment of your own (`brew install pipx` on macOS, `python3 -m pip install --user pipx` elsewhere):
+
+```bash
+pipx install zeus-options-terminal
+zeus
+```
+
+`zeus` starts the same server as `./start.sh` and opens **http://localhost:8765** once it answers; the Positions page then offers the sample, a broker or your trades ([2.1](#21-choose-how-your-positions-get-in)).
+
+- **Options:** `zeus --port 8790` for another port, `zeus --no-browser` to start without opening a window, `zeus --version`. `zeus-terminal` is the same command, in case another program already uses the name `zeus`. Ctrl+C stops ZEUS.
+- **Your data** stays in `~/.zeus-terminal` (or the folder in `ZEUS_HOME`), as with `./start.sh`.
+- **Update:** `pipx upgrade zeus-options-terminal`; your settings and trades stay. **Remove:** `pipx uninstall zeus-options-terminal`; the settings folder stays until you delete it.
+- **AI agents (MCP)**: ⚙ Settings → AI agents shows the commands with the paths of this install ([18.2](#182-connect-your-agent)).
+- **Not included:** the Barchart lists and the Benzinga cookie export (they need Playwright and Chromium), offline headline translation, and the Benzinga auto re-login helper (Node.js). Run ZEUS from the code with `./start.sh` and `requirements-optional.txt` if you need them.
 
 ---
 

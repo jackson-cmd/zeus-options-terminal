@@ -260,6 +260,7 @@ ZEUS 的功能远不止 README 截图里那些。顶栏有 7 个页面，后台�
 | ✅ | 测试 | `python -m pytest`（离线跑，行情是假的） |
 | ✅ | CI | 每个 PR 都会在 Linux、macOS、Windows 上跑测试（7 个任务）；`main` 只接受全部通过的 PR |
 | ✅ | Docker 镜像 <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | `ghcr.io/jackson-cmd/zeus-options-terminal`，支持 amd64 和 arm64，由 `zeus/Dockerfile` 构建：设置和数据在 `/data` 卷里，用普通用户运行，代码只读。每次发版都会先构建、启动并检查镜像（`tools/docker_smoke.sh`），再推送 `X.Y.Z`、`X.Y` 和 `latest` 三个标签（见[手册 §1.7](USER_GUIDE_zh.md#17-用-docker-运行)） |
+| ✅ | pip / pipx 安装包 <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | `pipx install zeus-options-terminal` 之后运行 `zeus`（`--port`、`--no-browser`、`--version`）。安装包里就是原样的 `zeus/` 文件夹，由 `pyproject.toml` 构建；CI 会在干净环境里装好并启动一遍，每次发版自动上传 PyPI |
 | ✅ | 隐私检查 | `tools/install_git_hook.sh` 会拦下数据文件、密钥和你自己的路径 |
 | ✅ | 干净打包 | `tools/export_clean_zip.sh` 只打包代码 |
 

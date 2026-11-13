@@ -4,6 +4,19 @@
 
 ZEUS Terminal 每个版本改了什么。新功能前面挂着 <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> 标记，括号里的数字是对应的 PR 编号。
 
+## 0.7.0 —— 2026-11-12
+
+### 新功能
+
+| | 功能 | 详细说明 |
+|---|---|---|
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **📦 pip 和 pipx**：`pipx install zeus-options-terminal` 之后运行 `zeus`，不用 clone 代码就能装好并启动 ZEUS。`zeus --port 8790`、`--no-browser`、`--version` 都能用，`zeus-terminal` 是同一个命令。设置和数据都在 `~/.zeus-terminal`，`pipx upgrade` 升级时都保留。(#PR) | [用 pipx 安装 →](docs/USER_GUIDE_zh.md#18-用-pipx-安装) |
+
+### 项目
+
+- `pyproject.toml` 把 `zeus/` 文件夹原样打成安装包，版本号取自 `APP_VERSION`，依赖和 `requirements.txt` 一致，有测试保证两边相同。每个 PR 都会构建安装包，在干净环境里装好，再从里面启动 `zeus`（`tools/package_smoke.sh`）。(#PR)
+- 每次发版，Release 工作流都会通过可信发布把这个版本上传到 PyPI，不存任何 token，而且要先通过同样的检查。(#PR)
+
 ## 0.6.0 —— 2026-11-12
 
 ### 新功能

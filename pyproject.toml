@@ -1,0 +1,106 @@
+# pip / pipx install of ZEUS Terminal:  pipx install zeus-options-terminal  →  zeus
+# The wheel holds the zeus/ folder as it is, the same code that start.sh and the Docker image run;
+# `zeus` (zeus/zeus_cli.py) starts it. The version is APP_VERSION in zeus/zeus_config.py and the
+# dependencies mirror requirements.txt (tests/test_packaging.py keeps them equal).
+
+[build-system]
+requires = ["hatchling>=1.27", "hatch-fancy-pypi-readme>=24.1"]
+build-backend = "hatchling.build"
+
+[project]
+name = "zeus-options-terminal"
+dynamic = ["version", "readme"]
+description = "ZEUS Terminal · 宙斯期权终端: the self-hosted options trading terminal. Positions and Greeks, risk, paper trading, a stock picker, news and a trade journal on your own computer."
+license = "PolyForm-Noncommercial-1.0.0"
+license-files = ["LICENSE"]
+requires-python = ">=3.10"
+keywords = ["options", "options-trading", "trading-terminal", "greeks", "paper-trading", "portfolio-tracker",
+            "stock-screener", "trading-journal", "tastytrade", "alpaca", "self-hosted", "mcp-server"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Web Environment",
+    "Framework :: FastAPI",
+    "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Natural Language :: Chinese (Simplified)",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Office/Business :: Financial :: Investment",
+]
+dependencies = [
+    "fastapi>=0.110",
+    "uvicorn>=0.29",
+    "websockets>=12",
+    "requests>=2.31",
+    "httpx>=0.27",
+    "pandas>=2.0",
+    "numpy>=1.26",
+    "scipy>=1.11",
+    "pyarrow>=14",
+    "zstandard>=0.22",
+    "pydantic>=2.5",
+    "yfinance>=0.2.54",
+    "beautifulsoup4>=4.12",
+    "lxml>=5",
+    "finviz>=1.4",
+    "pandas_market_calendars>=4.4",
+    "pypdf>=4",
+    "pytz>=2024.1",
+    "tzdata>=2024.1",
+    "duckdb>=1.0",
+    "schedule>=1.2",
+]
+
+[project.optional-dependencies]
+# Barchart screener and Benzinga cookie export; then run:  python -m playwright install chromium
+browser = ["playwright>=1.44"]
+# Headline translation on your own computer instead of Google or Bing
+offline-translation = ["argostranslate>=1.9", "ctranslate2>=4", "sentencepiece>=0.2"]
+
+[project.scripts]
+zeus = "zeus.zeus_cli:main"
+zeus-terminal = "zeus.zeus_cli:main"
+
+[project.urls]
+Homepage = "https://jackson-cmd.github.io/zeus-options-terminal/"
+Source = "https://github.com/jackson-cmd/zeus-options-terminal"
+Documentation = "https://github.com/jackson-cmd/zeus-options-terminal/blob/main/docs/USER_GUIDE.md"
+Changelog = "https://github.com/jackson-cmd/zeus-options-terminal/blob/main/CHANGELOG.md"
+Issues = "https://github.com/jackson-cmd/zeus-options-terminal/issues"
+
+[tool.hatch.version]
+path = "zeus/zeus_config.py"
+pattern = '^APP_VERSION = "(?P<version>[^"]+)"'
+
+[tool.hatch.build.targets.wheel]
+packages = ["zeus"]
+exclude = ["zeus/Dockerfile", "zeus/Dockerfile.dockerignore", "zeus/premarket/node_modules"]
+
+[tool.hatch.build.targets.sdist]
+include = ["/zeus", "/README.md", "/README_zh.md", "/LICENSE", "/CHANGELOG.md", "/CHANGELOG_zh.md",
+           "/requirements.txt", "/requirements-optional.txt", "/pyproject.toml"]
+exclude = ["/zeus/premarket/node_modules"]
+
+# PyPI shows the README without the repository around it: point its links and pictures at GitHub.
+[tool.hatch.metadata.hooks.fancy-pypi-readme]
+content-type = "text/markdown"
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
+path = "README.md"
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.substitutions]]
+pattern = '\]\(#([^)]+)\)'
+replacement = '](https://github.com/jackson-cmd/zeus-options-terminal#\1)'
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.substitutions]]
+pattern = '\]\((?!https?://|mailto:)([^)\s]+)\)'
+replacement = '](https://github.com/jackson-cmd/zeus-options-terminal/blob/main/\1)'
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.substitutions]]
+pattern = 'src="(?!https?://)([^"]+)"'
+replacement = 'src="https://raw.githubusercontent.com/jackson-cmd/zeus-options-terminal/main/\1"'

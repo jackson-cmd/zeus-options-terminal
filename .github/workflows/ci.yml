@@ -40,3 +40,21 @@ jobs:
         run: python -m compileall -q .
       - name: Test (offline)
         run: python -m pytest -q
+
+  package:
+    # The pip / pipx install: build the wheel and the source archive, then install the wheel in a
+    # clean environment and start `zeus` from it (tools/package_smoke.sh).
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Build
+        run: |
+          python -m pip install build twine
+          python -m build
+          python -m twine check --strict dist/*
+      - name: Install the wheel and start zeus
+        run: tools/package_smoke.sh dist/*.whl
