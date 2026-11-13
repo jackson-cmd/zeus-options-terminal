@@ -17,7 +17,7 @@ ZEUS has far more features than the README can show, and it keeps growing. Pull 
    python -m pip install -r requirements.txt pytest
    python -m pytest
    ```
-4. Install the privacy hook once: `tools/install_git_hook.sh`. It refuses data files, keys and your own paths in a commit.
+4. Install the privacy hook once: `tools/install_git_hook.sh`. It refuses data files, keys and your own paths in a commit. A pre-commit hook you already had keeps running after it.
 5. Open a pull request against `main`. CI runs the tests on Linux, macOS and Windows (7 jobs), then builds the pip package and starts `zeus` from it (1 job); a pull request can merge only when all 8 pass. `main` only accepts changes through pull requests.
 
 ### Releasing a new version
@@ -76,7 +76,7 @@ ZEUS 的功能远比 README 能写下的多，而且还在长。欢迎提 PR：�
    python -m pip install -r requirements.txt pytest
    python -m pytest
    ```
-4. 装一次隐私检查：`tools/install_git_hook.sh`。它会拦下数据文件、密钥和你自己的路径。
+4. 装一次隐私检查：`tools/install_git_hook.sh`。它会拦下数据文件、密钥和你自己的路径。你原来的 pre-commit 钩子会保留，检查完照常运行。
 5. 向 `main` 提 PR。CI 会在 Linux、macOS、Windows 上跑测试（7 个任务），再打出 pip 安装包、用它启动 `zeus`（1 个任务），8 个全部通过才能合并。`main` 只接受通过 PR 进来的改动。
 
 ### 发新版本
