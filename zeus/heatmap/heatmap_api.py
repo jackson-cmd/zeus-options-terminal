@@ -284,9 +284,9 @@ def _yf_quotes(tickers: list) -> dict:
         return _yf_cache["data"]
     out: dict = {}
     try:
-        import yfinance as yf
-        df = yf.download(tickers, period="5d", progress=False,
-                         auto_adjust=False, threads=True)
+        import zeus_yf
+        df = zeus_yf.download(tickers, period="5d", progress=False,
+                              auto_adjust=False, threads=True)
         close = df["Close"]
         single = (getattr(close, "ndim", 1) == 1)
         for t in tickers:
@@ -361,9 +361,9 @@ def _reconstruct_reg_from_yf(close_date: datetime.date, only: Optional[list] = N
         return {}
     out: dict = {}
     try:
-        import yfinance as yf
-        df = yf.download(syms, period="1mo", interval="1d", progress=False,
-                         auto_adjust=False, threads=True)
+        import zeus_yf
+        df = zeus_yf.download(syms, period="1mo", interval="1d", progress=False,
+                              auto_adjust=False, threads=True)
         close = df["Close"]
         single = (getattr(close, "ndim", 1) == 1)
         for t in syms:

@@ -169,15 +169,15 @@ _RETRIES = 2
 
 def _yf_daily(symbols, lookback_days, on_progress=None, on_chunk=None) -> dict:
     """Manual (no-tastytrade) mode: daily OHLCV from Yahoo Finance, batched."""
-    import yfinance as yf
+    import zeus_yf
     out: dict = {}
     start = (pd.Timestamp.today() - pd.Timedelta(days=max(int(lookback_days), 5))).strftime("%Y-%m-%d")
     for i in range(0, len(symbols), 60):
         chunk = symbols[i:i + 60]
         ymap = {s: s.replace(".", "-").replace("/", "-") for s in chunk}
         try:
-            df = yf.download(list(ymap.values()), start=start, interval="1d", group_by="ticker",
-                             auto_adjust=False, progress=False, threads=True)
+            df = zeus_yf.download(list(ymap.values()), start=start, interval="1d", group_by="ticker",
+                                  auto_adjust=False, progress=False, threads=True)
         except Exception as e:
             print(f"[daily_candles] yfinance chunk err: {e!r}")
             continue

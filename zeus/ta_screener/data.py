@@ -1,6 +1,7 @@
 """TA Screener 数据层:heatmap universe 解析 + yfinance 批量日线 + 周/月重采样。"""
 from __future__ import annotations
 
+import sys
 import time
 from pathlib import Path
 
@@ -8,6 +9,8 @@ import numpy as np
 import pandas as pd
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:      # zeus/, for zeus_yf when a script here runs on its own
+    sys.path.append(str(REPO_ROOT))
 # TA screener 专属 universe(作者精选 392 票,抄底为主);分类标签从 heatmap 借。
 UNIVERSE_FILE = REPO_ROOT / "data" / "ta_screener_universe.txt"
 # 专属池:从 universe 筛掉「不会动/太便宜/太贵」的票(build_pool.py 生成);扫描只在池里跑。
@@ -115,14 +118,15 @@ def industry_map() -> dict:
     return out
 
 
-def _fetch_batch(yf, batch, out, period, min_bars: int = MIN_BARS):
+def _fetch_batch(batch, out, period, min_bars: int = MIN_BARS):
     """拉一批 → 把够长的票塞进 out。返回本批新增数。throttle 时返回的 df 常缺票
     (无异常),故由调用方据 out 缺口决定二次重试。"""
+    import zeus_yf
     df = None
     for attempt in (1, 2):
         try:
-            df = yf.download(batch, period=period, interval="1d", auto_adjust=True,
-                             group_by="ticker", threads=True, progress=False)
+            df = zeus_yf.download(batch, period=period, interval="1d", auto_adjust=True,
+                                  group_by="ticker", threads=True, progress=False)
             break
         except Exception:
             df = None
@@ -149,12 +153,11 @@ def _fetch_batch(yf, batch, out, period, min_bars: int = MIN_BARS):
 def _download_full(tickers, progress_cb=None, period: str = PERIOD, min_bars: int = MIN_BARS):
     """yfinance 分块批量下载日线(原全量路径)。主跑 120/批;**失败票二次重试**
     (小批 50 + 退避),专治 Yahoo 限流导致整批缺票(无异常静默丢)。"""
-    import yfinance as yf
     out = {}
     n_chunks = (len(tickers) + CHUNK - 1) // CHUNK
     for ci in range(n_chunks):
         batch = tickers[ci * CHUNK:(ci + 1) * CHUNK]
-        _fetch_batch(yf, batch, out, period, min_bars)
+        _fetch_batch(batch, out, period, min_bars)
         if progress_cb:
             progress_cb(ci + 1, n_chunks, f"已下载 {len(out)}/{len(tickers)} 票({ci+1}/{n_chunks} 批)")
     # 二次/三次重试缺失的票(限流恢复后小批补回),退避递增
@@ -166,7 +169,7 @@ def _download_full(tickers, progress_cb=None, period: str = PERIOD, min_bars: in
             progress_cb(n_chunks, n_chunks, f"重试缺失 {len(missing)} 票(第{rnd}轮,等{wait}s)…")
         time.sleep(wait)
         for i in range(0, len(missing), small):
-            _fetch_batch(yf, missing[i:i + small], out, period, min_bars)
+            _fetch_batch(missing[i:i + small], out, period, min_bars)
             time.sleep(1)
     return out
 

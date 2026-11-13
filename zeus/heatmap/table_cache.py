@@ -9,10 +9,13 @@ so a bad download must not replace a good table:
   TTL, and the refresh is tried again after RETRY_SECONDS. With no good table yet,
   the empty result is served for RETRY_SECONDS only. Other readers of the disk file
   (market_brief reads etf_trends.json) therefore keep the last good table as well.
-* The tables refresh one at a time. yfinance.download keeps the state of a call in
-  module globals (yfinance.shared._DFS), so downloads that overlap in different
-  threads lose each other's tickers or fail with "dictionary changed size during
-  iteration". The server starts all three refreshes at the same moment on startup.
+* A refresh holds the process-wide yfinance download turn (zeus_yf) from the cache
+  check to the end of its download. yfinance.download keeps the state of a call in
+  module globals, so downloads that overlap in different threads lose each other's
+  tickers or fail with "dictionary changed size during iteration"; the server
+  starts all three refreshes at the same moment on startup. A request that waited
+  finds the table the refresh before it just wrote, so concurrent requests cause
+  one download.
 """
 from __future__ import annotations
 
@@ -23,10 +26,10 @@ import time
 from pathlib import Path
 from typing import Callable, Optional
 
-RETRY_SECONDS = 5 * 60     # a refresh that brought back no data is tried again after this
-LOCK_WAIT_SECONDS = 120    # wait this long for a refresh in progress, then refresh anyway
+import zeus_yf
 
-_refresh_lock = threading.Lock()
+RETRY_SECONDS = 5 * 60     # a refresh that brought back no data is tried again after this
+LOCK_WAIT_SECONDS = 120    # wait this long for the downloads ahead, then keep the cached table
 
 
 def has_data(payload) -> bool:
@@ -113,9 +116,11 @@ def get(state: dict, path: Path, ttl: float, compute: Callable[[], dict],
         hit = _fresh(state, path, ttl)
         if hit is not None:
             return hit
-    locked = _refresh_lock.acquire(timeout=LOCK_WAIT_SECONDS)
-    if not locked:
-        print(f"[{tag}] another table is still refreshing after {LOCK_WAIT_SECONDS}s; refreshing anyway")
+    if not zeus_yf.acquire(LOCK_WAIT_SECONDS):
+        # other downloads still running: handled like a failed download (last good table)
+        def busy():
+            raise zeus_yf.DownloadBusy(f"other yfinance downloads still running after {LOCK_WAIT_SECONDS}s")
+        return _refresh(state, path, ttl, busy, tag)
     try:
         if not force:
             hit = _fresh(state, path, ttl)   # refreshed by another thread while we waited
@@ -123,5 +128,4 @@ def get(state: dict, path: Path, ttl: float, compute: Callable[[], dict],
                 return hit
         return _refresh(state, path, ttl, compute, tag)
     finally:
-        if locked:
-            _refresh_lock.release()
+        zeus_yf.release()
