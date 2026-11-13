@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ZEUS Terminal: Self-Hosted Options Trading Terminal (tastytrade, Alpaca, Public)</title>
+<meta name="description" content="Free, self-hosted options trading terminal: live positions and Greeks, P/L and risk, paper trading, a stock screener, market news and a trade journal in one app. Works with tastytrade, Alpaca, Public or a CSV.">
+<meta name="keywords" content="options trading terminal, options trading dashboard, self-hosted, options profit calculator, option Greeks, implied volatility, options risk management, paper trading, trading journal, stock screener, tastytrade, Alpaca, Public, portfolio tracker, open source, 期权交易终端">
+<meta name="theme-color" content="#0d1117">
+<link rel="canonical" href="https://jackson-cmd.github.io/zeus-options-terminal/">
+<link rel="alternate" hreflang="en" href="https://jackson-cmd.github.io/zeus-options-terminal/">
+<link rel="alternate" hreflang="zh-Hans" href="https://jackson-cmd.github.io/zeus-options-terminal/zh/">
+<link rel="alternate" hreflang="x-default" href="https://jackson-cmd.github.io/zeus-options-terminal/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ZEUS Terminal">
+<meta property="og:title" content="ZEUS Terminal: the self-hosted options trading terminal">
+<meta property="og:description" content="Everything an options trader keeps ten browser tabs open for, in one terminal: positions and Greeks, risk, paper trading, a stock screener, news and a trade journal. tastytrade, Alpaca, Public or a CSV.">
+<meta property="og:url" content="https://jackson-cmd.github.io/zeus-options-terminal/">
+<meta property="og:image" content="https://jackson-cmd.github.io/zeus-options-terminal/screenshots/positions_en.png">
+<meta property="og:image:width" content="1440">
+<meta property="og:image:height" content="900">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="zh_CN">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ZEUS Terminal: the self-hosted options trading terminal">
+<meta name="twitter:description" content="Positions and Greeks, risk, paper trading, a stock screener, news and a trade journal in one app on your own computer.">
+<meta name="twitter:image" content="https://jackson-cmd.github.io/zeus-options-terminal/screenshots/positions_en.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9A%A1%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "ZEUS Terminal",
+  "alternateName": "宙斯期权终端",
+  "description": "Self-hosted, all-in-one options trading terminal: live positions and Greeks, P/L and risk, exit discipline, paper trading, a stock screener, bilingual market news, earnings and SEC filings, and a trade journal. Connects to tastytrade, Alpaca or Public, or reads a CSV from any broker.",
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "macOS, Linux, Windows",
+  "url": "https://jackson-cmd.github.io/zeus-options-terminal/",
+  "downloadUrl": "https://github.com/jackson-cmd/zeus-options-terminal",
+  "sameAs": ["https://github.com/jackson-cmd/zeus-options-terminal"],
+  "screenshot": "https://jackson-cmd.github.io/zeus-options-terminal/screenshots/positions_en.png",
+  "license": "https://polyformproject.org/licenses/noncommercial/1.0.0/",
+  "inLanguage": ["en", "zh"],
+  "isAccessibleForFree": true,
+  "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
+  "featureList": [
+    "Live option positions with Greeks, grouped into strategies",
+    "P/L, max profit and loss, chance of profit, risk view with stress tests and Monte Carlo",
+    "Exit alerts, missing take-profit order alarm, pre-trade checkup",
+    "Paper trading with option and stock legs",
+    "Stock screener: chart wall with support and resistance, TA score, heatmap, sector rotation",
+    "Market news from Finviz, WSJ, MarketWatch and Benzinga, in English and Chinese",
+    "Earnings calendar, corporate events and SEC filings",
+    "Trade journal with win rate, profit factor and AI review",
+    "MCP server for AI agents",
+    "Brokers: tastytrade, Alpaca, Public, or a CSV from any broker"
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type": "Question", "name": "Is ZEUS Terminal free?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Yes, for personal, non-commercial use (PolyForm Noncommercial license). It runs on your own computer, with no subscription and no account to create."}},
+    {"@type": "Question", "name": "Do I need a tastytrade account?",
+     "acceptedAnswer": {"@type": "Answer", "text": "No. Connect tastytrade, Alpaca (free, with a paper account) or Public, or upload a CSV of your trades from any broker. Without a broker feed, quotes come from free sources: Cboe options about 15 minutes delayed and Yahoo Finance stocks. A sample portfolio lets you try every page first."}},
+    {"@type": "Question", "name": "Does it place trades?",
+     "acceptedAnswer": {"@type": "Answer", "text": "No. It only reads positions and quotes from your broker. The Paper Trade tab simulates trades for practice; nothing is sent to a broker."}},
+    {"@type": "Question", "name": "Where is my data stored?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Only on your computer, in ~/.zeus-terminal. Keys, trades and settings never leave it, except in requests to the broker or service you connected yourself. There is no telemetry."}},
+    {"@type": "Question", "name": "Which systems does it run on?",
+     "acceptedAnswer": {"@type": "Answer", "text": "macOS, Linux and Windows with Python 3.10 or newer. Desktop notifications are macOS only; e-mail alerts work on macOS and Linux."}},
+    {"@type": "Question", "name": "Is there a Chinese interface?",
+     "acceptedAnswer": {"@type": "Answer", "text": "Yes. The interface switches between Chinese, bilingual and English at any time, and news headlines can be shown in both languages."}}
+  ]
+}
+</script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="brand" href="./">⚡ ZEUS Terminal<span>宙斯期权终端</span></a>
+  <nav class="links" aria-label="Sections">
+    <a href="#features">Features</a>
+    <a href="#brokers">Brokers</a>
+    <a href="#screenshots">Screenshots</a>
+    <a href="#start">Quick start</a>
+    <a href="#faq">FAQ</a>
+    <a class="lang" href="zh/" hreflang="zh-Hans" lang="zh">中文</a>
+    <a class="gh" href="https://github.com/jackson-cmd/zeus-options-terminal">GitHub</a>
+  </nav>
+</div></header>
+
+<main>
+<div class="wrap hero">
+  <p class="kicker">RULE THE GREEKS · 驾驭希腊值</p>
+  <h1>The self-hosted options trading terminal</h1>
+  <p class="lead">Everything an options trader keeps ten browser tabs open for, in one terminal: live positions and Greeks, P/L and risk, exit alerts, paper trading, a stock screener, market news, earnings and SEC filings, and an honest trade journal. It runs on your own computer and works with tastytrade, Alpaca, Public, or a CSV from any broker.</p>
+  <div class="cta">
+    <a class="btn primary" href="https://github.com/jackson-cmd/zeus-options-terminal">Get it on GitHub</a>
+    <a class="btn" href="#start">Quick start</a>
+    <a class="btn" href="https://github.com/jackson-cmd/zeus-options-terminal/blob/main/docs/USER_GUIDE.md">User manual</a>
+  </div>
+  <ul class="chips">
+    <li>Free for personal use</li><li>100% local</li><li>中文 · 双语 · English</li><li>macOS · Linux · Windows</li>
+  </ul>
+  <div class="shot"><img src="screenshots/positions_en.png" width="1440" height="900" alt="ZEUS Terminal positions board: option strategies with total and daily P/L, breakeven, max profit and loss, chance of profit and days to expiration"></div>
+</div>
+
+<section id="features"><div class="wrap">
+  <h2>One terminal, all of it</h2>
+  <p class="sub">Built by an options trader for daily use, then opened up. Every page also has a ? that explains each button and number: what it is, how it is calculated, how to use it.</p>
+  <div class="grid">
+    <div class="card"><h3>⚔️ Positions and Greeks</h3><p>Every leg marked to market and grouped into strategies: verticals, iron condors, calendars, diagonals, covered calls and stock. Today's and total P/L, breakeven distance, max profit and loss, chance of profit, DTE.</p></div>
+    <div class="card"><h3>⚠ Risk view</h3><p>Stress tests for market moves, portfolio Greeks, an expiration ladder, theta runway and Monte Carlo odds for the whole book.</p></div>
+    <div class="card"><h3>🩺 Exit discipline</h3><p>Take-profit and deep-loss lights, an alarm for spreads without a closing order, a four-gate pre-trade checkup, a liquidity scan and an event risk radar.</p></div>
+    <div class="card"><h3>🧪 Paper trading</h3><p>Build any strategy on the live option chain, with option and stock legs, then follow its P/L like an options profit calculator that keeps score.</p></div>
+    <div class="card"><h3>🎯 Stock picker</h3><p>A chart wall with support and resistance and EMA 50/200, a TA score, a heatmap, sector rotation and options sentiment, plus a TA screener that suggests spreads.</p></div>
+    <div class="card"><h3>📋 News desk</h3><p>Finviz, WSJ, MarketWatch and optionally Benzinga in one list, headlines in English and Chinese, filters for your positions and watchlist.</p></div>
+    <div class="card"><h3>📅 Earnings and filings</h3><p>An earnings and macro calendar, corporate events and an SEC EDGAR filings reader next to your positions.</p></div>
+    <div class="card"><h3>📓 Trade journal</h3><p>Win rate, profit factor, a P/L calendar, monthly targets, what-if analysis and an AI review, rebuilt from your fills.</p></div>
+    <div class="card"><h3>🤖 Your AI and agents</h3><p>Bring Claude, an OpenAI-compatible API or a local model. An MCP server lets AI agents read your positions, run the checkup and price spreads.</p></div>
+  </div>
+</div></section>
+
+<section id="brokers"><div class="wrap">
+  <h2>tastytrade, Alpaca, Public, or no broker at all</h2>
+  <p class="sub">ZEUS only reads from your broker; it never places an order. Positions and quotes are separate choices, and anything a broker does not carry comes from free sources.</p>
+  <div class="tablewrap"><table class="cmp">
+    <thead><tr><th></th><th>tastytrade</th><th>Alpaca</th><th>Public</th><th>Free mode</th></tr></thead>
+    <tbody>
+      <tr><th>Positions</th><td>Live from your account</td><td>Live from your paper or live account</td><td>Live from your account</td><td>From a CSV or trades you type in</td></tr>
+      <tr><th>Quotes</th><td>Real-time streaming</td><td>Free: IEX stocks in real time, options with Greeks and IV</td><td>Real-time quotes, chains and Greeks</td><td>Cboe options and Yahoo stocks, about 15 minutes delayed</td></tr>
+      <tr><th>What you need</th><td>A tastytrade account</td><td>A free account; paper needs no deposit</td><td>A Public account</td><td>Nothing</td></tr>
+    </tbody>
+  </table></div>
+</div></section>
+
+<section id="screenshots"><div class="wrap">
+  <h2>Screenshots</h2>
+  <p class="sub">The trades are made up; quotes, news and filings are real public data from the day the pictures were taken.</p>
+  <div class="gallery">
+    <figure><img loading="lazy" src="screenshots/detail_en.png" width="1440" height="900" alt="Option strategy detail with P/L chart across prices and dates and the Greeks"><figcaption><b>Strategy detail</b>: P/L across prices and dates, Greeks, chance of profit</figcaption></figure>
+    <figure><img loading="lazy" src="screenshots/risk_en.png" width="1440" height="900" alt="Portfolio risk view with stress tests, expiration ladder and Monte Carlo"><figcaption><b>Risk view</b>: stress tests, expiration ladder, Monte Carlo</figcaption></figure>
+    <figure><img loading="lazy" src="screenshots/picker_en.png" width="1440" height="900" alt="Stock picker chart wall with support and resistance and moving averages"><figcaption><b>Picker</b>: the chart wall with support, resistance and EMA 50/200</figcaption></figure>
+    <figure><img loading="lazy" src="screenshots/paper_builder_en.png" width="1440" height="900" alt="Paper trading strategy builder on a live option chain"><figcaption><b>Paper Trade</b>: build a strategy on the live chain</figcaption></figure>
+    <figure><img loading="lazy" src="screenshots/digest_en.png" width="1440" height="900" alt="Bilingual market news digest from Finviz, WSJ and MarketWatch"><figcaption><b>Digest</b>: four news wires, English and Chinese</figcaption></figure>
+    <figure><img loading="lazy" src="screenshots/journal_en.png" width="1440" height="900" alt="Options trade journal with win rate, profit factor and equity curve"><figcaption><b>Trade journal</b>: win rate, profit factor, monthly targets</figcaption></figure>
+  </div>
+</div></section>
+
+<section id="start"><div class="wrap">
+  <h2>Quick start</h2>
+  <p class="sub">Python 3.10 or newer. The first start installs everything into a local virtual environment.</p>
+<pre><code>git clone https://github.com/jackson-cmd/zeus-options-terminal
+cd zeus-options-terminal
+./start.sh          # macOS / Linux (Windows: double-click start.bat)</code></pre>
+  <ol class="steps">
+    <li>The browser opens <code>http://localhost:8765</code>.</li>
+    <li>Press <b>Load the sample</b> to look around with a sample portfolio priced from today's quotes.</li>
+    <li>Then connect tastytrade, Alpaca or Public in ⚙ Settings, or upload a CSV of your trades.</li>
+  </ol>
+</div></section>
+
+<section id="faq" class="faq"><div class="wrap">
+  <h2>FAQ</h2>
+  <details open><summary>Is ZEUS Terminal free?</summary><p>Yes, for personal, non-commercial use (PolyForm Noncommercial license). It runs on your own computer, with no subscription and no account to create.</p></details>
+  <details><summary>Do I need a tastytrade account?</summary><p>No. Connect tastytrade, Alpaca (free, with a paper account) or Public, or upload a CSV of your trades from any broker. Without a broker feed, quotes come from free sources: Cboe options about 15 minutes delayed and Yahoo Finance stocks. A sample portfolio lets you try every page first.</p></details>
+  <details><summary>Does it place trades?</summary><p>No. It only reads positions and quotes from your broker. The Paper Trade tab simulates trades for practice; nothing is sent to a broker.</p></details>
+  <details><summary>Where is my data stored?</summary><p>Only on your computer, in ~/.zeus-terminal. Keys, trades and settings never leave it, except in requests to the broker or service you connected yourself. There is no telemetry.</p></details>
+  <details><summary>Which systems does it run on?</summary><p>macOS, Linux and Windows with Python 3.10 or newer. Desktop notifications are macOS only; e-mail alerts work on macOS and Linux.</p></details>
+  <details><summary>Is there a Chinese interface?</summary><p>Yes. The interface switches between Chinese, bilingual and English at any time, and news headlines can be shown in both languages.</p></details>
+</div></section>
+</main>
+
+<footer><div class="wrap">
+  <span>ZEUS Terminal · 宙斯期权终端 · <a href="https://github.com/jackson-cmd/zeus-options-terminal">GitHub</a> · <a href="https://github.com/jackson-cmd/zeus-options-terminal/blob/main/docs/FEATURES.md">All features</a> · <a href="https://github.com/jackson-cmd/zeus-options-terminal/blob/main/CHANGELOG.md">Changelog</a></span>
+  <span>PolyForm Noncommercial 1.0.0 · not investment advice</span>
+</div></footer>
+</body>
+</html>
