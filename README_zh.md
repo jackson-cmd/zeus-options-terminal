@@ -8,7 +8,7 @@
 
 [🌐 网站](https://jackson-cmd.github.io/zeus-options-terminal/zh/) · [English → README.md](README.md) · [🚀 快速开始](#-快速开始) · [新功能](#-新功能) · [全部功能](docs/FEATURES_zh.md) · [使用手册](docs/USER_GUIDE_zh.md) · [参与贡献](#-参与贡献)
 
-[![CI](https://github.com/jackson-cmd/zeus-options-terminal/actions/workflows/ci.yml/badge.svg)](https://github.com/jackson-cmd/zeus-options-terminal/actions/workflows/ci.yml) [![版本](https://img.shields.io/github/v/release/jackson-cmd/zeus-options-terminal?label=版本)](https://github.com/jackson-cmd/zeus-options-terminal/releases) ![Python](https://img.shields.io/badge/python-3.10%2B-3776ab) ![本地部署](https://img.shields.io/badge/100%25-本地部署-2ea043) ![界面语言](https://img.shields.io/badge/界面-中文%20%7C%20双语%20%7C%20English-e3b341) ![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial-b31b1b)
+[![CI](https://github.com/jackson-cmd/zeus-options-terminal/actions/workflows/ci.yml/badge.svg)](https://github.com/jackson-cmd/zeus-options-terminal/actions/workflows/ci.yml) [![版本](https://img.shields.io/github/v/release/jackson-cmd/zeus-options-terminal?label=版本)](https://github.com/jackson-cmd/zeus-options-terminal/releases) [![PyPI](https://img.shields.io/pypi/v/zeus-options-terminal)](https://pypi.org/project/zeus-options-terminal/) ![Python](https://img.shields.io/badge/python-3.10%2B-3776ab) ![本地部署](https://img.shields.io/badge/100%25-本地部署-2ea043) ![界面语言](https://img.shields.io/badge/界面-中文%20%7C%20双语%20%7C%20English-e3b341) ![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial-b31b1b)
 
 <img src="docs/assets/demo_zh.gif" alt="宙斯期权终端 14 秒演示：持仓总览、策略盈亏表、风险视图、K 线图墙、新闻和交易日记" width="100%">
 
@@ -31,6 +31,17 @@ cd zeus-options-terminal
 3. 新闻源、AI、邮件提醒都是可选的，也在设置页里填，不用手改任何文件。
 
 8765 端口被占用？用 `PORT=8790 ./start.sh`。各家券商的 key 去哪拿，见[连接券商](#-连接券商)。
+
+### 📦 用 pipx 安装
+
+一条命令，不用 clone。[pipx](https://pipx.pypa.io/) 会把 ZEUS 装进它自己的环境（需要 Python 3.10+）：
+
+```bash
+pipx install zeus-options-terminal
+zeus                # 打开 http://localhost:8765（换端口用 zeus --port 8790）
+```
+
+设置和数据都在 `~/.zeus-terminal`，所以 `pipx upgrade zeus-options-terminal` 升级不会丢。在虚拟环境里用 `pip install zeus-options-terminal` 也可以。详见[手册 §1.8](docs/USER_GUIDE_zh.md#18-用-pipx-安装)。
 
 ### 🐳 用 Docker 运行
 
@@ -69,6 +80,7 @@ docker run -d --name zeus --restart unless-stopped \
 
 | | 0.6.0、0.5.x、0.4.x、0.3.x 和 0.2.x 新加入 |
 |---|---|
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **📦 pip 和 pipx**：`pipx install zeus-options-terminal` 之后运行 `zeus`，不用 clone 代码就能装好并启动 ZEUS；`pipx upgrade` 升级时设置和交易都保留。[用 pipx 安装 →](docs/USER_GUIDE_zh.md#18-用-pipx-安装) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🐳 用 Docker 运行**：一条 `docker run` 就能从 GitHub Packages 拉起 ZEUS，Intel、AMD、ARM 都能跑。设置和交易存在卷里，端口只留在你自己的电脑上，AI 智能体通过 `docker exec` 连进来。[怎么运行 →](docs/USER_GUIDE_zh.md#17-用-docker-运行) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🔌 Alpaca 和 Public**：连上 Alpaca（免费，自带模拟盘）或 Public 账户，就有实时持仓、成交、在途订单和带希腊值的报价。持仓和行情分开选，也可以照样上传自己的交易、行情改用 Alpaca。ZEUS 只读，从不下单。[连接券商 →](docs/USER_GUIDE_zh.md#22-连接券商) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🧪 示例组合**：新装好以后点一下，就载入 6 个持仓和 1 笔已平仓交易，价格取自当天的真实期权报价，什么都不连也能把每个页面试一遍。一键清除。[怎么开始 →](docs/USER_GUIDE_zh.md#21-先选持仓从哪来) |

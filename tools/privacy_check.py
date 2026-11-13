@@ -121,9 +121,10 @@ def check(files: list[tuple[str, str]], staged: bool) -> list[str]:
         for label, value in marks.items():
             seen = text
             if label == "your global git name":
-                # a GitHub handle inside the repository's own URL, its container image on ghcr.io,
+                # a GitHub handle inside the repository's own URL (pages, raw files), its container image on ghcr.io,
                 # or a shields.io badge for one of its repositories, is public anyway
                 seen = seen.replace(f"github.com/{value}/", "").replace(f"{value}.github.io", "")
+                seen = seen.replace(f"raw.githubusercontent.com/{value}/", "")
                 seen = seen.replace(f"ghcr.io/{value}/", "")
                 seen = re.sub(r"img\.shields\.io/github/[\w./-]*?/" + re.escape(value) + "/", "", seen)
             if value and value in seen:

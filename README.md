@@ -8,7 +8,7 @@ Live positions & Greeks · P/L and risk · exit discipline · paper trading with
 
 [🌐 Website](https://jackson-cmd.github.io/zeus-options-terminal/) · [中文说明 → README_zh.md](README_zh.md) · [🚀 Quick start](#-quick-start) · [What's new](#-whats-new) · [All features](docs/FEATURES.md) · [User manual](docs/USER_GUIDE.md) · [Contributing](#-contributing)
 
-[![CI](https://github.com/jackson-cmd/zeus-options-terminal/actions/workflows/ci.yml/badge.svg)](https://github.com/jackson-cmd/zeus-options-terminal/actions/workflows/ci.yml) [![Release](https://img.shields.io/github/v/release/jackson-cmd/zeus-options-terminal)](https://github.com/jackson-cmd/zeus-options-terminal/releases) ![Python](https://img.shields.io/badge/python-3.10%2B-3776ab) ![Self-hosted](https://img.shields.io/badge/self--hosted-100%25%20local-2ea043) ![Languages](https://img.shields.io/badge/UI-中文%20%7C%20双语%20%7C%20English-e3b341) ![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial-b31b1b)
+[![CI](https://github.com/jackson-cmd/zeus-options-terminal/actions/workflows/ci.yml/badge.svg)](https://github.com/jackson-cmd/zeus-options-terminal/actions/workflows/ci.yml) [![Release](https://img.shields.io/github/v/release/jackson-cmd/zeus-options-terminal)](https://github.com/jackson-cmd/zeus-options-terminal/releases) [![PyPI](https://img.shields.io/pypi/v/zeus-options-terminal)](https://pypi.org/project/zeus-options-terminal/) ![Python](https://img.shields.io/badge/python-3.10%2B-3776ab) ![Self-hosted](https://img.shields.io/badge/self--hosted-100%25%20local-2ea043) ![Languages](https://img.shields.io/badge/UI-中文%20%7C%20双语%20%7C%20English-e3b341) ![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial-b31b1b)
 
 <img src="docs/assets/demo_en.gif" alt="A 14-second tour of ZEUS Terminal: the positions board, a strategy's P/L grid, the risk view, the K-line chart wall, the news digest and the trade journal" width="100%">
 
@@ -31,6 +31,17 @@ The first run installs everything into a local virtual environment (Python 3.10+
 3. News sources, AI and e-mail alerts are optional, in the same Settings page. Nothing is edited by hand.
 
 Port 8765 taken? Run `PORT=8790 ./start.sh`. Where each broker's keys come from: [Connect your broker](#-connect-your-broker).
+
+### 📦 Install with pipx
+
+One command and no clone. [pipx](https://pipx.pypa.io/) puts ZEUS in an environment of its own (Python 3.10+):
+
+```bash
+pipx install zeus-options-terminal
+zeus                # opens http://localhost:8765  (zeus --port 8790 for another port)
+```
+
+Settings and data stay in `~/.zeus-terminal`, so `pipx upgrade zeus-options-terminal` keeps them. `pip install zeus-options-terminal` inside a virtual environment works too. More in [manual §1.8](docs/USER_GUIDE.md#18-install-with-pipx).
 
 ### 🐳 Run with Docker
 
@@ -69,6 +80,7 @@ Then open **http://localhost:8765**. Your settings, trades and caches stay in th
 
 | | New in 0.6.0, 0.5.x, 0.4.x, 0.3.x and 0.2.x |
 |---|---|
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **📦 pip and pipx**: `pipx install zeus-options-terminal`, then `zeus`, installs and starts ZEUS without cloning the code; `pipx upgrade` keeps your settings and trades. [Install with pipx →](docs/USER_GUIDE.md#18-install-with-pipx) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🐳 Run with Docker**: one `docker run` starts ZEUS from GitHub Packages on Intel, AMD and ARM. Your settings and trades stay in a volume, the port stays on your own computer, and AI agents connect through `docker exec`. [How to run it →](docs/USER_GUIDE.md#17-run-with-docker) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🔌 Alpaca and Public**: connect an Alpaca account (free, paper trading included) or a Public account for live positions, fills, working orders and quotes with Greeks. Positions and quotes are separate choices, so you can also keep your uploaded trades and take quotes from Alpaca. ZEUS only reads; it never places an order. [Connect a broker →](docs/USER_GUIDE.md#22-connect-a-broker) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🧪 Sample portfolio**: on a fresh install, one click loads six positions and a closed trade priced with today's real option quotes, so you can try every page before connecting anything. One click removes it. [How to start →](docs/USER_GUIDE.md#21-choose-how-your-positions-get-in) |

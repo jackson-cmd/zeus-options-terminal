@@ -6,12 +6,21 @@ name: Release
 # so the release is a tested commit. Run it by hand to see the notes in the run summary; it
 # publishes nothing when the version already has its tag. A release made with GITHUB_TOKEN
 # raises no event for other workflows, so this run starts the Docker image build for the new
-# tag itself (.github/workflows/docker.yml).
+# tag itself (.github/workflows/docker.yml). With the repository variable PYPI_PUBLISH set to
+# true, the new release also goes to PyPI as zeus-options-terminal by trusted publishing (no
+# token is stored; PyPI trusts this file and the pypi environment), after the wheel has been
+# installed and started in a clean environment (tools/package_smoke.sh). Run by hand with
+# pypi_tag to upload a release that is already on GitHub.
 on:
   push:
     branches: [main]
     paths: ["zeus/zeus_config.py", "CHANGELOG.md", "CHANGELOG_zh.md", "tools/release_notes.py", ".github/workflows/release.yml"]
   workflow_dispatch:
+    inputs:
+      pypi_tag:
+        description: "Upload this existing release to PyPI, such as v0.7.0 (empty: a normal run)"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -25,6 +34,9 @@ jobs:
   release:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    outputs:
+      version: ${{ steps.notes.outputs.version }}
+      published: ${{ steps.publish.outputs.published }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
@@ -38,6 +50,7 @@ jobs:
           echo "version=$version" >> "$GITHUB_OUTPUT"
           { echo "## Notes for v$version"; echo; cat "$RUNNER_TEMP/notes.md"; } >> "$GITHUB_STEP_SUMMARY"
       - name: Publish the release
+        id: publish
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ steps.notes.outputs.version }}
@@ -52,6 +65,7 @@ jobs:
           fi
           gh release create "v$VERSION" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
             --title "ZEUS Terminal $VERSION" --notes-file "$RUNNER_TEMP/notes.md"
+          echo "published=true" >> "$GITHUB_OUTPUT"
           echo "Published https://github.com/$GITHUB_REPOSITORY/releases/tag/v$VERSION" | tee -a "$GITHUB_STEP_SUMMARY"
           for attempt in 1 2 3; do   # the new tag can take a moment to be visible
             gh workflow run docker.yml --repo "$GITHUB_REPOSITORY" --ref "v$VERSION" && break
@@ -59,3 +73,30 @@ jobs:
             sleep 10
           done
           echo "Started the Docker image build for v$VERSION: https://github.com/$GITHUB_REPOSITORY/actions/workflows/docker.yml" | tee -a "$GITHUB_STEP_SUMMARY"
+
+  pypi:
+    needs: release
+    if: vars.PYPI_PUBLISH == 'true' && (needs.release.outputs.published == 'true' || inputs.pypi_tag != '')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: pypi
+      url: https://pypi.org/project/zeus-options-terminal/
+    permissions:
+      contents: read
+      id-token: write          # trusted publishing
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.pypi_tag || format('v{0}', needs.release.outputs.version) }}
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Build, check, install and start
+        run: |
+          python -m pip install build twine
+          python -m build
+          python -m twine check --strict dist/*
+          tools/package_smoke.sh dist/*.whl
+      - name: Upload to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1

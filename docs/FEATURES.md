@@ -260,6 +260,7 @@ Saved secrets are write-only: the page shows *set* or *not set* and never sends 
 | ✅ | Tests | `python -m pytest` (offline; quotes are faked) |
 | ✅ | CI | Every pull request runs the tests on Linux, macOS and Windows (7 jobs); `main` only accepts green pull requests |
 | ✅ | Docker image <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | `ghcr.io/jackson-cmd/zeus-options-terminal` for amd64 and arm64, built from `zeus/Dockerfile`: settings and data in the `/data` volume, a non-root user, read-only code. Each release builds it, starts it and checks it (`tools/docker_smoke.sh`) before pushing `X.Y.Z`, `X.Y` and `latest` ([manual §1.7](USER_GUIDE.md#17-run-with-docker)) |
+| ✅ | pip / pipx package <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | `pipx install zeus-options-terminal`, then `zeus` (`--port`, `--no-browser`, `--version`). The wheel holds the `zeus/` folder as it is; built from `pyproject.toml`, installed and started in a clean environment by CI, and uploaded to PyPI by each release |
 | ✅ | Privacy hook | `tools/install_git_hook.sh` refuses data files, keys and your own paths in commits |
 | ✅ | Clean export | `tools/export_clean_zip.sh` builds a zip of the code only |
 
