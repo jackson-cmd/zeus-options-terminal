@@ -23,6 +23,7 @@ import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 from html import unescape
+from urllib.parse import urlsplit
 
 import zeus_config as hc
 
@@ -67,6 +68,15 @@ def _ms(dt: datetime) -> int:
     return int(dt.timestamp() * 1000)
 
 
+def _drop_tracking(link: str) -> str:
+    """WSJ and MarketWatch links carry tracking parameters: drop the query string for those
+    hosts only, judged by the host name rather than by text anywhere in the URL."""
+    host = (urlsplit(link).hostname or "").lower()
+    if host in ("wsj.com", "marketwatch.com") or host.endswith((".wsj.com", ".marketwatch.com")):
+        return link.split("?")[0]
+    return link
+
+
 def _rss(url: str, source: str, section: str) -> list[dict]:
     xml = _get(url)
     root = ET.fromstring(xml.encode("utf-8") if isinstance(xml, str) else xml)
@@ -83,7 +93,7 @@ def _rss(url: str, source: str, section: str) -> list[dict]:
                 dt = dt.replace(tzinfo=timezone.utc)
         except Exception:
             dt = datetime.now(timezone.utc)
-        out.append({"url": link.split("?")[0] if "wsj.com" in link or "marketwatch.com" in link else link,
+        out.append({"url": _drop_tracking(link),
                     "title": title, "teaser": _clean(it.findtext("description"))[:500],
                     "source": source, "section": section, "ts": _ms(dt),
                     "date": dt.astimezone(_ET).strftime("%Y-%m-%d")})

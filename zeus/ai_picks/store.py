@@ -8,7 +8,8 @@ DIR = REPO / "data" / "ai_picks"
 
 
 def _path(date: str) -> Path:
-    return DIR / f"{date}.json"
+    # rebuilt from the parsed date, so a date from a request can never carry a path
+    return DIR / f"{datetime.date.fromisoformat(str(date)).isoformat()}.json"
 
 
 def save(date: str, picks: dict, meta: dict | None = None) -> None:
@@ -25,7 +26,10 @@ def save(date: str, picks: dict, meta: dict | None = None) -> None:
 
 
 def load(date: str) -> dict | None:
-    p = _path(date)
+    try:
+        p = _path(date)
+    except ValueError:
+        return None
     if not p.exists():
         return None
     try:

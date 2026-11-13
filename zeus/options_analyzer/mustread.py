@@ -8,7 +8,7 @@
 LLM 不进此运行路径；最近 1 月由 `.mr.json` 覆盖层叠加(见 finalize_day)。
 """
 from __future__ import annotations
-import json, re
+import datetime, json, re
 from pathlib import Path
 
 _ROOT = Path(__file__).resolve().parent.parent
@@ -261,13 +261,14 @@ def dedupe_day(items: list, universe: set, max_per_ticker: int = 3, max_per_macr
 # ── 覆盖层(最近 1 月 LLM 精修) ──
 _overlay_cache = {}
 def overlay_path(date: str) -> Path:
-    return _DIGEST_DIR / date[:7] / f".{date}.mr.json"
+    day = datetime.date.fromisoformat(str(date)).isoformat()   # never a path from a request
+    return _DIGEST_DIR / day[:7] / f".{day}.mr.json"
 
 def overlay_load(date: str) -> dict:
     if date in _overlay_cache:
         return _overlay_cache[date]
-    p = overlay_path(date)
     try:
+        p = overlay_path(date)
         data = json.loads(p.read_text(encoding="utf-8")) if p.exists() else {}
     except Exception:
         data = {}

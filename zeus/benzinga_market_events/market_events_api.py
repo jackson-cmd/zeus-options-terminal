@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import datetime
 import json
+import re
 import sys
 import threading
 import time
@@ -85,6 +86,8 @@ _arch_cache: dict[str, tuple[float, list]] = {}
 def _load_archive(kind: str):
     """Full-history rows from data/market_events/<kind>.parquet (mtime-cached).
     None if no archive (e.g. option_activity)."""
+    if not re.fullmatch(r"[a-z0-9_]+", kind or ""):      # a kind is a plain name, never a path
+        return None
     p = _ARCHIVE_DIR / f"{kind}.parquet"
     if not p.exists():
         return None

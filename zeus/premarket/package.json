@@ -5,13 +5,20 @@
   "type": "module",
   "scripts": {
     "login": "node login.mjs",
-    "scrape": "node scrape.mjs",
-    "run": "node login.mjs && node scrape.mjs"
+    "scrape": "node fetch.mjs",
+    "run": "node login.mjs && node fetch.mjs"
   },
   "dependencies": {
-    "csv-parse": "^5.5.0",
     "puppeteer": "^21.0.0",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2"
+  },
+  "overrides": {
+    "basic-ftp": "^6.2.4",
+    "brace-expansion": "^1.1.22",
+    "ip-address": "^10.7.4",
+    "js-yaml": "^4.3.2",
+    "tar-fs": "^3.1.1",
+    "ws": "^8.21.0"
   }
 }

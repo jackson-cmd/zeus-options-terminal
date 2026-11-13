@@ -12494,9 +12494,23 @@ _ss_cache_dir = PROJECT_ROOT / "data" / "stock_selector_cache"
 _ss_cache_dir.mkdir(parents=True, exist_ok=True)
 
 
+def _safe_day(value) -> str:
+    """A date as YYYY-MM-DD, rebuilt from its parsed parts, so a date that came with a request
+    can never carry a path (../, /, \\, C:) into a cache file name. Raises ValueError."""
+    return datetime.date.fromisoformat(str(value)).isoformat()
+
+
+def _safe_part(value) -> str:
+    """A ticker, scope or kind inside a cache file name, with every path character replaced."""
+    s = str(value)
+    for ch in ("/", "\\", ":", "\0"):
+        s = s.replace(ch, "_")
+    return s.replace("..", "_")
+
+
 def _ss_cache_path(today_key: str, no_sonnet: bool):
     suffix = "_nosonnet" if no_sonnet else ""
-    return _ss_cache_dir / f"{today_key}{suffix}.json"
+    return _ss_cache_dir / f"{_safe_day(today_key)}{suffix}.json"
 
 
 @app.get("/api/stock_selector")
@@ -12511,6 +12525,12 @@ async def api_stock_selector(today: Optional[str] = Query(None),
     换日自动失效: cache_key = (today, no_sonnet), today 换了 key 就变.
     """
     import datetime as _dt
+    if today:
+        try:
+            today = _safe_day(today)
+        except ValueError:
+            from fastapi import HTTPException
+            raise HTTPException(status_code=400, detail="today must be a date such as 2026-11-12")
     today_key = today or _dt.date.today().isoformat()
     cache_key = (today_key, bool(no_sonnet))
 
@@ -16009,9 +16029,8 @@ def _aisum_key(date: str, scope: str) -> str:
 
 def _aisum_path(date: str, scope: str = ""):
     base = Path(__file__).resolve().parent.parent / "benzinga_digest" / "ai_summary"
-    name = f"{date}__{scope}.json" if scope else f"{date}.json"
-    name = name.replace("/", "_").replace("..", "_")      # 兜底过滤路径
-    return base / name
+    day = "adhoc" if date == "adhoc" else _safe_day(date)     # 'adhoc': items picked by hand, no day
+    return base / (f"{day}__{_safe_part(scope)}.json" if scope else f"{day}.json")
 
 
 def _aisum_load(date: str, scope: str = ""):
@@ -16155,7 +16174,7 @@ def _aisum_start(date, scope, kind, items, old_summary, new_items, result_ids,
 def _digest_premarket_text(date: str) -> str:
     """当天 Chris 盘前评论文本(data/benzinga/<date>.json), 用于喂进当天主摘要的 🌅盘前要点。"""
     try:
-        f = Path(__file__).resolve().parent.parent / "data" / "benzinga" / f"{date}.json"
+        f = Path(__file__).resolve().parent.parent / "data" / "benzinga" / f"{_safe_day(date)}.json"
         if not f.exists():
             return ""
         d = json.loads(f.read_text(encoding="utf-8"))
@@ -16421,8 +16440,7 @@ def _pivot_key(symbol: str, date: str, kind: str) -> str:
 
 def _pivot_path(symbol: str, date: str, kind: str) -> Path:
     base = Path(__file__).resolve().parent.parent / "benzinga_digest" / "pivot_summary"
-    name = f"{symbol}__{date}__{kind}.json".replace("/", "_").replace("..", "_")
-    return base / name
+    return base / f"{_safe_part(symbol)}__{_safe_day(date)}__{_safe_part(kind)}.json"
 
 
 def _pivot_load(symbol: str, date: str, kind: str):
@@ -17078,7 +17096,8 @@ async def digest_today_stream():
 
 # ── 翻译缓存(标题/正文中文)：独立 .<date>.tr.json，不碰主 digest 文件 ──
 def _digest_tr_path(date: str):
-    return _DIGEST_DIR / date[:7] / f".{date}.tr.json"
+    day = _safe_day(date)
+    return _DIGEST_DIR / day[:7] / f".{day}.tr.json"
 
 
 def _digest_tr_load(date: str) -> dict:
