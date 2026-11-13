@@ -15,6 +15,7 @@ calendar 计数走 .counts.json 索引(compactor 维护),避免每次解析全�
 """
 from __future__ import annotations
 
+import datetime
 import json
 import os
 import re
@@ -31,24 +32,39 @@ _index_lock = threading.Lock()
 
 
 # ── 路径 ──────────────────────────────────────────────────────────────────
+def _day(date) -> str:
+    """YYYY-MM-DD rebuilt from the parsed date, so a date from a request can never carry a path."""
+    return datetime.date.fromisoformat(str(date)).isoformat()
+
+
+def _is_day(date) -> bool:
+    try:
+        _day(date)
+        return True
+    except ValueError:
+        return False
+
+
 def _month_dir(date: str) -> Path:
-    return DIGEST_DIR / date[:7]
+    return DIGEST_DIR / _day(date)[:7]
 
 
 def plain_path(date: str) -> Path:
-    return _month_dir(date) / f".{date}.json"
+    return _month_dir(date) / f".{_day(date)}.json"
 
 
 def zst_path(date: str) -> Path:
-    return _month_dir(date) / f".{date}.json.zst"
+    return _month_dir(date) / f".{_day(date)}.json.zst"
 
 
 def md_path(date: str) -> Path:
-    return _month_dir(date) / f"{date}.md"
+    return _month_dir(date) / f"{_day(date)}.md"
 
 
 def day_path(date: str):
     """该天实际存在的数据文件:优先普通 .json,否则 .json.zst,都没有则 None。"""
+    if not _is_day(date):
+        return None
     p = plain_path(date)
     if p.exists():
         return p
@@ -66,6 +82,8 @@ def _zstd():
 
 def load_day(date: str):
     """返回该天的 item 列表(无则 None)。优先读普通 .json(最新),否则解压 .json.zst。"""
+    if not _is_day(date):
+        return None
     p = plain_path(date)
     if p.exists():
         return json.loads(p.read_bytes())

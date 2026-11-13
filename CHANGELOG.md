@@ -4,6 +4,15 @@
 
 What changed in each version of ZEUS Terminal. New features carry the <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> badge. Numbers in parentheses are the pull requests.
 
+## 0.5.2 — 2026-11-12
+
+### Security
+
+- A page on another website could make your browser call `/api/stock_selector?today=…` on the local ZEUS server, and ZEUS wrote the screener result to the path given in `today`. Such a page could create or overwrite `.json` files outside ZEUS's folders and start a screener run. `today` must now be a date; anything else gets an error, and nothing is read or written. (#56)
+- Every cache file named after a date, a ticker or a scope now checks that value itself: AI summaries, pivot summaries, news translations, must-read marks, AI picks, the news and Finviz archives, and the market-event archives. Dates are rebuilt from the day they name and path characters are replaced, so no value from a request can lead outside its folder, on Windows either. (#56)
+- News links lose their tracking parameters only when the host really is wsj.com or marketwatch.com, not whenever the text appears somewhere in the link. (#56)
+- The optional Benzinga helper in `zeus/premarket` takes the fixed releases of ws, tar-fs, basic-ftp, ip-address, js-yaml and brace-expansion and drops csv-parse, which it never used. `npm run scrape` now runs `fetch.mjs`, the script that exists. If you use the helper, run `npm install` in `zeus/premarket` again. (#56)
+
 ## 0.5.1 — 2026-11-12
 
 ### Project
