@@ -165,10 +165,14 @@ def test_privacy_check_allows_handle_only_in_github_urls(tmp_path, monkeypatch):
     (tmp_path / "ok.md").write_text("git clone https://github.com/octo-cat/zeus\nsite: https://octo-cat.github.io/zeus/\n"
                                     "![Release](https://img.shields.io/github/v/release/octo-cat/zeus)\n"
                                     "docker run ghcr.io/octo-cat/zeus:latest\n"
-                                    "<img src=\"https://raw.githubusercontent.com/octo-cat/zeus/main/a.png\">")
+                                    "<img src=\"https://raw.githubusercontent.com/octo-cat/zeus/main/a.png\">\n"
+                                    "<!-- mcp-name: io.github.octo-cat/zeus -->")
+    (tmp_path / "glama.json").write_text('{"maintainers": ["octo-cat"]}')       # Glama's claim file
     (tmp_path / "bad.md").write_text("written by octo-cat")
-    problems = pc.check([("100644", "ok.md"), ("100644", "bad.md")], staged=False)
-    assert problems == ["bad.md: contains your global git name"]
+    (tmp_path / "other.json").write_text('{"maintainers": ["octo-cat"]}')       # only glama.json may list it
+    files = [("100644", n) for n in ("ok.md", "glama.json", "bad.md", "other.json")]
+    problems = pc.check(files, staged=False)
+    assert problems == ["bad.md: contains your global git name", "other.json: contains your global git name"]
 
 
 def test_every_runtime_dir_is_ignored_and_covers_the_finviz_store():

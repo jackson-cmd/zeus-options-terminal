@@ -12,6 +12,7 @@
 set -euo pipefail
 
 IMAGE="${1:?usage: tools/docker_smoke.sh <image>}"
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"   # the repository, for server.json
 PORT="${SMOKE_PORT:-8765}"
 URL="http://127.0.0.1:$PORT"
 NAME=zeus                               # the --name the manual uses; Settings shows commands with it
@@ -106,6 +107,9 @@ docker exec "$NAME" test -s /data/runtime/data/heatmap_universe.txt || fail "the
 tz=$(docker exec "$NAME" date +%Z)
 case "$tz" in EST|EDT) ;; *) fail "TZ=America/New_York gives $tz" ;; esac
 ok "uid 1000, read-only code, data and runtime links in /data, clock $tz"
+label=$(docker inspect --format '{{ index .Config.Labels "io.modelcontextprotocol.server.name" }}' "$IMAGE")
+[ "$label" = "$(json "$ROOT/server.json" 'd["name"]')" ] || fail "the image's MCP Registry label is '$label', not the name in server.json"
+ok "MCP Registry label: $label"
 
 # ---- MCP: docker exec works, HTTP from the host is refused
 docker exec -i "$NAME" python /app/zeus/zeus_mcp_stdio.py --check > "$TMP/check.txt" || { cat "$TMP/check.txt"; fail "MCP through docker exec failed"; }

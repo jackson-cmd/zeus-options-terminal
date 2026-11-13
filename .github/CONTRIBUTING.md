@@ -22,7 +22,7 @@ ZEUS has far more features than the README can show, and it keeps growing. Pull 
 
 ### Releasing a new version
 
-A merge that raises the version publishes the release by itself. In the pull request, raise `APP_VERSION` in `zeus/zeus_config.py` and add a section for the new version at the top of both `CHANGELOG.md` and `CHANGELOG_zh.md`. After the merge, the Release workflow tags the commit `v<version>` and publishes a GitHub release whose notes are those two sections. `tests/test_release.py` fails when the version and the two changelogs disagree. The same run starts the Docker image build and, when the repository variable `PYPI_PUBLISH` is `true`, uploads the release to PyPI as `zeus-options-terminal` after `tools/package_smoke.sh` has installed and started the wheel. Changes that users do not notice, such as docs and tests, keep the version.
+A merge that raises the version publishes the release by itself. In the pull request, raise `APP_VERSION` in `zeus/zeus_config.py` and the three versions in `server.json` (the server, the PyPI package and the image tag), and add a section for the new version at the top of both `CHANGELOG.md` and `CHANGELOG_zh.md`. After the merge, the Release workflow tags the commit `v<version>` and publishes a GitHub release whose notes are those two sections. `tests/test_release.py` fails when the version and the two changelogs disagree. The same run starts the Docker image build and, when the repository variable `PYPI_PUBLISH` is `true`, uploads the release to PyPI as `zeus-options-terminal` after `tools/package_smoke.sh` has installed and started the wheel. Once the image is pushed, the Docker workflow lists the version in the official MCP Registry as `io.github.jackson-cmd/zeus-options-terminal` (`server.json`); `tests/test_mcp_registry.py` fails when `server.json` and `APP_VERSION` disagree. Changes that users do not notice, such as docs and tests, keep the version.
 
 ### Where things are
 
@@ -44,6 +44,7 @@ zeus-options-terminal/
 ├── tools/                privacy pre-commit hook, clean zip export, release notes, checks of the Docker image and the pip package
 ├── examples/             CSV template for manual trades
 ├── .github/              CI and release workflows, issue forms, CONTRIBUTING, security policy, code of conduct
+├── server.json · glama.json · CITATION.cff   entries for the MCP Registry, Glama and Zenodo
 └── start.sh · start.command · start.bat · requirements.txt · pyproject.toml
 ```
 
@@ -81,7 +82,7 @@ ZEUS 的功能远比 README 能写下的多，而且还在长。欢迎提 PR：�
 
 ### 发新版本
 
-合并一个提高了版本号的 PR，就会自动发版。在 PR 里把 `zeus/zeus_config.py` 的 `APP_VERSION` 改成新版本号，并在 `CHANGELOG.md` 和 `CHANGELOG_zh.md` 最上面各加一节写这个版本。合并后，Release 工作流给这个提交打上 `v<版本号>` 标签，发布 GitHub Release，说明就用这两节。版本号和两份更新记录对不上时，`tests/test_release.py` 会失败。同一次运行还会启动 Docker 镜像构建；仓库变量 `PYPI_PUBLISH` 为 `true` 时，`tools/package_smoke.sh` 装好并启动一遍安装包之后，把这个版本上传到 PyPI（`zeus-options-terminal`）。文档、测试这类用户感觉不到的改动，不用改版本号。
+合并一个提高了版本号的 PR，就会自动发版。在 PR 里把 `zeus/zeus_config.py` 的 `APP_VERSION` 和 `server.json` 里的三处版本号（服务器、PyPI 包、镜像标签）改成新版本号，并在 `CHANGELOG.md` 和 `CHANGELOG_zh.md` 最上面各加一节写这个版本。合并后，Release 工作流给这个提交打上 `v<版本号>` 标签，发布 GitHub Release，说明就用这两节。版本号和两份更新记录对不上时，`tests/test_release.py` 会失败。同一次运行还会启动 Docker 镜像构建；仓库变量 `PYPI_PUBLISH` 为 `true` 时，`tools/package_smoke.sh` 装好并启动一遍安装包之后，把这个版本上传到 PyPI（`zeus-options-terminal`）。镜像推送完以后，Docker 工作流把这个版本登记到官方 MCP Registry，名字是 `io.github.jackson-cmd/zeus-options-terminal`（`server.json`）；`server.json` 和 `APP_VERSION` 对不上时，`tests/test_mcp_registry.py` 会失败。文档、测试这类用户感觉不到的改动，不用改版本号。
 
 ### 东西放在哪
 
@@ -103,6 +104,7 @@ zeus-options-terminal/
 ├── tools/                隐私检查钩子、干净打包脚本、发版说明、Docker 镜像和 pip 安装包的检查
 ├── examples/             手动交易的 CSV 模板
 ├── .github/              CI 和发版工作流、Issue 表单、CONTRIBUTING、安全政策、行为准则
+├── server.json · glama.json · CITATION.cff   MCP Registry、Glama 和 Zenodo 用的登记信息
 └── start.sh · start.command · start.bat · requirements.txt · pyproject.toml
 ```
 

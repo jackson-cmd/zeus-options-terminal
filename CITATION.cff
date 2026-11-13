@@ -1,0 +1,24 @@
+# GitHub shows "Cite this repository" from this file, and Zenodo archives each GitHub release with
+# a DOI using the same details.
+cff-version: 1.2.0
+message: "If you use ZEUS Terminal in your work, please cite it as below."
+type: software
+title: "ZEUS Terminal: the self-hosted options trading terminal"
+abstract: >-
+  ZEUS Terminal (宙斯期权终端) is a self-hosted options trading terminal that runs on your own
+  computer: live positions and Greeks, P/L and risk, paper trading with option and stock legs, a
+  stock picker, a news desk, earnings and SEC filings, and a trade journal, with an MCP endpoint
+  for AI agents.
+authors:
+  - name: "ZEUS Terminal contributors"
+repository-code: "https://github.com/jackson-cmd/zeus-options-terminal"
+url: "https://jackson-cmd.github.io/zeus-options-terminal/"
+license: PolyForm-Noncommercial-1.0.0
+keywords:
+  - options trading
+  - trading terminal
+  - greeks
+  - paper trading
+  - trade journal
+  - self-hosted
+  - mcp-server

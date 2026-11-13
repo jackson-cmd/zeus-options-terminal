@@ -1,3 +1,4 @@
+<!-- mcp-name: io.github.jackson-cmd/zeus-options-terminal -->
 <div align="center">
 
 <img src="docs/assets/banner.svg" alt="ZEUS Terminal · 宙斯期权终端: the self-hosted options trading terminal" width="100%">
@@ -330,6 +331,7 @@ zeus-options-terminal/
 ├── tools/                privacy pre-commit hook, clean zip export, release notes, checks of the Docker image and the pip package
 ├── examples/             CSV template for manual trades
 ├── .github/              CI and release workflows, issue forms, CONTRIBUTING, security policy, code of conduct
+├── server.json · glama.json · CITATION.cff   entries for the MCP Registry, Glama and Zenodo
 └── start.sh · start.command · start.bat · requirements.txt · pyproject.toml
 ```
 

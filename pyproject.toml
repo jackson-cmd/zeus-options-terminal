@@ -65,6 +65,9 @@ offline-translation = ["argostranslate>=1.9", "ctranslate2>=4", "sentencepiece>=
 [project.scripts]
 zeus = "zeus.zeus_cli:main"
 zeus-terminal = "zeus.zeus_cli:main"
+# uvx zeus-options-terminal (how the MCP Registry entry in server.json starts ZEUS) runs the
+# command named like the package
+zeus-options-terminal = "zeus.zeus_cli:main"
 
 [project.urls]
 Homepage = "https://jackson-cmd.github.io/zeus-options-terminal/"
