@@ -1,0 +1,66 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.jackson-cmd/zeus-options-terminal",
+  "title": "ZEUS Terminal",
+  "description": "Self-hosted options trading terminal: positions and Greeks, risk, paper trading, news, journal",
+  "repository": {
+    "url": "https://github.com/jackson-cmd/zeus-options-terminal",
+    "source": "github"
+  },
+  "websiteUrl": "https://jackson-cmd.github.io/zeus-options-terminal/",
+  "version": "0.7.0",
+  "packages": [
+    {
+      "registryType": "pypi",
+      "registryBaseUrl": "https://pypi.org",
+      "identifier": "zeus-options-terminal",
+      "version": "0.7.0",
+      "runtimeHint": "uvx",
+      "transport": {
+        "type": "streamable-http",
+        "url": "http://localhost:{--port}/mcp"
+      },
+      "packageArguments": [
+        {
+          "type": "positional",
+          "value": "--no-browser"
+        },
+        {
+          "type": "named",
+          "name": "--port",
+          "format": "number",
+          "default": "8765",
+          "description": "Port of the ZEUS page; the MCP endpoint is /mcp on the same port"
+        }
+      ]
+    },
+    {
+      "registryType": "oci",
+      "identifier": "ghcr.io/jackson-cmd/zeus-options-terminal:0.7.0",
+      "transport": {
+        "type": "streamable-http",
+        "url": "http://localhost:8765/mcp"
+      },
+      "runtimeArguments": [
+        {
+          "type": "named",
+          "name": "-p",
+          "value": "127.0.0.1:8765:8765",
+          "description": "Publish the page and /mcp on this computer only; ZEUS has no login"
+        },
+        {
+          "type": "named",
+          "name": "-v",
+          "value": "zeus-data:/data",
+          "description": "Volume for settings, trades and caches"
+        },
+        {
+          "type": "named",
+          "name": "-e",
+          "value": "ZEUS_MCP_FROM_HOST=1",
+          "description": "Answer MCP over HTTP from this computer (otherwise only through docker exec)"
+        }
+      ]
+    }
+  ]
+}

@@ -58,7 +58,7 @@ def test_workflow_pushes_three_tags_after_the_check():
     assert "linux/amd64,linux/arm64" in WORKFLOW and WORKFLOW.count("file: zeus/Dockerfile") == 2
     for tag in ("value=${{ steps.v.outputs.version }}", "value=${{ steps.v.outputs.minor }}", "value=latest"):
         assert tag in WORKFLOW, tag
-    assert WORKFLOW.index("tools/docker_smoke.sh zeus-smoke:ci") < WORKFLOW.index("push: ${{")
+    assert WORKFLOW.index("tools/docker_smoke.sh zeus-smoke:ci") < WORKFLOW.index("push: ${{ steps.v.outputs.push == 'true' }}")
     release = (ROOT / ".github" / "workflows" / "release.yml").read_text(encoding="utf-8")
     assert 'gh workflow run docker.yml --repo "$GITHUB_REPOSITORY" --ref "v$VERSION"' in release
     assert "actions: write" in release

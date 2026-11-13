@@ -15,7 +15,8 @@ FROM python:3.12-slim
 
 LABEL org.opencontainers.image.title="ZEUS Terminal" \
       org.opencontainers.image.source=https://github.com/jackson-cmd/zeus-options-terminal \
-      org.opencontainers.image.licenses=PolyForm-Noncommercial-1.0.0
+      org.opencontainers.image.licenses=PolyForm-Noncommercial-1.0.0 \
+      io.modelcontextprotocol.server.name="io.github.jackson-cmd/zeus-options-terminal"
 
 # Container-only behaviour. ZEUS_CONTAINER marks the image (Settings and the MCP endpoint show
 # the docker commands); HOST makes the server listen on every interface inside the container,

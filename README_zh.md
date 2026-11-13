@@ -330,6 +330,7 @@ zeus-options-terminal/
 ├── tools/                隐私检查钩子、干净打包脚本、发版说明、Docker 镜像和 pip 安装包的检查
 ├── examples/             手动交易的 CSV 模板
 ├── .github/              CI 和发版工作流、Issue 表单、CONTRIBUTING、安全政策、行为准则
+├── server.json · glama.json · CITATION.cff   MCP Registry、Glama 和 Zenodo 用的登记信息
 └── start.sh · start.command · start.bat · requirements.txt · pyproject.toml
 ```
 

@@ -39,7 +39,8 @@ def test_dependencies_match_requirements_txt():
 def test_the_command_and_the_wheel():
     p = PYPROJECT["project"]
     assert p["name"] == "zeus-options-terminal" and p["requires-python"] == ">=3.10"
-    assert p["scripts"] == {"zeus": "zeus.zeus_cli:main", "zeus-terminal": "zeus.zeus_cli:main"}
+    assert p["scripts"] == {"zeus": "zeus.zeus_cli:main", "zeus-terminal": "zeus.zeus_cli:main",
+                            "zeus-options-terminal": "zeus.zeus_cli:main"}   # uvx runs this one
     assert PYPROJECT["tool"]["hatch"]["build"]["targets"]["wheel"]["packages"] == ["zeus"]
     assert (ROOT / "LICENSE").exists() and p["license-files"] == ["LICENSE"]
 

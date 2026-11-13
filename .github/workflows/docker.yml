@@ -8,7 +8,8 @@ name: Docker
 # GITHUB_TOKEN cannot raise a release event for other workflows); a release published by hand
 # raises the event. Run by hand on a tag v<version> to rebuild that release's image; run on a
 # branch it only builds and checks. Pull requests that touch the image are built and checked
-# for both platforms, and nothing is pushed.
+# for both platforms, and nothing is pushed. After a release's image is pushed, the mcp-registry
+# job lists that version in the official MCP Registry (server.json).
 on:
   release:
     types: [published]
@@ -31,6 +32,10 @@ jobs:
   image:
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+      push: ${{ steps.v.outputs.push }}
+      newest: ${{ steps.v.outputs.newest }}
     permissions:
       contents: read
       packages: write        # push to ghcr.io
@@ -158,3 +163,79 @@ jobs:
             echo
             echo "Digest \`$DIGEST\`. Run it: \`docker run -d --name zeus -p 127.0.0.1:8765:8765 -v zeus-data:/data $IMAGE:${{ steps.v.outputs.version }}\`"
           } >> "$GITHUB_STEP_SUMMARY"
+
+  mcp-registry:
+    # The official MCP Registry (registry.modelcontextprotocol.io) lists ZEUS under the name in
+    # server.json. It accepts a version only when the PyPI package's README carries
+    # "mcp-name: <that name>" and the image carries the io.modelcontextprotocol.server.name label,
+    # so this runs after the image is pushed; the Release workflow uploads to PyPI meanwhile. A
+    # version can be published once: a rebuilt image skips what the registry already has, and a
+    # rebuild of an older tag never runs. GitHub's OIDC token proves that this repository owns
+    # the name, so no secret is stored.
+    needs: image
+    if: needs.image.outputs.push == 'true' && needs.image.outputs.newest == 'true' && vars.PYPI_PUBLISH == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write        # log in to the registry as this repository
+    env:
+      VERSION: ${{ needs.image.outputs.version }}
+      MCP_PUBLISHER_VERSION: v1.8.9
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Skip a version the registry already has
+        id: check
+        run: |
+          name="$(jq -r .name server.json)"
+          for v in "$(jq -r .version server.json)" $(jq -r '.packages[] | .version // (.identifier | sub(".*:"; ""))' server.json); do
+            [ "$v" = "$VERSION" ] || { echo "::error::server.json names version $v, the release is $VERSION"; exit 1; }
+          done
+          code="$(curl -s -o /dev/null -w '%{http_code}' \
+            "https://registry.modelcontextprotocol.io/v0.1/servers/${name//\//%2F}/versions/$VERSION")"
+          if [ "$code" = 200 ]; then
+            echo "$name $VERSION is already in the MCP Registry" | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Wait for the release on PyPI
+        if: steps.check.outputs.skip != 'true'
+        run: |
+          for _ in $(seq 30); do
+            curl -fs -o /dev/null "https://pypi.org/pypi/zeus-options-terminal/$VERSION/json" && exit 0
+            sleep 20
+          done
+          echo "::error::zeus-options-terminal $VERSION is not on PyPI after 10 minutes"
+          exit 1
+
+      - uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+        if: steps.check.outputs.skip != 'true'
+
+      - name: Download mcp-publisher and verify its signature
+        if: steps.check.outputs.skip != 'true'
+        run: |
+          set -euo pipefail
+          archive="mcp-publisher_linux_amd64.tar.gz"
+          base="https://github.com/modelcontextprotocol/registry/releases/download/$MCP_PUBLISHER_VERSION"
+          curl --fail --location --silent --show-error --output "$RUNNER_TEMP/$archive" "$base/$archive"
+          curl --fail --location --silent --show-error --output "$RUNNER_TEMP/$archive.sigstore.json" "$base/$archive.sigstore.json"
+          cosign verify-blob --bundle "$RUNNER_TEMP/$archive.sigstore.json" \
+            --certificate-identity "https://github.com/modelcontextprotocol/registry/.github/workflows/release.yml@refs/tags/$MCP_PUBLISHER_VERSION" \
+            --certificate-oidc-issuer "https://token.actions.githubusercontent.com" "$RUNNER_TEMP/$archive"
+          tar -xzf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP" mcp-publisher
+
+      - name: Publish to the MCP Registry
+        if: steps.check.outputs.skip != 'true'
+        run: |
+          "$RUNNER_TEMP/mcp-publisher" validate server.json
+          "$RUNNER_TEMP/mcp-publisher" login github-oidc
+          for attempt in 1 2 3; do
+            "$RUNNER_TEMP/mcp-publisher" publish server.json && {
+              echo "Listed: https://registry.modelcontextprotocol.io/v0.1/servers?search=zeus-options-terminal" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            }
+            echo "attempt $attempt failed; PyPI or ghcr.io may not show $VERSION yet"
+            sleep 60
+          done
+          exit 1

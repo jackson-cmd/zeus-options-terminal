@@ -127,6 +127,11 @@ def check(files: list[tuple[str, str]], staged: bool) -> list[str]:
                 seen = seen.replace(f"raw.githubusercontent.com/{value}/", "")
                 seen = seen.replace(f"ghcr.io/{value}/", "")
                 seen = re.sub(r"img\.shields\.io/github/[\w./-]*?/" + re.escape(value) + "/", "", seen)
+                # the MCP Registry names the server io.github.<handle>/<repo>, and Glama's claim file
+                # lists the maintainers' GitHub handles: both are public by design
+                seen = seen.replace(f"io.github.{value}/", "")
+                if path == "glama.json":
+                    seen = re.sub(r'"maintainers"\s*:\s*\[[^\]]*\]', "", seen)
             if value and value in seen:
                 problems.append(f"{path}: contains {label}")
     return problems
