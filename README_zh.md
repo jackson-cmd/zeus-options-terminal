@@ -76,10 +76,11 @@ docker run -d --name zeus --restart unless-stopped \
 
 ## 🆕 新功能
 
-<sub>最新版本 **0.6.0**（2026-11-12）。完整的更新历史见[更新记录](CHANGELOG_zh.md)。</sub>
+<sub>最新版本 **0.7.1**（2026-11-13）。完整的更新历史见[更新记录](CHANGELOG_zh.md)。</sub>
 
-| | 0.6.0、0.5.x、0.4.x、0.3.x 和 0.2.x 新加入 |
+| | 0.7.x、0.6.0、0.5.x、0.4.x、0.3.x 和 0.2.x 新加入 |
 |---|---|
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🤖 进了官方 MCP Registry**：从这个目录安装 MCP 服务器的 AI 客户端能找到 ZEUS（`io.github.jackson-cmd/zeus-options-terminal`），自己用 `uvx zeus-options-terminal` 或 Docker 镜像把它启动起来。[连接智能体 →](docs/USER_GUIDE_zh.md#182-连接你的智能体) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **📦 pip 和 pipx**：`pipx install zeus-options-terminal` 之后运行 `zeus`，不用 clone 代码就能装好并启动 ZEUS；`pipx upgrade` 升级时设置和交易都保留。[用 pipx 安装 →](docs/USER_GUIDE_zh.md#18-用-pipx-安装) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🐳 用 Docker 运行**：一条 `docker run` 就能从 GitHub Packages 拉起 ZEUS，Intel、AMD、ARM 都能跑。设置和交易存在卷里，端口只留在你自己的电脑上，AI 智能体通过 `docker exec` 连进来。[怎么运行 →](docs/USER_GUIDE_zh.md#17-用-docker-运行) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🔌 Alpaca 和 Public**：连上 Alpaca（免费，自带模拟盘）或 Public 账户，就有实时持仓、成交、在途订单和带希腊值的报价。持仓和行情分开选，也可以照样上传自己的交易、行情改用 Alpaca。ZEUS 只读，从不下单。[连接券商 →](docs/USER_GUIDE_zh.md#22-连接券商) |
@@ -213,7 +214,7 @@ ZEUS Terminal（宙斯期权终端）是我给自己做的网站。前前后后�
 你有哪个就用哪个：**Claude Code CLI**（用你自己的 Claude 订阅）、**Anthropic API key**，或者**任何 OpenAI 兼容接口**（OpenAI、DeepSeek、OpenRouter、本地 Ollama……）。什么都不配也能用，只是没有 AI 按钮。
 
 ### 🔌 接入你自己的 AI 智能体（MCP）
-反过来也行：ZEUS 本身就是一个 MCP 服务器。把 Claude Code、Claude Desktop、Codex（GPT）、Gemini CLI 或者你自己写的智能体指向 `http://127.0.0.1:8765/mcp`，它就有了 18 个工具，数字全是 ZEUS 自己算的：带精确最大盈亏、盈亏平衡点、希腊值和出场建议的持仓，任意策略的假设估价，四道关体检，流动性，新闻，事件，行业轮动，还有你的交易日记。然后直接问，比如 *「我哪些仓位该止盈？到期之前有哪些财报？」* 默认只读，你允许了才能下模拟单；只回应本机程序，碰不到任何真实订单。[连接智能体 →](docs/USER_GUIDE_zh.md#18-ai-智能体mcp)
+反过来也行：ZEUS 本身就是一个 MCP 服务器。把 Claude Code、Claude Desktop、Codex（GPT）、Gemini CLI 或者你自己写的智能体指向 `http://127.0.0.1:8765/mcp`，它就有了 18 个工具，数字全是 ZEUS 自己算的：带精确最大盈亏、盈亏平衡点、希腊值和出场建议的持仓，任意策略的假设估价，四道关体检，流动性，新闻，事件，行业轮动，还有你的交易日记。然后直接问，比如 *「我哪些仓位该止盈？到期之前有哪些财报？」* 默认只读，你允许了才能下模拟单；只回应本机程序，碰不到任何真实订单。它也在官方 MCP Registry 里（`io.github.jackson-cmd/zeus-options-terminal`），从那里安装服务器的客户端可以用 `uvx zeus-options-terminal` 直接启动它。[连接智能体 →](docs/USER_GUIDE_zh.md#18-ai-智能体mcp)
 
 ---
 

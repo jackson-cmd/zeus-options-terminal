@@ -977,6 +977,8 @@ The Settings page fills in the real paths for this computer. To check the connec
 
 `docker exec -i zeus python /app/zeus/zeus_mcp_stdio.py --check` tests the connection. To use the HTTP address instead, start the container with `-e ZEUS_MCP_FROM_HOST=1` as well: ZEUS then also answers programs that come in through the published port. Use it only with `-p 127.0.0.1:…`, or machines on your network could reach the tools too.
 
+**From the MCP Registry.** ZEUS is listed in the official MCP Registry as `io.github.jackson-cmd/zeus-options-terminal`. A client that installs servers from the registry starts ZEUS itself, with `uvx zeus-options-terminal --no-browser --port 8765` (the same program as `zeus`, installed from PyPI) or with the Docker image and `-e ZEUS_MCP_FROM_HOST=1`, and connects to `http://localhost:8765/mcp`. Started with uvx, it keeps its settings and trades in `~/.zeus-terminal`, like the `zeus` command.
+
 Then just ask, for example: "Use zeus: which of my positions should I take profit on?", "Run the pre-trade checkup on NVDA and price a 30-day bull call spread", "Which earnings land before my expirations this month?"
 
 ### 18.3 Your own agent

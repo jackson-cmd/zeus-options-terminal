@@ -8,13 +8,13 @@
     "source": "github"
   },
   "websiteUrl": "https://jackson-cmd.github.io/zeus-options-terminal/",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "packages": [
     {
       "registryType": "pypi",
       "registryBaseUrl": "https://pypi.org",
       "identifier": "zeus-options-terminal",
-      "version": "0.7.0",
+      "version": "0.7.1",
       "runtimeHint": "uvx",
       "transport": {
         "type": "streamable-http",
@@ -36,7 +36,7 @@
     },
     {
       "registryType": "oci",
-      "identifier": "ghcr.io/jackson-cmd/zeus-options-terminal:0.7.0",
+      "identifier": "ghcr.io/jackson-cmd/zeus-options-terminal:0.7.1",
       "transport": {
         "type": "streamable-http",
         "url": "http://localhost:8765/mcp"
