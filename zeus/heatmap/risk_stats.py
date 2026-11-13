@@ -17,12 +17,10 @@ refreshed at most weekly (7-day TTL) + a manual Refresh. Mirrors etf_trends.py.
 """
 from __future__ import annotations
 
-import json
 import time
 from pathlib import Path
-from typing import Optional
 
-from . import metadata
+from . import metadata, table_cache
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 _CACHE = _REPO_ROOT / "data" / "heatmap" / "risk_stats.json"
@@ -32,9 +30,6 @@ _CACHE_TTL = 7 * 24 * 60 * 60  # 1 week — "一周更新一次"
 _WINDOWS = [("3M", "3m", 63), ("6M", "6m", 126), ("1Y", "1y", 252)]
 _BENCHMARKS = ["SPY", "QQQ"]
 _ANN = 252 ** 0.5  # daily → annualized vol factor
-
-_mem: Optional[dict] = None
-_mem_at: float = 0.0
 
 
 def _min_obs(n: int) -> int:
@@ -180,8 +175,7 @@ def _compute(universe: str = "stocks") -> dict:
 
 
 # Separate in-memory + on-disk cache per universe (stocks / etf).
-_mem_by: dict = {}
-_mem_at_by: dict = {}
+_state_by: dict = {"stocks": {}, "etf": {}}
 
 
 def _cache_path(universe: str) -> Path:
@@ -189,26 +183,9 @@ def _cache_path(universe: str) -> Path:
 
 
 def get(force: bool = False, universe: str = "stocks") -> dict:
-    """Cached payload for the given universe; recompute if forced/missing/stale."""
+    """Cached payload for the given universe; recompute if forced/missing/stale. A
+    refresh that brings back no data keeps the last good table (see table_cache)."""
     universe = "etf" if universe == "etf" else "stocks"
-    now = time.time()
-    if not force and _mem_by.get(universe) is not None and (now - _mem_at_by.get(universe, 0)) < _CACHE_TTL:
-        return _mem_by[universe]
-    path = _cache_path(universe)
-    if not force and path.exists():
-        try:
-            disk = json.loads(path.read_text())
-            if (now - disk.get("_ts", 0)) < _CACHE_TTL:
-                _mem_by[universe], _mem_at_by[universe] = disk, now
-                return disk
-        except Exception:
-            pass
-    payload = _compute(universe)
-    payload["_ts"] = now
-    try:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(payload))
-    except Exception:
-        pass
-    _mem_by[universe], _mem_at_by[universe] = payload, now
-    return payload
+    return table_cache.get(_state_by[universe], _cache_path(universe), _CACHE_TTL,
+                           lambda: _compute(universe), force=force,
+                           tag=f"heatmap.risk_stats.{universe}")
