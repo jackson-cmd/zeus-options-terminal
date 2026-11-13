@@ -87,3 +87,9 @@ def test_pictures_come_from_docs_screenshots():
             assert (ROOT / "docs" / "screenshots" / name).exists(), src
         for i in p.imgs:
             assert i.get("alt") and i.get("width") == "1440" and i.get("height") == "900", i["src"]
+
+
+def test_google_search_console_file_stays():
+    """Google re-checks this file; removing it drops the site's verified ownership in Search Console."""
+    f = SITE / "google3ed451f05041f5f9.html"
+    assert f.read_text(encoding="utf-8").strip() == "google-site-verification: google3ed451f05041f5f9.html"
