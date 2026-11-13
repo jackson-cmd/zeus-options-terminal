@@ -2,7 +2,7 @@
 
 [English → FEATURES.md](FEATURES.md) · [使用手册](USER_GUIDE_zh.md) · [新功能](../CHANGELOG_zh.md) · [回到 README](../README_zh.md)
 
-ZEUS 的功能远不止 README 截图里那些。顶栏有 7 个页面，后台有 30 来个自动运行的任务，API 接口超过 200 个。这一页把现在能从界面里用到的功能全部列出来。欢迎提 PR，以后也可能继续加新功能（见[参与贡献](../CONTRIBUTING.md)）。标着 <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> 的是 0.2.0 到 0.6.0 版新加入的（见[更新记录](../CHANGELOG_zh.md)）；每一项怎么用，见[使用手册](USER_GUIDE_zh.md)。
+ZEUS 的功能远不止 README 截图里那些。顶栏有 7 个页面，后台有 30 来个自动运行的任务，API 接口超过 200 个。这一页把现在能从界面里用到的功能全部列出来。欢迎提 PR，以后也可能继续加新功能（见[参与贡献](../.github/CONTRIBUTING.md)）。标着 <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> 的是 0.2.0 到 0.6.0 版新加入的（见[更新记录](../CHANGELOG_zh.md)）；每一项怎么用，见[使用手册](USER_GUIDE_zh.md)。
 
 **每项功能需要什么：**
 
@@ -258,7 +258,7 @@ ZEUS 的功能远不止 README 截图里那些。顶栏有 7 个页面，后台�
 | ✅ | MCP 接口 | `zeus/zeus_mcp.py`（用 `@tool` 装饰器加工具）；智能体读到的期权计算在 `zeus/zeus_payoff.py`，有测试和页面自己的 JavaScript 逐项对比 |
 | ✅ | 环境变量配置 | 任何设置都能写成 `ZEUS_<KEY>`；用 `ZEUS_HOME` 换设置文件夹的位置 |
 | ✅ | 测试 | `python -m pytest`（离线跑，行情是假的） |
-| ✅ | CI | 每个 PR 都会在 Linux、macOS、Windows 上跑测试（7 个任务）；`main` 只接受全部通过的 PR |
+| ✅ | CI | 每个 PR 都会在 Linux、macOS、Windows 上跑测试（7 个任务），再把 pip 安装包装进一个干净环境启动一遍（1 个任务）；`main` 只接受全部通过的 PR |
 | ✅ | Docker 镜像 <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | `ghcr.io/jackson-cmd/zeus-options-terminal`，支持 amd64 和 arm64，由 `zeus/Dockerfile` 构建：设置和数据在 `/data` 卷里，用普通用户运行，代码只读。每次发版都会先构建、启动并检查镜像（`tools/docker_smoke.sh`），再推送 `X.Y.Z`、`X.Y` 和 `latest` 三个标签（见[手册 §1.7](USER_GUIDE_zh.md#17-用-docker-运行)） |
 | ✅ | pip / pipx 安装包 <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | `pipx install zeus-options-terminal` 之后运行 `zeus`（`--port`、`--no-browser`、`--version`）。安装包里就是原样的 `zeus/` 文件夹，由 `pyproject.toml` 构建；CI 会在干净环境里装好并启动一遍，每次发版自动上传 PyPI |
 | ✅ | 隐私检查 | `tools/install_git_hook.sh` 会拦下数据文件、密钥和你自己的路径 |

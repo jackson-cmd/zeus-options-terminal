@@ -327,9 +327,10 @@ zeus-options-terminal/
 ├── docs/                 user manual, feature list, screenshots, README images
 ├── site/                 the project website (GitHub Pages)
 ├── tests/                offline tests: python -m pytest
-├── tools/                privacy pre-commit hook, clean zip export, release notes, Docker image check
+├── tools/                privacy pre-commit hook, clean zip export, release notes, checks of the Docker image and the pip package
 ├── examples/             CSV template for manual trades
-└── start.sh · start.command · start.bat · requirements.txt
+├── .github/              CI and release workflows, issue forms, CONTRIBUTING, security policy, code of conduct
+└── start.sh · start.command · start.bat · requirements.txt · pyproject.toml
 ```
 
 How the pieces talk to each other (paths below are inside `zeus/`):
@@ -378,7 +379,7 @@ Runtime data (candles, caches, digests) lives in `~/.zeus-terminal/runtime/`; fo
 
 ## 🤝 Contributing
 
-ZEUS has far more features than this page can show, and it keeps growing; new features may be added over time. **Pull requests are welcome**: a bug fix, a new data source or broker, a translation, better docs, or one of the [parts not wired up yet](docs/FEATURES.md#not-wired-up-yet--ideas-for-pull-requests). Read [CONTRIBUTING.md](CONTRIBUTING.md) first. Every pull request runs the test suite on Linux, macOS and Windows, and `main` only accepts pull requests whose checks pass.
+ZEUS has far more features than this page can show, and it keeps growing; new features may be added over time. **Pull requests are welcome**: a bug fix, a new data source or broker, a translation, better docs, or one of the [parts not wired up yet](docs/FEATURES.md#not-wired-up-yet--ideas-for-pull-requests). Read [CONTRIBUTING.md](.github/CONTRIBUTING.md) first. Every pull request runs the test suite on Linux, macOS and Windows, and `main` only accepts pull requests whose checks pass.
 
 Questions and ideas go to [Discussions](https://github.com/jackson-cmd/zeus-options-terminal/discussions), bugs to [Issues](https://github.com/jackson-cmd/zeus-options-terminal/issues/new/choose), and security problems to a private report ([SECURITY.md](.github/SECURITY.md)). Everyone here follows the [code of conduct](.github/CODE_OF_CONDUCT.md).
 

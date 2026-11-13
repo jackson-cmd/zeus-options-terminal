@@ -2,7 +2,7 @@
 
 [中文 → FEATURES_zh.md](FEATURES_zh.md) · [User manual](USER_GUIDE.md) · [What's new](../CHANGELOG.md) · [Back to README](../README.md)
 
-ZEUS does far more than the screenshots in the README show. There are 7 pages in the top bar, about 30 jobs that run by themselves in the background, and more than 200 API endpoints. This page lists every feature you can reach from the interface today. Pull requests are welcome, and new features may be added over time ([Contributing](../CONTRIBUTING.md)). Features marked <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> arrived in versions 0.2.0 to 0.6.0 ([changelog](../CHANGELOG.md)); how to use each one is in the [user manual](USER_GUIDE.md).
+ZEUS does far more than the screenshots in the README show. There are 7 pages in the top bar, about 30 jobs that run by themselves in the background, and more than 200 API endpoints. This page lists every feature you can reach from the interface today. Pull requests are welcome, and new features may be added over time ([Contributing](../.github/CONTRIBUTING.md)). Features marked <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> arrived in versions 0.2.0 to 0.6.0 ([changelog](../CHANGELOG.md)); how to use each one is in the [user manual](USER_GUIDE.md).
 
 **What each feature needs:**
 
@@ -258,7 +258,7 @@ Saved secrets are write-only: the page shows *set* or *not set* and never sends 
 | ✅ | MCP server | `zeus/zeus_mcp.py` (add a tool with the `@tool` decorator); the option math agents read is in `zeus/zeus_payoff.py` and is tested against the page's own JavaScript |
 | ✅ | Configuration by environment | Any setting as `ZEUS_<KEY>`; move the settings folder with `ZEUS_HOME` |
 | ✅ | Tests | `python -m pytest` (offline; quotes are faked) |
-| ✅ | CI | Every pull request runs the tests on Linux, macOS and Windows (7 jobs); `main` only accepts green pull requests |
+| ✅ | CI | Every pull request runs the tests on Linux, macOS and Windows (7 jobs), then installs the pip package in a clean environment and starts it (1 job); `main` only accepts green pull requests |
 | ✅ | Docker image <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | `ghcr.io/jackson-cmd/zeus-options-terminal` for amd64 and arm64, built from `zeus/Dockerfile`: settings and data in the `/data` volume, a non-root user, read-only code. Each release builds it, starts it and checks it (`tools/docker_smoke.sh`) before pushing `X.Y.Z`, `X.Y` and `latest` ([manual §1.7](USER_GUIDE.md#17-run-with-docker)) |
 | ✅ | pip / pipx package <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | `pipx install zeus-options-terminal`, then `zeus` (`--port`, `--no-browser`, `--version`). The wheel holds the `zeus/` folder as it is; built from `pyproject.toml`, installed and started in a clean environment by CI, and uploaded to PyPI by each release |
 | ✅ | Privacy hook | `tools/install_git_hook.sh` refuses data files, keys and your own paths in commits |

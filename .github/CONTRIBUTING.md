@@ -6,7 +6,7 @@
 
 ## English
 
-ZEUS has far more features than the README can show, and it keeps growing. Pull requests are welcome: bug fixes, new data sources or brokers, translations, docs, and the parts listed under [Not wired up yet](docs/FEATURES.md#not-wired-up-yet--ideas-for-pull-requests).
+ZEUS has far more features than the README can show, and it keeps growing. Pull requests are welcome: bug fixes, new data sources or brokers, translations, docs, and the parts listed under [Not wired up yet](../docs/FEATURES.md#not-wired-up-yet--ideas-for-pull-requests).
 
 ### Sending a pull request
 
@@ -18,7 +18,7 @@ ZEUS has far more features than the README can show, and it keeps growing. Pull 
    python -m pytest
    ```
 4. Install the privacy hook once: `tools/install_git_hook.sh`. It refuses data files, keys and your own paths in a commit.
-5. Open a pull request against `main`. CI runs the tests on Linux, macOS and Windows (7 jobs), and a pull request can merge only when all of them pass. `main` only accepts changes through pull requests.
+5. Open a pull request against `main`. CI runs the tests on Linux, macOS and Windows (7 jobs), then builds the pip package and starts `zeus` from it (1 job); a pull request can merge only when all 8 pass. `main` only accepts changes through pull requests.
 
 ### Releasing a new version
 
@@ -36,12 +36,14 @@ zeus-options-terminal/
 │   ├── benzinga_digest/ · news_radar/ · market_brief/ · sec_filings/ …        news, brief, events
 │   ├── trade_journal/ · journal_review/ · journal_expiry_whatif/              the journal
 │   ├── zeus_*.py · local_broker.py    settings, brokers (Alpaca, Public), AI, news, MCP, e-mail
+│   ├── Dockerfile          the container image on ghcr.io (and Dockerfile.dockerignore)
 │   └── defaults/           ticker lists seeded on the first start
 ├── docs/                 user manual, feature list, screenshots, README images
 ├── site/                 the project website (GitHub Pages)
 ├── tests/                offline tests: python -m pytest
-├── tools/                privacy pre-commit hook, clean zip export, release notes
+├── tools/                privacy pre-commit hook, clean zip export, release notes, checks of the Docker image and the pip package
 ├── examples/             CSV template for manual trades
+├── .github/              CI and release workflows, issue forms, CONTRIBUTING, security policy, code of conduct
 └── start.sh · start.command · start.bat · requirements.txt · pyproject.toml
 ```
 
@@ -52,18 +54,18 @@ zeus-options-terminal/
 - Add tests for new endpoints, with faked market data as in `tests/test_paper_trade.py`.
 - Update user-facing text in both languages: `README.md` and `README_zh.md`, `docs/*`, and `zeus/options_analyzer/static/i18n_en.json` for new Chinese interface strings.
 - Add each Chinese sentence to `i18n_en.json` whole, never piece by piece. A sentence built with numbers cannot be a dictionary key, so give its English where it is built: `zt('剩 ' + n + ' 天', n + ' days left')` in a page script (`ztt` for a tooltip), or an `_en` field next to the Chinese in data the server sends. `tests/test_english_text.py` checks both.
-- Be kind: the [code of conduct](.github/CODE_OF_CONDUCT.md) applies in issues, pull requests and discussions.
-- By contributing, you agree that your contribution is released under the project's [PolyForm Noncommercial License 1.0.0](LICENSE).
+- Be kind: the [code of conduct](CODE_OF_CONDUCT.md) applies in issues, pull requests and discussions.
+- By contributing, you agree that your contribution is released under the project's [PolyForm Noncommercial License 1.0.0](../LICENSE).
 
 ### Bugs and ideas
 
-Report a bug with the [issue form](https://github.com/jackson-cmd/zeus-options-terminal/issues/new/choose): what you did, what you expected and what happened. Ask questions and share ideas in [Discussions](https://github.com/jackson-cmd/zeus-options-terminal/discussions). Leave out tokens, cookies and account numbers. Security problems go to a private report, as [SECURITY.md](.github/SECURITY.md) explains.
+Report a bug with the [issue form](https://github.com/jackson-cmd/zeus-options-terminal/issues/new/choose): what you did, what you expected and what happened. Ask questions and share ideas in [Discussions](https://github.com/jackson-cmd/zeus-options-terminal/discussions). Leave out tokens, cookies and account numbers. Security problems go to a private report, as [SECURITY.md](SECURITY.md) explains.
 
 ---
 
 ## 中文
 
-ZEUS 的功能远比 README 能写下的多，而且还在长。欢迎提 PR：修 bug、接新的数据源或券商、改翻译、补文档，或者把[还没接上的部分](docs/FEATURES_zh.md#还没接上的部分欢迎-pr)接起来都可以。
+ZEUS 的功能远比 README 能写下的多，而且还在长。欢迎提 PR：修 bug、接新的数据源或券商、改翻译、补文档，或者把[还没接上的部分](../docs/FEATURES_zh.md#还没接上的部分欢迎-pr)接起来都可以。
 
 ### 怎么提 PR
 
@@ -75,7 +77,7 @@ ZEUS 的功能远比 README 能写下的多，而且还在长。欢迎提 PR：�
    python -m pytest
    ```
 4. 装一次隐私检查：`tools/install_git_hook.sh`。它会拦下数据文件、密钥和你自己的路径。
-5. 向 `main` 提 PR。CI 会在 Linux、macOS、Windows 上跑测试（7 个任务），全部通过才能合并。`main` 只接受通过 PR 进来的改动。
+5. 向 `main` 提 PR。CI 会在 Linux、macOS、Windows 上跑测试（7 个任务），再打出 pip 安装包、用它启动 `zeus`（1 个任务），8 个全部通过才能合并。`main` 只接受通过 PR 进来的改动。
 
 ### 发新版本
 
@@ -93,12 +95,14 @@ zeus-options-terminal/
 │   ├── benzinga_digest/ · news_radar/ · market_brief/ · sec_filings/ …        新闻、市场判断、事件
 │   ├── trade_journal/ · journal_review/ · journal_expiry_whatif/              交易日记
 │   ├── zeus_*.py · local_broker.py    设置、券商（Alpaca、Public）、AI、新闻、MCP、邮件
+│   ├── Dockerfile          ghcr.io 上的容器镜像（还有 Dockerfile.dockerignore）
 │   └── defaults/           第一次启动时放进去的股票清单
 ├── docs/                 使用手册、功能清单、截图、README 用的图
 ├── site/                 项目网站（GitHub Pages）
 ├── tests/                离线测试：python -m pytest
-├── tools/                隐私检查钩子、干净打包脚本、发版说明
+├── tools/                隐私检查钩子、干净打包脚本、发版说明、Docker 镜像和 pip 安装包的检查
 ├── examples/             手动交易的 CSV 模板
+├── .github/              CI 和发版工作流、Issue 表单、CONTRIBUTING、安全政策、行为准则
 └── start.sh · start.command · start.bat · requirements.txt · pyproject.toml
 ```
 
@@ -109,9 +113,9 @@ zeus-options-terminal/
 - 新接口要配测试，行情用假的，参考 `tests/test_paper_trade.py`。
 - 面向用户的文字两种语言一起改：`README.md` 和 `README_zh.md`、`docs/*`，新加的中文界面文字要在 `zeus/options_analyzer/static/i18n_en.json` 里补英文。
 - 中文句子整句加进 `i18n_en.json`，别拆成词。带数字拼出来的句子当不了词典的键，就在拼句子的地方给英文：页面脚本里写 `zt('剩 ' + n + ' 天', n + ' days left')`（提示框用 `ztt`），服务器发出的数据在中文旁边加一个 `_en` 字段。`tests/test_english_text.py` 两样都会查。
-- 友善待人：[行为准则](.github/CODE_OF_CONDUCT.md) 适用于 Issue、PR 和 Discussions。
-- 提交贡献即表示你同意它按本项目的 [PolyForm Noncommercial License 1.0.0](LICENSE) 发布。
+- 友善待人：[行为准则](CODE_OF_CONDUCT.md) 适用于 Issue、PR 和 Discussions。
+- 提交贡献即表示你同意它按本项目的 [PolyForm Noncommercial License 1.0.0](../LICENSE) 发布。
 
 ### 报 bug、提想法
 
-用 [Issue 表单](https://github.com/jackson-cmd/zeus-options-terminal/issues/new/choose)报 bug：你做了什么、本来想看到什么、实际看到了什么。提问和想法发到 [Discussions](https://github.com/jackson-cmd/zeus-options-terminal/discussions)。别贴 token、cookie 和账户号。安全问题请按 [SECURITY.md](.github/SECURITY.md) 私下报告。
+用 [Issue 表单](https://github.com/jackson-cmd/zeus-options-terminal/issues/new/choose)报 bug：你做了什么、本来想看到什么、实际看到了什么。提问和想法发到 [Discussions](https://github.com/jackson-cmd/zeus-options-terminal/discussions)。别贴 token、cookie 和账户号。安全问题请按 [SECURITY.md](SECURITY.md) 私下报告。
