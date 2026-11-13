@@ -8,7 +8,7 @@ Live positions & Greeks · P/L and risk · exit discipline · paper trading with
 
 [🌐 Website](https://jackson-cmd.github.io/zeus-options-terminal/) · [中文说明 → README_zh.md](README_zh.md) · [🚀 Quick start](#-quick-start) · [What's new](#-whats-new) · [All features](docs/FEATURES.md) · [User manual](docs/USER_GUIDE.md) · [Contributing](#-contributing)
 
-[![CI](https://github.com/jackson-cmd/zeus-options-terminal/actions/workflows/ci.yml/badge.svg)](https://github.com/jackson-cmd/zeus-options-terminal/actions/workflows/ci.yml) ![Python](https://img.shields.io/badge/python-3.10%2B-3776ab) ![Self-hosted](https://img.shields.io/badge/self--hosted-100%25%20local-2ea043) ![Languages](https://img.shields.io/badge/UI-中文%20%7C%20双语%20%7C%20English-e3b341) ![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial-b31b1b)
+[![CI](https://github.com/jackson-cmd/zeus-options-terminal/actions/workflows/ci.yml/badge.svg)](https://github.com/jackson-cmd/zeus-options-terminal/actions/workflows/ci.yml) [![Release](https://img.shields.io/github/v/release/jackson-cmd/zeus-options-terminal)](https://github.com/jackson-cmd/zeus-options-terminal/releases) ![Python](https://img.shields.io/badge/python-3.10%2B-3776ab) ![Self-hosted](https://img.shields.io/badge/self--hosted-100%25%20local-2ea043) ![Languages](https://img.shields.io/badge/UI-中文%20%7C%20双语%20%7C%20English-e3b341) ![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial-b31b1b)
 
 <img src="docs/assets/demo_en.gif" alt="A 14-second tour of ZEUS Terminal: the positions board, a strategy's P/L grid, the risk view, the K-line chart wall, the news digest and the trade journal" width="100%">
 
@@ -280,6 +280,7 @@ date,symbol,asset,side,effect,qty,price,fees,option_type,strike,expiration,multi
 - The server listens on **127.0.0.1** only by default, refuses foreign `Host` headers (DNS rebinding), only accepts cross-origin calls from localhost, and write endpoints need a header that other websites cannot send.
 - No telemetry. The app only talks to the services you connect plus public market data (Cboe delayed quotes, Yahoo Finance, SEC EDGAR, Finviz, Dow Jones RSS).
 - Free market data is rate-limit aware: company data (sector, industry, market cap) comes from Finviz in batches of 20 tickers, stock quotes fall back to Finviz whenever Yahoo Finance throttles, and a whole option chain is one Cboe request instead of one Yahoo request per expiration.
+- **Found a security problem?** Please report it privately, as [SECURITY.md](SECURITY.md) explains, not in a public issue.
 
 ---
 
@@ -349,6 +350,8 @@ Runtime data (candles, caches, digests) lives in `~/.zeus-terminal/runtime/`; fo
 ## 🤝 Contributing
 
 ZEUS has far more features than this page can show, and it keeps growing; new features may be added over time. **Pull requests are welcome**: a bug fix, a new data source or broker, a translation, better docs, or one of the [parts not wired up yet](docs/FEATURES.md#not-wired-up-yet--ideas-for-pull-requests). Read [CONTRIBUTING.md](CONTRIBUTING.md) first. Every pull request runs the test suite on Linux, macOS and Windows, and `main` only accepts pull requests whose checks pass.
+
+Questions and ideas go to [Discussions](https://github.com/jackson-cmd/zeus-options-terminal/discussions), bugs to [Issues](https://github.com/jackson-cmd/zeus-options-terminal/issues/new/choose), and security problems to a private report ([SECURITY.md](SECURITY.md)). Everyone here follows the [code of conduct](CODE_OF_CONDUCT.md).
 
 ---
 

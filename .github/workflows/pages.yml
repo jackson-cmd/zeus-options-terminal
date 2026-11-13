@@ -1,11 +1,12 @@
 name: Website
 
 # The project page at https://jackson-cmd.github.io/zeus-options-terminal/ (site/), with the
-# screenshots copied in from docs/screenshots at build time so they are stored only once.
+# screenshots copied in from docs/screenshots and the share cards from docs/assets at build
+# time, so each picture is stored only once.
 on:
   push:
     branches: [main]
-    paths: ["site/**", "docs/screenshots/**", ".github/workflows/pages.yml"]
+    paths: ["site/**", "docs/screenshots/**", "docs/assets/social*.png", ".github/workflows/pages.yml"]
   workflow_dispatch:
 
 permissions:
@@ -24,12 +25,15 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
-      - name: Add the screenshots
-        run: cp -R docs/screenshots site/screenshots
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/checkout@v7
+      - name: Add the screenshots and the share cards
+        run: |
+          cp -R docs/screenshots site/screenshots
+          cp docs/assets/social.png site/social.png
+          cp docs/assets/social_zh.png site/social_zh.png
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: site
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

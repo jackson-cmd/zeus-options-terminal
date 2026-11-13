@@ -1,6 +1,6 @@
 """The project page in site/ (deployed by .github/workflows/pages.yml): both languages exist and point
-at each other, the structured data parses and matches what the page shows, and every picture it uses
-is one of docs/screenshots, which the workflow copies in."""
+at each other, the structured data parses and matches what the page shows, and its pictures come from
+docs/screenshots and its share cards from docs/assets, which the workflow copies in."""
 import json
 import re
 from html.parser import HTMLParser
@@ -76,17 +76,22 @@ def test_structured_data_matches_the_page():
             assert q["acceptedAnswer"]["text"] in html                    # the answers are on the page too
 
 
-def test_pictures_come_from_docs_screenshots():
+def test_pictures_come_from_docs():
     wf = (ROOT / ".github" / "workflows" / "pages.yml").read_text(encoding="utf-8")
     assert "cp -R docs/screenshots site/screenshots" in wf and "path: site" in wf
-    for lang in PAGES:
+    for lang, card in (("en", "social.png"), ("zh", "social_zh.png")):
         p = parse(lang)
-        srcs = [i["src"] for i in p.imgs] + [p.metas["og:image"], p.metas["twitter:image"]]
-        for src in srcs:
-            name = re.sub(r"^(\.\./|https://[^ ]*/screenshots/)", "", src).replace("screenshots/", "")
-            assert (ROOT / "docs" / "screenshots" / name).exists(), src
         for i in p.imgs:
+            name = re.sub(r"^(\.\./)?screenshots/", "", i["src"])
+            assert (ROOT / "docs" / "screenshots" / name).exists(), i["src"]
             assert i.get("alt") and i.get("width") == "1440" and i.get("height") == "900", i["src"]
+        # the link-preview card: 1280 x 640, under GitHub's 1 MB limit for a social preview
+        assert p.metas["og:image"] == p.metas["twitter:image"] == BASE + card
+        assert (p.metas["og:image:width"], p.metas["og:image:height"]) == ("1280", "640") and p.metas["og:image:alt"]
+        assert f"cp docs/assets/{card} site/{card}" in wf
+        png = (ROOT / "docs" / "assets" / card).read_bytes()
+        assert png[:8] == b"\x89PNG\r\n\x1a\n" and len(png) < 1_000_000
+        assert (int.from_bytes(png[16:20], "big"), int.from_bytes(png[20:24], "big")) == (1280, 640)
 
 
 def test_google_search_console_file_stays():

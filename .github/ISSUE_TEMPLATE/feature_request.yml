@@ -1,0 +1,25 @@
+name: Feature request · 新功能建议
+description: An idea for ZEUS · 给 ZEUS 提一个想法
+labels: [enhancement]
+body:
+  - type: textarea
+    id: want
+    attributes:
+      label: What you want to do · 你想做什么
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why it helps your trading · 对交易有什么帮助
+  - type: textarea
+    id: data
+    attributes:
+      label: Data it needs · 需要什么数据
+      description: A free source, a broker (tastytrade, Alpaca, Public), Benzinga, AI … · 免费数据源、券商（tastytrade、Alpaca、Public）、Benzinga、AI……
+  - type: checkboxes
+    id: pr
+    attributes:
+      label: Pull request · PR
+      options:
+        - label: I would like to send a pull request for this · 我愿意自己提 PR

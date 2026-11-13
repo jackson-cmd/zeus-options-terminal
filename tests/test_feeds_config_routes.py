@@ -162,7 +162,8 @@ def test_privacy_check_allows_handle_only_in_github_urls(tmp_path, monkeypatch):
     spec.loader.exec_module(pc)
     monkeypatch.setattr(pc, "ROOT", tmp_path)
     monkeypatch.setattr(pc, "identity_markers", lambda: {"your global git name": "octo-cat"})
-    (tmp_path / "ok.md").write_text("git clone https://github.com/octo-cat/zeus\nsite: https://octo-cat.github.io/zeus/")
+    (tmp_path / "ok.md").write_text("git clone https://github.com/octo-cat/zeus\nsite: https://octo-cat.github.io/zeus/\n"
+                                    "![Release](https://img.shields.io/github/v/release/octo-cat/zeus)")
     (tmp_path / "bad.md").write_text("written by octo-cat")
     problems = pc.check([("100644", "ok.md"), ("100644", "bad.md")], staged=False)
     assert problems == ["bad.md: contains your global git name"]
