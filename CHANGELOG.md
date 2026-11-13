@@ -10,18 +10,18 @@ What changed in each version of ZEUS Terminal. New features carry the <img src="
 
 | | Feature | Read more |
 |---|---|---|
-| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🐳 Run with Docker**: `docker run -d --name zeus --restart unless-stopped -p 127.0.0.1:8765:8765 -v zeus-data:/data ghcr.io/jackson-cmd/zeus-options-terminal:latest` starts ZEUS without Python, on Intel, AMD and ARM. Your settings, trades and caches live in the `zeus-data` volume and survive updates; ZEUS runs as an ordinary user that cannot change its code; the port stays on 127.0.0.1. The image runs on New York time; `-e TZ=` sets your own. (#57) | [Manual §1.7](docs/USER_GUIDE.md#17-run-with-docker) |
-| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **AI agents and Docker**: agents on your computer start ZEUS's MCP bridge inside the container with `docker exec`, and ⚙ Settings → AI agents shows those commands when ZEUS runs in Docker. Over HTTP, MCP in the container answers your computer only when you start it with `-e ZEUS_MCP_FROM_HOST=1`. (#57) | [Manual §18.2](docs/USER_GUIDE.md#182-connect-your-agent) |
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🐳 Run with Docker**: `docker run -d --name zeus --restart unless-stopped -p 127.0.0.1:8765:8765 -v zeus-data:/data ghcr.io/jackson-cmd/zeus-options-terminal:latest` starts ZEUS without Python, on Intel, AMD and ARM. Your settings, trades and caches live in the `zeus-data` volume and survive updates; ZEUS runs as an ordinary user that cannot change its code; the port stays on 127.0.0.1. The image runs on New York time; `-e TZ=` sets your own. (#59) | [Manual §1.7](docs/USER_GUIDE.md#17-run-with-docker) |
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **AI agents and Docker**: agents on your computer start ZEUS's MCP bridge inside the container with `docker exec`, and ⚙ Settings → AI agents shows those commands when ZEUS runs in Docker. Over HTTP, MCP in the container answers your computer only when you start it with `-e ZEUS_MCP_FROM_HOST=1`. (#59) | [Manual §18.2](docs/USER_GUIDE.md#182-connect-your-agent) |
 
 ### Fixed
 
-- A model server on this computer at `127.0.0.1`, or at `host.docker.internal` from the container, is now used without an API key, as `localhost` already was. (#57)
-- When the code folder is read-only and a runtime link under `zeus/` cannot be changed, ZEUS now names the folder at start instead of stopping with an error. (#57)
+- A model server on this computer at `127.0.0.1`, or at `host.docker.internal` from the container, is now used without an API key, as `localhost` already was. (#59)
+- When the code folder is read-only and a runtime link under `zeus/` cannot be changed, ZEUS now names the folder at start instead of stopping with an error. (#59)
 
 ### Project
 
-- Each release builds the image for amd64 and arm64, starts it and checks the page, the status API, the localhost checks, the sample portfolio, MCP and a restart (`tools/docker_smoke.sh`), then pushes it to GitHub Packages as `0.6.0`, `0.6` and `latest` with a signed build provenance. Pull requests that change the image get the same check without pushing. (#57)
-- The Dockerfile sits in `zeus/` with its ignore file, so the top of the repository stays at 20 entries. (#57)
+- Each release builds the image for amd64 and arm64, starts it and checks the page, the status API, the localhost checks, the sample portfolio, MCP and a restart (`tools/docker_smoke.sh`), then pushes it to GitHub Packages as `0.6.0`, `0.6` and `latest` with a signed build provenance. Pull requests that change the image get the same check without pushing. (#59)
+- The Dockerfile sits in `zeus/` with its ignore file, so the top of the repository stays at 20 entries. (#59)
 
 ## 0.5.2 — 2026-11-12
 
