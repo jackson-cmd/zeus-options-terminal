@@ -32,9 +32,9 @@ def _compute() -> dict:
     closes: dict[str, list] = {}
     if stocks:
         try:
-            import yfinance as yf
-            df = yf.download(stocks, period="400d", interval="1d", progress=False,
-                             auto_adjust=True, threads=True)
+            import zeus_yf
+            df = zeus_yf.download(stocks, period="400d", interval="1d", progress=False,
+                                  auto_adjust=True, threads=True)
             close = df["Close"]
             single = (getattr(close, "ndim", 1) == 1)
             for t in stocks:

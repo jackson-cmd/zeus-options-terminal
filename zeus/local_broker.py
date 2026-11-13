@@ -47,6 +47,7 @@ from pathlib import Path
 from typing import Any
 
 import zeus_config as hc
+import zeus_yf
 
 ACCOUNT = "MANUAL"
 _lock = threading.RLock()
@@ -720,8 +721,8 @@ def equity_quotes_batch(symbols: list[str]) -> dict:
         chunk = missing[i:i + 80]
         ymap = {s: _ysym(s) for s in chunk}
         try:
-            df = _yf().download(list(ymap.values()), period="5d", interval="1d", group_by="ticker",
-                                auto_adjust=False, progress=False, threads=True)
+            df = zeus_yf.download(list(ymap.values()), period="5d", interval="1d", group_by="ticker",
+                                  auto_adjust=False, progress=False, threads=True)
         except Exception:
             df = None
         for s, ys in ymap.items():

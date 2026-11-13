@@ -14,6 +14,8 @@ from pathlib import Path
 _HERE = Path(__file__).resolve().parent
 if str(_HERE) not in sys.path:
     sys.path.insert(0, str(_HERE))
+if str(_HERE.parent) not in sys.path:        # zeus/, for zeus_yf when run as a script
+    sys.path.append(str(_HERE.parent))
 
 import groups as _g  # noqa: E402
 
@@ -56,13 +58,13 @@ def refresh(period: str = "2y", log=print) -> dict:
         return {"ok": 0, "bad": [], "error": "universe 为空"}
     try:
         import pandas as pd
-        import yfinance as yf
+        import zeus_yf
     except Exception as e:
         return {"ok": 0, "bad": [], "error": f"依赖缺失: {e}"}
     log(f"[industry] 全量刷新 {len(tickers)} 只…")
     try:
-        d = yf.download(tickers, period=period, interval="1d", auto_adjust=False,
-                        progress=False, group_by="ticker", threads=True)
+        d = zeus_yf.download(tickers, period=period, interval="1d", auto_adjust=False,
+                             progress=False, group_by="ticker", threads=True)
     except Exception as e:
         return {"ok": 0, "bad": [], "error": f"下载失败: {e}"}
     rows, bad = [], []

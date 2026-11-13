@@ -113,6 +113,7 @@ try:
     HAS_YF = True
 except ImportError:
     HAS_YF = False
+import zeus_yf  # noqa: E402  every yf.download goes through it: one download at a time
 
 # ── App state ──
 app = FastAPI()
@@ -576,7 +577,7 @@ def fetch_positions_and_strategies():
             if und in metrics_data and metrics_data[und].get("iv", 0) > 0:
                 continue
             try:
-                hist = yf.download(und, period="60d", progress=False)
+                hist = zeus_yf.download(und, period="60d", progress=False)
                 if not hist.empty:
                     returns = hist["Close"].pct_change().dropna()
                     iv_est = float(returns.std() * math.sqrt(252))
@@ -1135,9 +1136,10 @@ async def periodic_refresh():
         try:
             if full_counter >= 60:
                 full_counter = 0
-                old_quotes = dict(state.live_quotes)
-                fetch_positions_and_strategies()
-                state.live_quotes = old_quotes
+                # In a worker thread, as at startup and on /api/refresh: it calls the broker and,
+                # for the IV fallback, yfinance, whose downloads wait for each other (zeus_yf).
+                # The stream keeps filling state.live_quotes meanwhile; the rebuild never replaces it.
+                await asyncio.get_running_loop().run_in_executor(None, fetch_positions_and_strategies)
                 reapply_cached_quotes()
             # Re-blend strat IV from per-leg IVs streamed via DXLink.
             try:
@@ -1501,18 +1503,23 @@ async def option_price_snapshot_loop():
                 closes = je.load_close_entries()
                 symbols = pt.tracked_symbols(opens, closes)
                 if symbols and state.client:
+                    # Broker calls in a worker thread: they block, and in manual mode the
+                    # spots come from a yfinance download that may wait its turn (zeus_yf).
+                    loop = asyncio.get_running_loop()
                     # Option marks (existing batched REST)
                     BATCH = 50
                     marks = {}
                     for i in range(0, len(symbols), BATCH):
                         chunk = symbols[i:i+BATCH]
-                        marks.update(fetch_option_marks(state.client, chunk))
+                        marks.update(await loop.run_in_executor(
+                            None, fetch_option_marks, state.client, chunk))
                     # Underlying spot prices — needed to solve IV + Greeks
                     underlyings = sorted({
                         s.split()[0] for s in symbols
                         if s.split()
                     })
-                    spots = fetch_stock_marks(state.client, underlyings)
+                    spots = await loop.run_in_executor(
+                        None, fetch_stock_marks, state.client, underlyings)
                     if marks:
                         path = pt.snapshot_to_parquet(marks, spots=spots)
                         if path:
@@ -12291,7 +12298,7 @@ async def checkup_liquidity(ticker: str, max_dte: int = Query(50)):
 
 
 @app.get("/api/checkup/regime")
-async def checkup_regime():
+def checkup_regime():
     """当前市场 regime(SPY vs 200SMA)→ 前端 regime 自适应止盈带(牛 70-80% / 震荡 50-60%)。
     日更缓存,fail-soft 返回中性。"""
     try:
@@ -12331,10 +12338,9 @@ def _rr_recent_activity(rr):
     try:
         if _rr_recent_cache["data"] and time.time() - _rr_recent_cache["ts"] < 3600:
             return _rr_recent_cache["data"]
-        import yfinance as yf
         series = {}
         for t in ("SPY", "QQQ"):
-            df = yf.download(t, period="6mo", interval="1d", auto_adjust=True, progress=False)
+            df = zeus_yf.download(t, period="6mo", interval="1d", auto_adjust=True, progress=False)
             if df is None or df.empty:
                 series[t.lower()] = []; continue
             cl = df["Close"]
@@ -13256,7 +13262,10 @@ async def _run_exit_alert_check() -> None:
     cfg = eap.load_config(_ALERT_CFG_PATH)
     if not cfg.get("enabled", True):
         return
-    regime = (_EXIT_RG.market_regime().get("regime") if _EXIT_RG else None)
+    regime = None
+    if _EXIT_RG:   # its daily cache is rebuilt from yfinance downloads → worker thread
+        rg = await asyncio.get_running_loop().run_in_executor(None, _EXIT_RG.market_regime)
+        regime = rg.get("regime")
     fires = eap.evaluate(state.strategies, cfg, _EXIT_FIRED,
                          datetime.datetime.now(), regime)
     for f in fires:
@@ -14010,7 +14019,7 @@ async def journal_entries_price_history(entry_id: str):
 
 
 @app.post("/api/option_prices/snapshot_now")
-async def option_prices_snapshot_now():
+def option_prices_snapshot_now():
     """Force an immediate snapshot. Useful after Refresh Trades or for
     manual debug — skips the hourly cadence."""
     je = _journal_entries_module()
@@ -14960,7 +14969,7 @@ def _compute_ticker_analysis(ticker: str) -> dict:
     # ── ETF Correlations ──
     etf_tickers = [ticker] + _ETF_LIST
     try:
-        raw = yf.download(etf_tickers, period="4mo", interval="1d", progress=False, threads=True)
+        raw = zeus_yf.download(etf_tickers, period="4mo", interval="1d", progress=False, threads=True)
         etf_close = raw["Close"] if "Close" in raw.columns.get_level_values(0) else raw
         log_ret = np.log(etf_close / etf_close.shift(1)).dropna()
         corrs = []
@@ -15157,11 +15166,11 @@ def _compute_atr14_batch(tickers: list) -> dict:
     try:
         import pandas as pd
         if len(tickers) == 1:
-            hist_all = yf.download(tickers[0], period="2mo", progress=False, auto_adjust=False)
+            hist_all = zeus_yf.download(tickers[0], period="2mo", progress=False, auto_adjust=False)
             frames = {tickers[0]: hist_all}
         else:
-            hist_all = yf.download(tickers, period="2mo", group_by="ticker",
-                                   progress=False, auto_adjust=False, threads=True)
+            hist_all = zeus_yf.download(tickers, period="2mo", group_by="ticker",
+                                        progress=False, auto_adjust=False, threads=True)
             frames = {}
             for t in tickers:
                 try:
@@ -15431,8 +15440,8 @@ def _fetch_yf_single_close(ticker: str, period: str):
     if not HAS_YF:
         return None
     try:
-        df = yf.download(ticker, period=period, progress=False,
-                         auto_adjust=False, threads=False)
+        df = zeus_yf.download(ticker, period=period, progress=False,
+                              auto_adjust=False, threads=False)
         if df is None or df.empty or "Close" not in df.columns:
             return None
         ser = df["Close"].dropna()
@@ -15462,12 +15471,12 @@ def _compute_corr_vs_spy_batch(tickers: list, lookback_days: int = 60) -> dict:
         if HAS_YF:
             try:
                 if len(fetch_tickers) == 1:
-                    spy_only = yf.download("SPY", period=period, progress=False, auto_adjust=False)
+                    spy_only = zeus_yf.download("SPY", period=period, progress=False, auto_adjust=False)
                     if spy_only is not None and not spy_only.empty and "Close" in spy_only.columns:
                         cols["SPY"] = spy_only["Close"]
                 else:
-                    hist_all = yf.download(fetch_tickers, period=period, group_by="ticker",
-                                           progress=False, auto_adjust=False, threads=True)
+                    hist_all = zeus_yf.download(fetch_tickers, period=period, group_by="ticker",
+                                                progress=False, auto_adjust=False, threads=True)
                     for t in fetch_tickers:
                         try:
                             if t in hist_all.columns.get_level_values(0):
@@ -15567,8 +15576,8 @@ def _compute_corr_matrix_batch(tickers: list, lookback_days: int = 90) -> dict:
         cols: dict = {}
         if HAS_YF:
             try:
-                hist_all = yf.download(fetch_tickers, period=period, group_by="ticker",
-                                       progress=False, auto_adjust=False, threads=True)
+                hist_all = zeus_yf.download(fetch_tickers, period=period, group_by="ticker",
+                                            progress=False, auto_adjust=False, threads=True)
                 for t in fetch_tickers:
                     try:
                         if len(fetch_tickers) == 1:
@@ -16210,8 +16219,8 @@ async def api_digest_ai_summary(req: Request):
     scope = str((body or {}).get("scope") or "")
     cur_ids = [str(it.get("id")) for it in items
                if isinstance(it, dict) and it.get("id")]
-    # 补价: 前端 scrData 只 170 只,这里从 TastyTrade REST 拉全 S&P
-    items = _ai_enrich_items_with_prices(items)
+    # 补价: 前端 scrData 只 170 只,这里从 TastyTrade REST 拉全 S&P(线程池里跑,不堵事件循环)
+    items = await asyncio.get_running_loop().run_in_executor(None, _ai_enrich_items_with_prices, items)
     key = _aisum_key(date, scope)
     cache = _aisum_load(date, scope)
     j = _aisum_jobs.get(key) or {}
@@ -16308,9 +16317,8 @@ def _market_chart_build(sym: str) -> list:
     """yfinance 拉 sym 全历史日线 → [[YYYY-MM-DD, o, h, l, c, v], ...](旧→新)。"""
     if not HAS_YF:
         return []
-    import yfinance as yf
-    df = yf.download(sym, start="2011-01-01", interval="1d", progress=False,
-                     auto_adjust=False, threads=False)
+    df = zeus_yf.download(sym, start="2011-01-01", interval="1d", progress=False,
+                          auto_adjust=False, threads=False)
     if df is None or not len(df):
         return []
     if isinstance(df.columns, pd.MultiIndex):      # 单票有时也回 MultiIndex
@@ -19242,9 +19250,8 @@ def barchart_ohlc(ticker: str, days: int = 126):
             df = hit[0]
         else:
             import pandas as pd
-            import yfinance as yf
-            df = yf.download(t, period="2y", interval="1d", progress=False,
-                             auto_adjust=False, threads=False)
+            df = zeus_yf.download(t, period="2y", interval="1d", progress=False,
+                                  auto_adjust=False, threads=False)
             # yfinance 单票常返回 MultiIndex 列(('Close','CBOE')...) → 压成单层 + 去重,
             # 否则 df["Volume"] 是 DataFrame, ohlc_chart 里 v==v 在数组上报 ambiguous。
             if df is not None and getattr(df, "columns", None) is not None:

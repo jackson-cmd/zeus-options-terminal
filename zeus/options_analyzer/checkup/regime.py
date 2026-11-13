@@ -75,9 +75,9 @@ def force_at(b: dict, dte) -> float:
 def _vix_last() -> float | None:
     try:
         import numpy as np
-        import yfinance as yf
-        df = yf.download("^VIX", period="1mo", interval="1d",
-                         progress=False, auto_adjust=False)
+        import zeus_yf
+        df = zeus_yf.download("^VIX", period="1mo", interval="1d",
+                              progress=False, auto_adjust=False)
         if df is None or df.empty or "Close" not in df.columns:
             return None
         vals = np.asarray(df["Close"]).ravel()          # robust to MultiIndex columns

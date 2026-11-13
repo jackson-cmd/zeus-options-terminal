@@ -304,9 +304,8 @@ def _ohlc_fetch_one(D, tk: str):
     if df is not None and len(df) >= 2:
         return df
     try:
-        import yfinance as yf
         tmp: dict = {}
-        D._fetch_batch(yf, [tk], tmp, D.PERIOD, min_bars=2)
+        D._fetch_batch([tk], tmp, D.PERIOD, min_bars=2)
         df = tmp.get(tk)
     except Exception:
         df = None
