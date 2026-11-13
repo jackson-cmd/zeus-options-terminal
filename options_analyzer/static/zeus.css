@@ -22,6 +22,8 @@ html.zs-hide-cn .ttl-cn, html.zs-hide-cn .dg-zh { display: none !important; }
 html.zs-lang-bi [data-zs-en]::after { content: attr(data-zs-en); font-size: 0.76em; font-weight: 500; opacity: 0.62;
   margin-left: 0.38em; letter-spacing: 0; text-transform: none; white-space: nowrap; }
 html.zs-lang-bi th[data-zs-en]::after, html.zs-lang-bi h1[data-zs-en]::after, html.zs-lang-bi h2[data-zs-en]::after { display: block; margin-left: 0; }
+/* 🌐 shows the translation engine's own name; an English gloss of it would only widen the top bar */
+html.zs-lang-bi #trStatusBtn[data-zs-en]::after { content: none; }
 .zs-sub-en { color: #8b949e; font-size: 0.92em; }
 /* help (zeus_help.js): the small ? beside a column, a score or a card, and the help card / page guide */
 .zs-q { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; margin-left: 4px;
