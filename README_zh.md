@@ -280,7 +280,7 @@ date,symbol,asset,side,effect,qty,price,fees,option_type,strike,expiration,multi
 - 服务默认只监听 **127.0.0.1**，拒绝陌生的 `Host` 头（防 DNS 重绑定），跨域请求只接受本机来源，写操作需要一个其他网站发不出来的请求头。
 - 没有任何遥测。应用只连接你自己接入的服务，以及公开行情数据（Cboe 延迟行情、Yahoo Finance、SEC EDGAR、Finviz、道琼斯 RSS）。
 - 免费数据会避开限流：公司资料（行业、细分行业、市值）从 Finviz 每次批量查 20 只；Yahoo Finance 一旦限流，股票报价自动改用 Finviz；一整条期权链只向 Cboe 请求一次，不再按到期日逐个请求 Yahoo。
-- **发现安全问题？** 请按 [SECURITY.md](SECURITY.md) 私下报告，不要公开发 Issue。
+- **发现安全问题？** 请按 [SECURITY.md](.github/SECURITY.md) 私下报告，不要公开发 Issue。
 
 ---
 
@@ -351,7 +351,7 @@ FastAPI 服务 ── options_analyzer/optionstrat_server.py
 
 ZEUS 的功能远比这一页能写下的多，而且还在长，以后也可能加新功能。**欢迎提 PR**：修 bug、接新的数据源或券商、改翻译、补文档，或者把[还没接上的部分](docs/FEATURES_zh.md#还没接上的部分欢迎-pr)接起来都可以。动手前先看 [CONTRIBUTING.md](CONTRIBUTING.md)。每个 PR 都会在 Linux、macOS、Windows 上跑一遍测试，`main` 只接受测试全部通过的 PR。
 
-提问和讨论去 [Discussions](https://github.com/jackson-cmd/zeus-options-terminal/discussions)，bug 走 [Issues](https://github.com/jackson-cmd/zeus-options-terminal/issues/new/choose)，安全问题请私下报告（[SECURITY.md](SECURITY.md)）。大家都遵守[行为准则](CODE_OF_CONDUCT.md)。
+提问和讨论去 [Discussions](https://github.com/jackson-cmd/zeus-options-terminal/discussions)，bug 走 [Issues](https://github.com/jackson-cmd/zeus-options-terminal/issues/new/choose)，安全问题请私下报告（[SECURITY.md](.github/SECURITY.md)）。大家都遵守[行为准则](.github/CODE_OF_CONDUCT.md)。
 
 ---
 

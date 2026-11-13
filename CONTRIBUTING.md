@@ -52,12 +52,12 @@ zeus-options-terminal/
 - Add tests for new endpoints, with faked market data as in `tests/test_paper_trade.py`.
 - Update user-facing text in both languages: `README.md` and `README_zh.md`, `docs/*`, and `zeus/options_analyzer/static/i18n_en.json` for new Chinese interface strings.
 - Add each Chinese sentence to `i18n_en.json` whole, never piece by piece. A sentence built with numbers cannot be a dictionary key, so give its English where it is built: `zt('剩 ' + n + ' 天', n + ' days left')` in a page script (`ztt` for a tooltip), or an `_en` field next to the Chinese in data the server sends. `tests/test_english_text.py` checks both.
-- Be kind: the [code of conduct](CODE_OF_CONDUCT.md) applies in issues, pull requests and discussions.
+- Be kind: the [code of conduct](.github/CODE_OF_CONDUCT.md) applies in issues, pull requests and discussions.
 - By contributing, you agree that your contribution is released under the project's [PolyForm Noncommercial License 1.0.0](LICENSE).
 
 ### Bugs and ideas
 
-Report a bug with the [issue form](https://github.com/jackson-cmd/zeus-options-terminal/issues/new/choose): what you did, what you expected and what happened. Ask questions and share ideas in [Discussions](https://github.com/jackson-cmd/zeus-options-terminal/discussions). Leave out tokens, cookies and account numbers. Security problems go to a private report, as [SECURITY.md](SECURITY.md) explains.
+Report a bug with the [issue form](https://github.com/jackson-cmd/zeus-options-terminal/issues/new/choose): what you did, what you expected and what happened. Ask questions and share ideas in [Discussions](https://github.com/jackson-cmd/zeus-options-terminal/discussions). Leave out tokens, cookies and account numbers. Security problems go to a private report, as [SECURITY.md](.github/SECURITY.md) explains.
 
 ---
 
@@ -109,9 +109,9 @@ zeus-options-terminal/
 - 新接口要配测试，行情用假的，参考 `tests/test_paper_trade.py`。
 - 面向用户的文字两种语言一起改：`README.md` 和 `README_zh.md`、`docs/*`，新加的中文界面文字要在 `zeus/options_analyzer/static/i18n_en.json` 里补英文。
 - 中文句子整句加进 `i18n_en.json`，别拆成词。带数字拼出来的句子当不了词典的键，就在拼句子的地方给英文：页面脚本里写 `zt('剩 ' + n + ' 天', n + ' days left')`（提示框用 `ztt`），服务器发出的数据在中文旁边加一个 `_en` 字段。`tests/test_english_text.py` 两样都会查。
-- 友善待人：[行为准则](CODE_OF_CONDUCT.md) 适用于 Issue、PR 和 Discussions。
+- 友善待人：[行为准则](.github/CODE_OF_CONDUCT.md) 适用于 Issue、PR 和 Discussions。
 - 提交贡献即表示你同意它按本项目的 [PolyForm Noncommercial License 1.0.0](LICENSE) 发布。
 
 ### 报 bug、提想法
 
-用 [Issue 表单](https://github.com/jackson-cmd/zeus-options-terminal/issues/new/choose)报 bug：你做了什么、本来想看到什么、实际看到了什么。提问和想法发到 [Discussions](https://github.com/jackson-cmd/zeus-options-terminal/discussions)。别贴 token、cookie 和账户号。安全问题请按 [SECURITY.md](SECURITY.md) 私下报告。
+用 [Issue 表单](https://github.com/jackson-cmd/zeus-options-terminal/issues/new/choose)报 bug：你做了什么、本来想看到什么、实际看到了什么。提问和想法发到 [Discussions](https://github.com/jackson-cmd/zeus-options-terminal/discussions)。别贴 token、cookie 和账户号。安全问题请按 [SECURITY.md](.github/SECURITY.md) 私下报告。

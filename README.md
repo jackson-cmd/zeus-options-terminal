@@ -280,7 +280,7 @@ date,symbol,asset,side,effect,qty,price,fees,option_type,strike,expiration,multi
 - The server listens on **127.0.0.1** only by default, refuses foreign `Host` headers (DNS rebinding), only accepts cross-origin calls from localhost, and write endpoints need a header that other websites cannot send.
 - No telemetry. The app only talks to the services you connect plus public market data (Cboe delayed quotes, Yahoo Finance, SEC EDGAR, Finviz, Dow Jones RSS).
 - Free market data is rate-limit aware: company data (sector, industry, market cap) comes from Finviz in batches of 20 tickers, stock quotes fall back to Finviz whenever Yahoo Finance throttles, and a whole option chain is one Cboe request instead of one Yahoo request per expiration.
-- **Found a security problem?** Please report it privately, as [SECURITY.md](SECURITY.md) explains, not in a public issue.
+- **Found a security problem?** Please report it privately, as [SECURITY.md](.github/SECURITY.md) explains, not in a public issue.
 
 ---
 
@@ -351,7 +351,7 @@ Runtime data (candles, caches, digests) lives in `~/.zeus-terminal/runtime/`; fo
 
 ZEUS has far more features than this page can show, and it keeps growing; new features may be added over time. **Pull requests are welcome**: a bug fix, a new data source or broker, a translation, better docs, or one of the [parts not wired up yet](docs/FEATURES.md#not-wired-up-yet--ideas-for-pull-requests). Read [CONTRIBUTING.md](CONTRIBUTING.md) first. Every pull request runs the test suite on Linux, macOS and Windows, and `main` only accepts pull requests whose checks pass.
 
-Questions and ideas go to [Discussions](https://github.com/jackson-cmd/zeus-options-terminal/discussions), bugs to [Issues](https://github.com/jackson-cmd/zeus-options-terminal/issues/new/choose), and security problems to a private report ([SECURITY.md](SECURITY.md)). Everyone here follows the [code of conduct](CODE_OF_CONDUCT.md).
+Questions and ideas go to [Discussions](https://github.com/jackson-cmd/zeus-options-terminal/discussions), bugs to [Issues](https://github.com/jackson-cmd/zeus-options-terminal/issues/new/choose), and security problems to a private report ([SECURITY.md](.github/SECURITY.md)). Everyone here follows the [code of conduct](.github/CODE_OF_CONDUCT.md).
 
 ---
 
