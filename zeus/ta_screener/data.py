@@ -12,10 +12,13 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:      # zeus/, for zeus_yf when a script here runs on its own
     sys.path.append(str(REPO_ROOT))
 # TA screener 专属 universe(作者精选 392 票,抄底为主);分类标签从 heatmap 借。
+# 新装第一次启动时 zeus_config.ensure_default_data() 用自带的 heatmap 默认清单生成它。
 UNIVERSE_FILE = REPO_ROOT / "data" / "ta_screener_universe.txt"
 # 专属池:从 universe 筛掉「不会动/太便宜/太贵」的票(build_pool.py 生成);扫描只在池里跑。
 POOL_FILE = REPO_ROOT / "data" / "ta_screener_pool.txt"
 _CATEGORY_SOURCE = REPO_ROOT / "data" / "heatmap_universe.txt"
+# TA 清单和 heatmap 清单都读不到时的最后退路:随代码发布的默认清单。
+_DEFAULT_SOURCE = REPO_ROOT / "defaults" / "heatmap_universe.txt"
 # 粗粒度 GICS sector(Technology/Industrials/…)从 heatmap metadata 借,供快速筛选。
 _SECTOR_SOURCE = REPO_ROOT / "data" / "heatmap" / "metadata.json"
 
@@ -56,9 +59,18 @@ def _parse_file(path: Path):
     return tickers, cat_map
 
 
-def parse_universe(path: Path = UNIVERSE_FILE):
-    """解析 TA universe;对没分类的票从 heatmap_universe 借分类标签(纯展示用)。"""
-    tickers, cat_map = _parse_file(path)
+def parse_universe(path: Path | None = None):
+    """解析 TA universe;对没分类的票从 heatmap_universe 借分类标签(纯展示用)。
+    TA 清单缺失、读不出或一只票都没有 → 退回 heatmap 票池,再退回自带默认清单,
+    扫描照常跑,不会在后台线程里因 FileNotFoundError 中断。"""
+    tickers, cat_map = [], {}
+    for src in (path or UNIVERSE_FILE, _CATEGORY_SOURCE, _DEFAULT_SOURCE):
+        try:
+            tickers, cat_map = _parse_file(src)
+        except (OSError, ValueError):       # 缺文件 / 不是 UTF-8
+            continue
+        if tickers:
+            break
     missing = [t for t in tickers if not cat_map.get(t)]
     if missing and _CATEGORY_SOURCE.exists():
         try:
