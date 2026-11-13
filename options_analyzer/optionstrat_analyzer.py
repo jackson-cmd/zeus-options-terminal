@@ -2389,7 +2389,7 @@ function renderTimeView() {
       '<td style="padding:6px 10px;color:var(--text2);font-size:11px">' + names + '</td></tr>';
   });
   const ladder =
-    '<h3 style="margin:14px 0 6px;font-size:14px">&#128197; 到期阶梯（按到期日，≤7天标红）</h3>' +
+    '<h3 id="expLadderTitle" style="margin:14px 0 6px;font-size:14px">&#128197; 到期阶梯（按到期日，≤7天标红）</h3>' +
     '<div style="overflow-x:auto"><table class="dashboard-table" style="width:100%;border-collapse:collapse;font-size:12px">' +
     '<thead><tr style="color:var(--text2)"><th style="text-align:left;padding:6px 10px">到期日</th><th style="text-align:right;padding:6px 10px">DTE</th>' +
     '<th style="text-align:right;padding:6px 10px">仓数</th><th style="text-align:right;padding:6px 10px">合计最大亏损</th>' +
@@ -2421,7 +2421,7 @@ function renderTimeView() {
   });
 
   body.innerHTML = ladder +
-    '<h3 style="margin:18px 0 6px;font-size:14px">&#9203; Theta 跑道（横盘·只算时间衰减）</h3>' +
+    '<h3 id="thetaRunwayTitle" style="margin:18px 0 6px;font-size:14px">&#9203; Theta 跑道（横盘·只算时间衰减）</h3>' +
     '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:13px;line-height:1.7;margin-bottom:10px">' + runwayNote + '</div>' +
     '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:12px"><canvas id="thetaCanvas" style="width:100%;height:200px;display:block"></canvas></div>' +
     '<h3 style="margin:14px 0 6px;font-size:13px;color:var(--text2)">Theta 贡献最大的仓</h3>' +
@@ -2527,7 +2527,7 @@ function renderProbView() {
       <tr><td style="padding:4px 10px;color:var(--text2)">扛到期 &gt; 现在</td><td style="padding:4px 10px;text-align:right;color:var(--text);font-weight:700">${pctS(R.pBeat)}</td><td style="padding:4px 10px;color:var(--text2);font-size:11px">${zt(`现在 ${money(R.curMark)},继续拿能更好的概率`, `now ${money(R.curMark)}: the chance that holding on ends better`)}</td></tr>
     </table>`;
     const updatedAt = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
-    body.innerHTML = `<div style="display:flex;align-items:center;gap:8px;margin:10px 0 6px"><div style="flex:1;font-size:12px;color:var(--text2)">${zt(`蒙特卡洛 ${R.nSims.toLocaleString()} 次模拟「持有到期」组合盈亏:每标的按 IV/DTE 对数正态、用 β 与大盘相关(SPY 波动≈${pctS(R.SPY_VOL)},取自实时 VIX);无方向假设。<b>每小时自动重算一次</b>,或点 🔄。绿=赚 / 红=亏,<span style="color:#58a6ff">蓝线</span>=现在浮盈,<span style="color:#e3b341">黄线</span>=中位。`,
+    body.innerHTML = `<div style="display:flex;align-items:center;gap:8px;margin:10px 0 6px"><div id="probDesc" style="flex:1;font-size:12px;color:var(--text2)">${zt(`蒙特卡洛 ${R.nSims.toLocaleString()} 次模拟「持有到期」组合盈亏:每标的按 IV/DTE 对数正态、用 β 与大盘相关(SPY 波动≈${pctS(R.SPY_VOL)},取自实时 VIX);无方向假设。<b>每小时自动重算一次</b>,或点 🔄。绿=赚 / 红=亏,<span style="color:#58a6ff">蓝线</span>=现在浮盈,<span style="color:#e3b341">黄线</span>=中位。`,
       `${R.nSims.toLocaleString()} Monte Carlo runs of the portfolio's P/L if everything is held to expiration: each underlying is log-normal from its IV/DTE and tied to the market through β (SPY volatility ≈ ${pctS(R.SPY_VOL)}, from the live VIX); no directional view. <b>Recomputed every hour</b>, or click 🔄. Green = profit / red = loss, <span style="color:#58a6ff">blue line</span> = unrealized P/L now, <span style="color:#e3b341">yellow line</span> = median.`)}</div><span style="flex:none;font-size:10px;color:#6e7681">更新于 ${updatedAt}</span><button onclick="_probForce=true;renderProbView()" style="flex:none;background:#21262d;color:#58a6ff;border:1px solid #30363d;border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer">&#128260; 重新模拟</button></div>${svg}${tbl}`;
     body.dataset.done = '1';
   }, 30);
@@ -3971,7 +3971,7 @@ function renderRiskView() {
     <div class="risk-summary-row"><span class="risk-summary-label">Account Net Liquidating Value (bankroll)</span><span class="risk-summary-value">${nlvStr}</span></div>
     <div class="risk-summary-row"><span class="risk-summary-label">Cash available</span><span class="risk-summary-value">${cashStr}</span></div>
     <div class="risk-summary-row"><span class="risk-summary-label">Current unrealized P/L</span><span class="risk-summary-value" style="color:${col2(totPnl)}">${fmtSign(totPnl)}</span></div>
-    <div class="risk-summary-row"><span class="risk-summary-label">Tomorrow 1σ worst (~68% band)</span><span class="risk-summary-value" style="color:${col2(tot1s)}">${fmtSign(tot1s)}</span></div>
+    <div class="risk-summary-row"><span class="risk-summary-label" id="riskTotalsLabel">Tomorrow 1σ worst (~68% band)</span><span class="risk-summary-value" style="color:${col2(tot1s)}">${fmtSign(tot1s)}</span></div>
     <div class="risk-summary-row"><span class="risk-summary-label">Tomorrow 2σ worst (~95% band, stress) &nbsp;<span style="color:var(--text2);font-weight:400">${tot2sPctNlv}% of NLV</span></span><span class="risk-summary-value" style="color:${col2(tot2s)}">${fmtSign(tot2s)}</span></div>
     <div class="risk-summary-row"><span class="risk-summary-label">VaR 95% (1-day)</span><span class="risk-summary-value" style="color:${col2(totVar)}">${fmtSign(totVar)}</span></div>
     <div class="risk-summary-row"><span class="risk-summary-label">CVaR 95% (1-day expected shortfall)</span><span class="risk-summary-value" style="color:${col2(totCvar)}">${fmtSign(totCvar)}</span></div>
@@ -3982,7 +3982,7 @@ function renderRiskView() {
   const unbNote = nUnbounded > 0 ? ` <span style="color:var(--text2);font-weight:400">${zt(`(${nUnbounded} 个无限上限未计入)`, `(${nUnbounded} with unlimited upside not counted)`)}</span>` : '';
   const upHtml = `
     <div style="background:rgba(63,185,80,0.08);border:1px solid rgba(63,185,80,0.35);border-radius:8px;padding:8px 14px;margin-bottom:12px">
-      <div class="risk-summary-row"><span class="risk-summary-label">&#128176; 理想最大盈利(全部持有到期)${unbNote}</span><span class="risk-summary-value" style="color:var(--green)">$${totMaxProfit.toFixed(0)}</span></div>
+      <div class="risk-summary-row"><span class="risk-summary-label" id="riskUpsideLabel">&#128176; 理想最大盈利(全部持有到期)${unbNote}</span><span class="risk-summary-value" style="color:var(--green)">$${totMaxProfit.toFixed(0)}</span></div>
       <div class="risk-summary-row"><span class="risk-summary-label">&#127922; 概率加权期望(到期) <span style="color:var(--text2);font-weight:400">— IV/DTE 对数正态加权,无方向假设</span></span><span class="risk-summary-value" style="color:${col2(totEv)}">${fmtSign(totEv)}</span></div>
       <div class="risk-summary-row"><span class="risk-summary-label">${zt(`当前浮盈 · 已吃到 <b style="color:var(--green)">${captured.toFixed(0)}%</b> 最大利润`, `Unrealized P/L · <b style="color:var(--green)">${captured.toFixed(0)}%</b> of max profit captured`)}</span><span class="risk-summary-value" style="color:${col2(totPnlBounded)}">${fmtSign(totPnlBounded)}</span></div>
       <div class="risk-summary-row"><span class="risk-summary-label">还能赚到顶(剩余空间)</span><span class="risk-summary-value" style="color:var(--green)">+$${remaining.toFixed(0)}</span></div>
@@ -4096,7 +4096,7 @@ async function renderPortfolioGreeks() {
 
   host.innerHTML =
     '<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:8px;flex-wrap:wrap">' +
-      '<h3 style="margin:0;font-size:14px;color:var(--text)">📊 组合级希腊 · Beta加权（全账户合计 vs SPY）</h3>' +
+      '<h3 id="pfGreeksTitle" style="margin:0;font-size:14px;color:var(--text)">📊 组合级希腊 · Beta加权（全账户合计 vs SPY）</h3>' +
       '<span style="font-size:11px;color:var(--text2)">' + zt(strats.length + ' 个策略 · ' + unders.length + ' 个标的' +
         (_pfBeta.missing && _pfBeta.missing.length ? ' · ' + _pfBeta.missing.length + ' 个无beta按1.0' : ''),
         strats.length + ' strategies · ' + unders.length + ' underlyings' +
@@ -6371,11 +6371,11 @@ async function renderRiskRadar() {
   const fscore = f.score || 0;
   const fcol = fscore >= 60 ? '#f85149' : fscore >= 30 ? '#ff9f0a' : '#3fb950';
   const flvl = f.level === 'high' ? '高危' : f.level === 'elevated' ? '偏高' : '平静';
-  const miniGauge = (title, sc, c, lv, sub) => `
+  const miniGauge = (title, sc, c, lv, sub, idAttr) => `
     <div style="flex:1;min-width:0;background:#161b22;border:1px solid #30363d;border-radius:10px;padding:12px 14px">
       <div style="display:flex;align-items:baseline;gap:8px">
         <div style="font-size:30px;font-weight:800;color:${c};line-height:1">${sc}</div>
-        <div style="color:${c};font-weight:700;font-size:13px">${title} · ${lv}</div>
+        <div ${idAttr || ''} style="color:${c};font-weight:700;font-size:13px">${title} · ${lv}</div>
       </div>
       <div style="height:6px;background:#21262d;border-radius:4px;overflow:hidden;margin-top:7px"><div style="height:100%;width:${sc}%;background:${c}"></div></div>
       <div style="color:#8b949e;font-size:11px;margin-top:7px;line-height:1.5">${sub}</div>
@@ -6384,8 +6384,8 @@ async function renderRiskRadar() {
     ? zt(`⚠️ 最挤一周 ${f.busiest_week_count} 个事件扎堆`, `⚠️ ${f.busiest_week_count} events crowd into one week`)
     : zt(`${f.n_events||0} 个高 lift 事件`, `${f.n_events||0} high-lift events`);
   const gauges = `<div style="display:flex;gap:10px;margin-bottom:12px">
-    ${miniGauge('今日新闻风险', score, col, lvl, g.top ? zt(`主导：${g.top.label}（这类日子跌≥1% ${g.top.lift}×）`, `Leading: ${g.top.label_en || g.top.label} (on days like this a ≥1% drop is ${g.top.lift}× as likely)`) : '今日新闻面平静')}
-    ${miniGauge('未来30天事件密度', fscore, fcol, flvl, busy + (fscore>=60 ? ' — 格外小心，别满仓撞上去' : ''))}
+    ${miniGauge('今日新闻风险', score, col, lvl, g.top ? zt(`主导：${g.top.label}（这类日子跌≥1% ${g.top.lift}×）`, `Leading: ${g.top.label_en || g.top.label} (on days like this a ≥1% drop is ${g.top.lift}× as likely)`) : '今日新闻面平静', 'id="radarNewsTitle"')}
+    ${miniGauge('未来30天事件密度', fscore, fcol, flvl, busy + (fscore>=60 ? ' — 格外小心，别满仓撞上去' : ''), 'id="radarDensityTitle"')}
   </div>`;
   const hotCard = `
     <div style="background:#161b22;border:1px solid #30363d;border-radius:10px;padding:12px 14px;margin-bottom:12px">
@@ -6405,7 +6405,7 @@ async function renderRiskRadar() {
     <div style="color:#6e7681;font-size:11px;padding:0 0 3px 16px">${e.note||''}</div>`).join('');
   const lmCard = `
     <div style="background:#161b22;border:1px solid #30363d;border-radius:10px;padding:14px 16px;margin-bottom:12px">
-      <div style="color:#e6edf3;font-weight:700;font-size:14px;margin-bottom:3px">📅 未来 30 天 landmine 日历</div>
+      <div id="radarLmTitle" style="color:#e6edf3;font-weight:700;font-size:14px;margin-bottom:3px">📅 未来 30 天 landmine 日历</div>
       <div style="color:#6e7681;font-size:11px;margin-bottom:2px;display:flex;align-items:center;gap:6px">${dot('red')} 你的持仓 ${dot('warn')} 计划内/龙头 ${dot('info')} ${zt('一般', 'other')}</div>
       ${lm || '<div style="color:#8b949e;font-size:13px;padding:8px 0">未来 3 周无重大事件</div>'}
     </div>`;
@@ -6683,7 +6683,7 @@ function _liqBanner(d) {
   const note = (d.market_hours === false)
     ? '<div style="color:#d29922;font-size:11px;margin-top:5px">⚠️ 盘后报价常单边,部分 🔴 可能只是收盘后没双边报价,以开盘为准</div>' : '';
   return '<div style="border:1px solid ' + m.c + '66;background:' + m.bg + ';border-radius:10px;padding:12px 14px;margin-bottom:12px">'
-    + '<div style="font-size:15px;font-weight:700;color:' + m.c + '">' + m.ic + ' ' + (zt(tv.label, tv.label_en || tv.label) || '—')
+    + '<div id="liqVerdictTitle" style="font-size:15px;font-weight:700;color:' + m.c + '">' + m.ic + ' ' + (zt(tv.label, tv.label_en || tv.label) || '—')
     + (d.earnings_date ? ' <span style="color:#f85149;font-weight:400;font-size:12px">· 财报 ' + d.earnings_date + '</span>' : '') + '</div>'
     + '<div style="font-size:12px;color:#8b949e;margin-top:3px">' + zt(tv.detail || '', tv.detail_en || tv.detail || '') + '</div>' + note + '</div>';
 }
@@ -6746,7 +6746,7 @@ function _liqCrossWeek(d) {
   if (!cw || !cw.rows || !cw.rows.length) return '';
   const cell = (v, color, b) => '<td style="text-align:center;padding:2px 6px;color:' + color + ';font-weight:' + (b ? 700 : 400) + '">' + v + (b ? ' ★' : '') + '</td>';
   let h = '<div style="border:1px solid #30363d;border-radius:10px;margin-top:16px;overflow:hidden">'
-    + '<div style="background:#161b22;padding:9px 12px;font-size:13px;font-weight:600;color:#e6edf3">📊 同一价差跨周对比 <span style="color:#6e7681;font-weight:400;font-size:11px">· ' + _liqFmtStrike(cw.long) + '/+' + cw.width_pct + '% Call Spread · 越低越对、net 越紧越好挂,★=最便宜的周</span></div>'
+    + '<div id="liqCrossTitle" style="background:#161b22;padding:9px 12px;font-size:13px;font-weight:600;color:#e6edf3">📊 同一价差跨周对比 <span style="color:#6e7681;font-weight:400;font-size:11px">· ' + _liqFmtStrike(cw.long) + '/+' + cw.width_pct + '% Call Spread · 越低越对、net 越紧越好挂,★=最便宜的周</span></div>'
     + '<div style="overflow-x:auto;padding:10px 12px"><table style="border-collapse:collapse;font-size:12px"><tr><td style="color:#8b949e;padding:2px 6px">到期</td>';
   cw.rows.forEach(r => { h += '<td style="text-align:center;padding:2px 6px;color:#c9d1d9">' + r.date.slice(5) + '<div style="font-size:10px;color:#6e7681">' + r.dte + 'd</div></td>'; });
   h += '</tr><tr><td style="color:#8b949e;padding:2px 6px">腿</td>';
