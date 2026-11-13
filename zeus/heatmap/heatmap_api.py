@@ -24,6 +24,7 @@ from __future__ import annotations
 import asyncio
 import datetime
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -96,9 +97,11 @@ def _load_persisted() -> None:
 def _save_persisted() -> None:
     try:
         _SNAPSHOT_PATH.parent.mkdir(parents=True, exist_ok=True)
-        _SNAPSHOT_PATH.write_text(json.dumps(
+        tmp = _SNAPSHOT_PATH.with_suffix(".json.tmp")   # renamed into place: never half a file
+        tmp.write_text(json.dumps(
             {"reg": _reg, "ext": _ext, "generated_at": _generated_at},
             separators=(",", ":")))
+        os.replace(tmp, _SNAPSHOT_PATH)
     except Exception as e:
         print(f"[heatmap] snapshot save failed: {e}")
 

@@ -166,7 +166,9 @@ def save_seen(path, seen) -> None:
     try:
         p = Path(path)
         p.parent.mkdir(parents=True, exist_ok=True)
-        p.write_text(json.dumps(sorted(seen), indent=2))
+        tmp = p.with_name(p.name + ".tmp")                  # renamed into place: never half a file
+        tmp.write_text(json.dumps(sorted(seen), indent=2))
+        tmp.replace(p)
     except Exception:
         pass
 

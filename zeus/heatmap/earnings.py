@@ -23,6 +23,8 @@ import datetime as _dt
 import json
 from pathlib import Path
 
+import zeus_shutdown
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 CACHE_FILE = REPO_ROOT / "data" / "heatmap" / "earnings.json"
 
@@ -217,6 +219,8 @@ def _fetch_tastytrade(tickers: list, log=print) -> dict:
             sys.path.insert(0, str(ta_dir))
         from ticker_metrics import fetch_ticker_metrics
         for i in range(0, len(tickers), TT_CHUNK):
+            if zeus_shutdown.stopping():
+                break
             m = fetch_ticker_metrics(tickers[i:i + TT_CHUNK]) or {}
             for t, d in m.items():
                 ed = (d or {}).get("earnings_date")
@@ -262,6 +266,8 @@ def _fetch_yfinance(tickers: list, log=print) -> dict:
         return out
     today = _dt.date.today().isoformat()
     for t in tickers:
+        if zeus_shutdown.stopping():
+            break
         try:
             info = yf.Ticker(t).info or {}
             got = pick_future_ts([info.get("earningsTimestampStart"),
@@ -286,6 +292,8 @@ def _fetch_finviz(tickers: list, log=print) -> dict:
         return out
     today = _dt.date.today()
     for t in tickers:
+        if zeus_shutdown.stopping():
+            break
         try:
             raw = (finviz.get_stock(t) or {}).get("Earnings") or ""
             if not raw or raw == "-":
@@ -329,7 +337,7 @@ def refresh(tickers, etfs=None, force: bool = False, log=print) -> dict:
     )
     for name, fn in chain:
         miss = [t for t in todo if t not in got]
-        if not miss:
+        if not miss or zeus_shutdown.stopping():
             break
         try:
             fresh = fn(miss) or {}
@@ -364,7 +372,9 @@ def refresh(tickers, etfs=None, force: bool = False, log=print) -> dict:
     # 四个源都没给出「未来日期」的:多半是**刚报完**, 下一季日期还没公布。
     # 这种票对「别撞上财报」而言恰恰最安全(三个月内没有财报), 所以把源给的
     # 「上一次财报日」留在 last_date 里, UI 显示「Jul 14 已报」而不是无信息的「?」。
-    for t in todo:
+    # The server is stopping: the sources were cut short, so a ticker without a date
+    # was not looked up everywhere. Keep its old record; the next start asks again.
+    for t in ([] if zeus_shutdown.stopping() else todo):
         if t not in got:
             last = _last_seen.get(t) or (recs.get(t) or {}).get("last_date")
             recs[t] = {"date": None, "last_date": last, "time": "",

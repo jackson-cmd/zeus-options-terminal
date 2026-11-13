@@ -21,7 +21,6 @@ import threading
 from pathlib import Path
 from typing import Optional
 
-import uvicorn
 from fastapi import FastAPI, Query, Request, WebSocket, WebSocketDisconnect, Body
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -115,6 +114,7 @@ try:
 except ImportError:
     HAS_YF = False
 import zeus_yf  # noqa: E402  every yf.download goes through it: one download at a time
+import zeus_shutdown  # noqa: E402  Ctrl+C / SIGTERM: long jobs stop early, the process ends within seconds
 
 # ── App state ──
 app = FastAPI()
@@ -13823,8 +13823,7 @@ async def heatmap_popup_loop():
 
     def _save_state(d: dict) -> None:
         try:
-            STATE_F.parent.mkdir(parents=True, exist_ok=True)
-            STATE_F.write_text(json.dumps(d))
+            _write_text_atomic(STATE_F, json.dumps(d))
         except Exception as e:
             print(f"[hmPopup] save err: {e}")
 
@@ -16057,11 +16056,18 @@ def _aisum_load(date: str, scope: str = ""):
         return None
 
 
+def _write_text_atomic(p: Path, text: str) -> None:
+    """Write through a temporary file that is renamed into place: a background job cut
+    off when the server stops (zeus_shutdown) leaves the previous file, never half of one."""
+    p.parent.mkdir(parents=True, exist_ok=True)
+    tmp = p.with_name(p.name + ".tmp")
+    tmp.write_text(text, encoding="utf-8")
+    os.replace(tmp, p)
+
+
 def _aisum_save(date: str, scope: str, obj: dict):
     try:
-        p = _aisum_path(date, scope)
-        p.parent.mkdir(parents=True, exist_ok=True)
-        p.write_text(json.dumps(obj, ensure_ascii=False), encoding="utf-8")
+        _write_text_atomic(_aisum_path(date, scope), json.dumps(obj, ensure_ascii=False))
     except Exception as e:
         print(f"[ai_summary] save err: {e}")
 
@@ -16753,9 +16759,7 @@ def _mbrief_auto_load():
 
 def _mbrief_auto_save(day: str):
     try:
-        p = _mbrief_auto_state_path()
-        p.parent.mkdir(parents=True, exist_ok=True)
-        p.write_text(json.dumps({"date": day}))
+        _write_text_atomic(_mbrief_auto_state_path(), json.dumps({"date": day}))
     except Exception:
         pass
 
@@ -16812,9 +16816,7 @@ def _aisum_load_morning_state() -> str:
 
 def _aisum_save_morning_state(date: str):
     try:
-        p = _aisum_morning_state_path()
-        p.parent.mkdir(parents=True, exist_ok=True)
-        p.write_text(json.dumps({"date": date}))
+        _write_text_atomic(_aisum_morning_state_path(), json.dumps({"date": date}))
     except Exception as e:
         print(f"[ai-morning] state save err: {e}")
 
@@ -16961,7 +16963,7 @@ def _bl_notify_load() -> dict:
 
 def _bl_notify_save(d: dict) -> None:
     try:
-        _BL_NOTIFY_PATH.write_text(json.dumps(d))
+        _write_text_atomic(_BL_NOTIFY_PATH, json.dumps(d))
     except Exception:
         pass
 
@@ -17641,6 +17643,8 @@ def _mv_gather_finviz(tickers: list, hours: int = 36,
     try:
         with ThreadPoolExecutor(max_workers=max_workers) as ex:
             for i in range(0, len(tickers), max_workers):
+                if zeus_shutdown.stopping():      # server stopping: return what is fetched
+                    break
                 batch = tickers[i:i + max_workers]
                 # 该批会真打网络吗(决定要不要节流):不许抓 / 全命中缓存 → 不暂停
                 will_fetch = allow_fetch and any(not _is_cached(t) for t in batch)
@@ -18334,7 +18338,7 @@ async def _finviz_ai_crawl_once() -> int:
     # 1) 慢速抓全(force=True 刷新 + gather 内固定 ~1 req/s + UA 轮换)
     fv_map = await loop.run_in_executor(
         None, lambda: _mv_gather_finviz(tickers, 36, force=True, allow_fetch=True))
-    if not fv_map:
+    if not fv_map or zeus_shutdown.stopping():   # cut short by Ctrl+C: no translations, no write
         return 0
     date = datetime.date.today().isoformat()
     # 2) 收集待翻(标题 + AI 正文),复用 .tr.json 按 id 缓存
@@ -19302,10 +19306,7 @@ if __name__ == "__main__":
     if _hc.in_container():
         print("Docker: open the port you published with -p (-p 127.0.0.1:8765:8765 → http://localhost:8765) · "
               "在 Docker 里：打开启动时用 -p 发布的端口")
-    # reload=False in production: this runs under launchd with a persistent
-    # DXLink WebSocket + ~10 background asyncio tasks and no shutdown handler,
-    # so uvicorn's hot-reload (watch files → kill/respawn worker) can leave a
-    # worker stuck during shutdown holding the port (orphan → service hangs).
-    # Deploy by an explicit restart instead:
-    #   (restart the process to deploy)
-    uvicorn.run("optionstrat_server:app", host=_host, port=_port, log_level="warning", reload=False)
+    # serve() is uvicorn.run() without hot reload (a reload can leave a worker stuck in
+    # shutdown holding the port; restart the process to deploy) that ends the process
+    # within seconds of Ctrl+C or SIGTERM, even while long background jobs run.
+    zeus_shutdown.serve("optionstrat_server:app", host=_host, port=_port, log_level="warning")

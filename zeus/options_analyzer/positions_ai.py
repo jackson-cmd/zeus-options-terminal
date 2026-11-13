@@ -260,7 +260,9 @@ def analyze_positions(strategies: list) -> dict:
 
     try:
         cache_f = CACHE_DIR / f"{today}.json"
-        cache_f.write_text(json.dumps(out, ensure_ascii=False))
+        tmp = cache_f.with_name(cache_f.name + ".tmp")   # renamed into place: never half a file
+        tmp.write_text(json.dumps(out, ensure_ascii=False))
+        os.replace(tmp, cache_f)
     except Exception:
         pass
 
