@@ -4,6 +4,12 @@
 
 What changed in each version of ZEUS Terminal. New features carry the <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> badge. Numbers in parentheses are the pull requests.
 
+## 0.4.2 — 2026-11-12
+
+### Fixed
+
+- Top bar: about 2 s after a page loads, the 🌐 button fills in the translation engine’s name. From then on the last tab, 🧪 Paper Trade, could still be cut off: in English at about 1100 px, and in bilingual mode up to about 1240 px, where the name also got an English gloss. The name now shows only on windows wider than 1240 px; the 🌐 tooltip and pop-up always show it. Bilingual mode no longer glosses it. All six tabs fit from 1024 px up in every language, measured after the name has loaded. (#36)
+
 ## 0.4.1 — 2026-11-12
 
 ### New features

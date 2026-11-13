@@ -17,6 +17,7 @@ SERVER = (ROOT / "options_analyzer" / "optionstrat_server.py").read_text(encodin
 ANALYZER = (ROOT / "options_analyzer" / "optionstrat_analyzer.py").read_text(encoding="utf-8")
 HEATMAP = (ROOT / "heatmap" / "heatmap.py").read_text(encoding="utf-8")
 ZEUS_JS = (ROOT / "options_analyzer" / "static" / "zeus.js").read_text(encoding="utf-8")
+ZEUS_CSS_TEXT = (ROOT / "options_analyzer" / "static" / "zeus.css").read_text(encoding="utf-8")
 EN = json.loads((ROOT / "options_analyzer" / "static" / "i18n_en.json").read_text(encoding="utf-8"))
 
 
@@ -169,8 +170,12 @@ def test_mode_moved_from_the_top_bar_to_settings():
 
 def test_tabs_tighten_before_they_would_scroll():
     assert re.search(r"@media \(max-width: 1240px\) \{\s*\.top-nav-tab \{ padding: 0 9px; \}", SERVER)
+    wide = SERVER.split("@media (max-width: 1240px) {", 1)[1].split("\n}", 1)[0]
     narrow = SERVER.split("@media (max-width: 1100px) {", 1)[1].split("\n}", 1)[0]
-    assert "#trStatusCur { display: none; }" in narrow and ".top-nav-tab { padding: 0 8px; }" in narrow
+    # the engine name beside 🌐 arrives about 2 s after load and needs room the tabs don't have
+    assert "#trStatusCur { display: none; }" in wide
+    assert ".top-nav-brand > span { display: none; }" in narrow and ".top-nav-tab { padding: 0 8px; }" in narrow
+    assert "html.zs-lang-bi #trStatusBtn[data-zs-en]::after { content: none; }" in ZEUS_CSS_TEXT
 
 
 def test_market_brief_header_and_subtabs_move_into_the_picker():

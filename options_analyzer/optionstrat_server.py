@@ -1980,9 +1980,12 @@ async def index():
   .top-nav-tab { padding: 0 9px; }
   html.zs-lang-bi .top-nav-tab { padding: 0 6px; }   /* bilingual labels carry an English word too */
   .top-nav-right { margin-left: 6px; gap: 6px; }
+  /* the translation engine's name beside 🌐 (filled in about 2 s after load) needs room the tabs
+     don't have here; its tooltip and pop-up still name it */
+  #trStatusCur { display: none; }
 }
 @media (max-width: 1100px) {
-  .top-nav-brand > span, #trStatusCur { display: none; }
+  .top-nav-brand > span { display: none; }
   .top-nav-tab { padding: 0 8px; }
   html.zs-lang-bi .top-nav-tab { padding: 0 6px; }
 }
