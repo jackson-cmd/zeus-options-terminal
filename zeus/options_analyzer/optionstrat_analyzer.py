@@ -11,6 +11,7 @@ import sys
 import os
 import json
 import datetime
+import math
 import time
 import webbrowser
 from pathlib import Path
@@ -132,16 +133,12 @@ def main():
 
     # Estimate IV from yfinance if missing
     if HAS_YF:
-        import math
-        import numpy as np
         for und in underlyings:
             if und in metrics_data and metrics_data[und].get("iv", 0) > 0:
                 continue
             try:
-                hist = yf.download(und, period="60d", progress=False)
-                if not hist.empty:
-                    returns = hist["Close"].pct_change().dropna()
-                    iv_est = float(returns.std() * math.sqrt(252))
+                iv_est = historical_vol(yf.download(und, period="60d", progress=False))
+                if iv_est is not None:
                     metrics_data[und] = metrics_data.get(und, {})
                     metrics_data[und]["iv"] = iv_est
                     metrics_data[und].setdefault("earnings_date", "")
@@ -195,6 +192,25 @@ def _safe_float(d, *keys):
             except (ValueError, TypeError):
                 pass
     return 0.0
+
+
+def historical_vol(hist):
+    """Annualized volatility of the daily closes in a one-ticker yfinance download, as a
+    fraction (0.32 = 32 %), or None when there are fewer than two daily returns.
+
+    yfinance 0.2.48 and later return (Price, Ticker) columns even for a single ticker, so
+    hist["Close"] is a frame with one column and its std() a one-value Series; pandas 3
+    refuses float() of that Series (pandas 2 only warned), so the column is taken out first."""
+    if hist is None or getattr(hist, "empty", True) or "Close" not in hist:
+        return None
+    close = hist["Close"]
+    if getattr(close, "ndim", 1) == 2:
+        close = close.iloc[:, 0]
+    returns = close.dropna().pct_change().dropna()
+    if len(returns) < 2:
+        return None
+    vol = float(returns.std()) * math.sqrt(252)
+    return vol if math.isfinite(vol) else None
 
 
 def build_opening_order_map(transactions, positions):

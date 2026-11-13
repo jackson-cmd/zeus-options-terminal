@@ -61,6 +61,7 @@ from optionstrat_analyzer import (
     build_opening_order_map,
     enrich_with_mid_prices,
     _safe_float,
+    historical_vol,
     _parse_expiration,
     _parse_strike,
     _parse_option_type,
@@ -485,6 +486,26 @@ def fetch_recent_transactions(client, acct_num, start_date):
     return results
 
 
+def _fill_iv_from_history(underlyings, metrics_data):
+    """Underlyings the broker gave no IV for (TastyTrade market metrics, or Cboe / Yahoo
+    option chains in manual mode) get the annualized volatility of their last 60 days of
+    closes from Yahoo Finance instead."""
+    if not HAS_YF:
+        return
+    for und in underlyings:
+        if und in metrics_data and metrics_data[und].get("iv", 0) > 0:
+            continue
+        try:
+            iv_est = historical_vol(zeus_yf.download(und, period="60d", progress=False))
+        except Exception:
+            continue
+        if iv_est is not None:
+            metrics_data[und] = metrics_data.get(und, {})
+            metrics_data[und]["iv"] = iv_est
+            metrics_data[und].setdefault("earnings_date", "")
+            metrics_data[und].setdefault("earnings_time", "")
+
+
 def fetch_positions_and_strategies():
     """Fetch all data from TastyTrade and build strategies."""
     print("Connecting to TastyTrade...")
@@ -570,23 +591,7 @@ def fetch_positions_and_strategies():
         print(f"  [WARN] Could not get market metrics: {e}")
 
     # IV from yfinance if missing
-    if HAS_YF:
-        import math
-        import numpy as np
-        for und in underlyings:
-            if und in metrics_data and metrics_data[und].get("iv", 0) > 0:
-                continue
-            try:
-                hist = zeus_yf.download(und, period="60d", progress=False)
-                if not hist.empty:
-                    returns = hist["Close"].pct_change().dropna()
-                    iv_est = float(returns.std() * math.sqrt(252))
-                    metrics_data[und] = metrics_data.get(und, {})
-                    metrics_data[und]["iv"] = iv_est
-                    metrics_data[und].setdefault("earnings_date", "")
-                    metrics_data[und].setdefault("earnings_time", "")
-            except Exception:
-                pass
+    _fill_iv_from_history(underlyings, metrics_data)
 
     # Reconstruct each leg's opening order from trade history. TT's position
     # created-at is sticky (first-ever open, not the current lot), so grouping
@@ -15473,7 +15478,10 @@ def _compute_corr_vs_spy_batch(tickers: list, lookback_days: int = 60) -> dict:
                 if len(fetch_tickers) == 1:
                     spy_only = zeus_yf.download("SPY", period=period, progress=False, auto_adjust=False)
                     if spy_only is not None and not spy_only.empty and "Close" in spy_only.columns:
-                        cols["SPY"] = spy_only["Close"]
+                        ser = spy_only["Close"]
+                        if hasattr(ser, "columns"):  # (Price, Ticker) columns
+                            ser = ser.iloc[:, 0]
+                        cols["SPY"] = ser
                 else:
                     hist_all = zeus_yf.download(fetch_tickers, period=period, group_by="ticker",
                                                 progress=False, auto_adjust=False, threads=True)
