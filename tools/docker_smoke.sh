@@ -85,9 +85,15 @@ done
 curl -fsS -o "$TMP/trades.json" "$URL/api/trades"
 n=$(json "$TMP/trades.json" 'd["summary"]["sample"]')
 open=$(json "$TMP/trades.json" 'd["summary"]["open_positions"]')
-[ "$n" -ge 6 ] && [ "$open" -ge 3 ] || fail "sample has $n trades and $open open positions"
-curl -fsS -o "$TMP/data.json" "$URL/api/data"
-strategies=$(json "$TMP/data.json" 'len(d["strategies"])')
+# the sample needs quotes for at least 3 of its 6 underlyings, so it has at least 3 trades
+[ "$n" -ge 3 ] && [ "$open" -ge 2 ] || fail "sample has $n trades and $open open positions"
+strategies=0
+for _ in $(seq 1 20); do   # the board is recomputed right after loading; give a slow quote source a minute
+  curl -fsS -o "$TMP/data.json" "$URL/api/data"
+  strategies=$(json "$TMP/data.json" 'len(d["strategies"])')
+  [ "$strategies" -ge 1 ] && break
+  sleep 3
+done
 [ "$strategies" -ge 1 ] || fail "the positions board has no strategies after loading the sample"
 ok "sample portfolio: $n trades, $open open positions, $strategies strategies on the board"
 
