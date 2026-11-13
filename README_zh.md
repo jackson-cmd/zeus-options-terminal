@@ -1,30 +1,54 @@
 <div align="center">
 
-# ⚡ ZEUS Terminal · 宙斯期权终端
-
-### 本地部署的全方位期权交易终端 · The self-hosted, all-in-one options trading terminal
-
-*驾驭希腊值。· Rule the Greeks.*
-
-**实时持仓与希腊值 · 盈亏与风险 · 出场纪律 · 期权和股票都能下的模拟盘 · 四路新闻台（Benzinga · Finviz · 华尔街日报 · MarketWatch）· 选股 · 财报与 SEC 文件 · 不说假话的交易日记 —— 接 tastytrade、Alpaca、Public，或者任何券商导出的一份 CSV 就能用，完全跑在你自己的电脑上，界面支持 中文 / 双语 / English。**
+<img src="docs/assets/banner.svg" alt="ZEUS Terminal · 宙斯期权终端：本地部署的美股期权交易终端" width="100%">
 
 **做期权要开十个网页才看得全的东西，一个终端全搞定。**
 
-<sub>如果你在找：本地部署的美股期权交易终端、带实时希腊值的期权盈亏计算器、tastytrade / Alpaca / Public 持仓管理、期权交易日记、期权价差和股票的模拟盘、带支撑阻力的美股选股器、中英双语美股新闻 —— 都在这一个应用里。</sub>
+实时持仓与希腊值 · 盈亏与风险 · 出场纪律 · 期权和股票都能下的模拟盘 · 四路新闻台 · 选股 · 财报与 SEC 文件 · 不说假话的交易日记。连 tastytrade、Alpaca 或 Public，或者上传任何券商导出的 CSV；完全跑在你自己的电脑上，界面支持 中文 / 双语 / English。
 
-[🌐 网站](https://jackson-cmd.github.io/zeus-options-terminal/zh/) · [English → README.md](README.md) · [新功能](#-新功能) · [全部功能](docs/FEATURES_zh.md) · [使用手册](docs/USER_GUIDE_zh.md) · [快速开始](#-快速开始) · [参与贡献](#-参与贡献) · [许可证](#-许可证禁止商业使用)
+[🌐 网站](https://jackson-cmd.github.io/zeus-options-terminal/zh/) · [English → README.md](README.md) · [🚀 快速开始](#-快速开始) · [新功能](#-新功能) · [全部功能](docs/FEATURES_zh.md) · [使用手册](docs/USER_GUIDE_zh.md) · [参与贡献](#-参与贡献)
 
-![Python](https://img.shields.io/badge/python-3.10%2B-3776ab) ![本地部署](https://img.shields.io/badge/100%25-本地部署-2ea043) ![界面语言](https://img.shields.io/badge/界面-中文%20%7C%20双语%20%7C%20English-e3b341) ![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial-b31b1b)
+[![CI](https://github.com/jackson-cmd/zeus-options-terminal/actions/workflows/ci.yml/badge.svg)](https://github.com/jackson-cmd/zeus-options-terminal/actions/workflows/ci.yml) ![Python](https://img.shields.io/badge/python-3.10%2B-3776ab) ![本地部署](https://img.shields.io/badge/100%25-本地部署-2ea043) ![界面语言](https://img.shields.io/badge/界面-中文%20%7C%20双语%20%7C%20English-e3b341) ![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial-b31b1b)
+
+<img src="docs/assets/demo_zh.gif" alt="宙斯期权终端 14 秒演示：持仓总览、策略盈亏表、风险视图、K 线图墙、新闻和交易日记" width="100%">
+
+<sub>演示里的交易是编的；报价、新闻和图表是录制当天的真实数据。</sub>
 
 </div>
+
+## 🚀 快速开始
+
+```bash
+git clone https://github.com/jackson-cmd/zeus-options-terminal
+cd zeus-options-terminal
+./start.sh          # macOS / Linux（Windows 双击 start.bat）
+```
+
+第一次运行会在本地建虚拟环境、装好依赖（需要 Python 3.10+），然后自动打开 **<http://localhost:8765>**。接着：
+
+1. 点 **载入示例组合**，用按当天报价生成的示例组合把每个页面试一遍；或者
+2. 打开 **⚙ 设置 → 券商与行情**，连 tastytrade、Alpaca 或 Public（每家都有 **测试连接** 按钮），或者上传你的交易 CSV。
+3. 新闻源、AI、邮件提醒都是可选的，也在设置页里填，不用手改任何文件。
+
+8765 端口被占用？用 `PORT=8790 ./start.sh`。各家券商的 key 去哪拿，见[连接券商](#-连接券商)。
+
+## 适合你吗？
+
+- 你做**期权**：垂直价差、铁鹰、日历、备兑、卖看跌，想在一个屏幕上看清每个持仓的盈亏、希腊值和风险。
+- 你的券商是 **tastytrade、Alpaca 或 Public**，或者能把成交导出成 CSV 的任何券商。
+- 你希望持仓和密钥**只留在自己电脑上**：不用云端账号，不用订阅，没有遥测。
+- 你看**中文或英文**的美股新闻，或者两种都看。
+- 你想要有规矩：止盈指示灯、价差没挂平仓单的提醒、开单前体检，还有一本不给你面子的交易日记。
+
+<sub>如果你在找：本地部署的美股期权交易终端、带实时希腊值的期权盈亏计算器、tastytrade / Alpaca / Public 持仓管理、期权交易日记、期权价差和股票的模拟盘、带支撑阻力的美股选股器、中英双语美股新闻 —— 都在这一个应用里。</sub>
 
 ---
 
 ## 目录
 
-- [🆕 新功能](#-新功能) · [写在前面](#写在前面) · [四种接入方式](#四种接入方式)
+- [🚀 快速开始](#-快速开始) · [适合你吗？](#适合你吗) · [🆕 新功能](#-新功能) · [写在前面](#写在前面) · [四种接入方式](#四种接入方式)
 - [🗺️ 功能全景](#️-功能全景)：[持仓](#️-持仓--指挥中心) · [纪律引擎](#-纪律引擎--真正帮你省钱的部分) · [选股](#-选股--找下一笔) · [模拟盘](#-模拟盘--先用假钱练手) · [市场判断](#-市场判断--大局观不带情绪) · [Digest](#-digest--四路新闻两种语言) · [事件](#-事件) · [交易日记](#-交易日记--照妖镜) · [三种界面语言](#-三种界面语言中文--双语--english) · [自带 AI](#-自带-ai) · [接入智能体（MCP）](#-接入你自己的-ai-智能体mcp)
-- [📸 截图一览](#-截图一览) · [🚀 快速开始](#-快速开始) · [🔑 每一项设置能解锁什么](#-每一项设置能解锁什么) · [📄 手动交易：CSV 格式](#-手动交易csv-格式)
+- [📸 截图一览](#-截图一览) · [🔌 连接券商](#-连接券商) · [🔑 每一项设置能解锁什么](#-每一项设置能解锁什么) · [📄 手动交易：CSV 格式](#-手动交易csv-格式)
 - [🔒 隐私与安全](#-隐私与安全) · [🏗️ 架构](#️-架构) · [❓ 常见问题](#-常见问题) · [🤝 参与贡献](#-参与贡献) · [📜 许可证](#-许可证禁止商业使用)
 
 ## 🆕 新功能
@@ -195,21 +219,9 @@ ZEUS Terminal（宙斯期权终端）是我给自己做的网站。前前后后�
 
 ---
 
-## 🚀 快速开始
+## 🔌 连接券商
 
-```bash
-git clone https://github.com/jackson-cmd/zeus-options-terminal
-cd zeus-options-terminal
-./start.sh          # macOS / Linux（Windows 双击 start.bat）
-```
-
-第一次运行会自动建虚拟环境、装好依赖（需要 Python 3.10+）。然后打开 **<http://localhost:8765>**，点右上角 **⚙ 设置**：
-
-1. **券商与行情** —— 粘贴 tastytrade OAuth 的 *client secret* 和 *refresh token*，**或者** Alpaca 的 key ID 和 secret，**或者** Public 的 secret key，**或者**上传你的交易 CSV。每一种都有 **测试连接** 按钮。还没准备好？在持仓页点 **载入示例组合**，先四处看看。
-2. **新闻源** —— 粘贴 Benzinga Pro 的 cookie（可选）、Finviz Elite token（可选）。
-3. **AI** —— 选一个提供方（可选）。
-
-就这样，不用手改任何文件。8765 端口被占用？用 `PORT=8790 ./start.sh` 启动，或者在设置里改端口。
+全部在浏览器里设置：**⚙ 设置 → 券商与行情**，每家券商一栏，都有 **测试连接** 按钮。持仓和行情分开选，券商没有的数据走免费源。ZEUS 只读，从不下单。
 
 ### tastytrade 凭证在哪拿
 my.tastytrade.com → **Manage → API Access → OAuth Applications** → 新建一个应用（记下 *client secret*）→ **Manage → Create Grant**（勾选全部 scope）→ 复制 *refresh token*。两样粘进设置页，点 **测试连接**。
@@ -273,11 +285,32 @@ date,symbol,asset,side,effect,qty,price,fees,option_type,strike,expiration,multi
 
 ## 🏗️ 架构
 
+东西放在哪：
+
+```
+zeus-options-terminal/
+├── zeus/                 全部代码
+│   ├── options_analyzer/   服务器（optionstrat_server.py）、持仓、体检、模拟盘、页面资源
+│   ├── heatmap/ · ta_screener/ · ai_picks/ · stock_selector/ · barchart/      选股和扫描
+│   ├── benzinga_digest/ · news_radar/ · market_brief/ · sec_filings/ …        新闻、市场判断、事件
+│   ├── trade_journal/ · journal_review/ · journal_expiry_whatif/              交易日记
+│   ├── zeus_*.py · local_broker.py    设置、券商（Alpaca、Public）、AI、新闻、MCP、邮件
+│   └── defaults/           第一次启动时放进去的股票清单
+├── docs/                 使用手册、功能清单、截图、README 用的图
+├── site/                 项目网站（GitHub Pages）
+├── tests/                离线测试：python -m pytest
+├── tools/                隐私检查钩子、干净打包脚本
+├── examples/             手动交易的 CSV 模板
+└── start.sh · start.command · start.bat · requirements.txt
+```
+
+各部分怎么连起来（下面的路径都在 `zeus/` 里）：
+
 ```
 浏览器（PWA，中文 / 双语 / English）
    │  WebSocket + REST
    ▼
-FastAPI 服务 ── zeus/options_analyzer/optionstrat_server.py   （所有代码都在 zeus/ 里）
+FastAPI 服务 ── options_analyzer/optionstrat_server.py
    ├─ 券商 ......... tastytrade REST + DXLink 推送      │  local_broker.py（手动模式，Cboe + Yahoo）
    │                                                   │  zeus_brokers.py（Alpaca · Public，只读）
    ├─ 新闻 ......... Benzinga（cookie / WS）            │  zeus_news.py（Finviz · WSJ · MarketWatch）

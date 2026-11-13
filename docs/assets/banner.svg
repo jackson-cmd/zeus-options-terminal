@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 260" width="1280" height="260" role="img" aria-label="ZEUS Terminal · 宙斯期权终端: the self-hosted options trading terminal">
+  <title>ZEUS Terminal · 宙斯期权终端</title>
+  <rect x="0" y="0" width="1280" height="260" rx="18" fill="#0d1117"/>
+  <rect x="0.5" y="0.5" width="1279" height="259" rx="18" fill="none" stroke="#30363d"/>
+  <!-- price chart motif, top right (kept clear of the text lines below) -->
+  <g stroke="#21262d" stroke-width="1">
+    <line x1="700" y1="52" x2="1240" y2="52"/><line x1="700" y1="96" x2="1240" y2="96"/><line x1="700" y1="140" x2="1240" y2="140"/>
+  </g>
+  <path d="M700 150 L740 136 L780 142 L820 118 L860 124 L900 98 L940 104 L980 78 L1020 86 L1060 62 L1100 70 L1140 46 L1180 54 L1236 30"
+        fill="none" stroke="#e3b341" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"/>
+  <path d="M700 162 L740 154 L780 158 L820 140 L860 146 L900 124 L940 128 L980 108 L1020 116 L1060 94 L1100 100 L1140 80 L1180 88 L1236 66"
+        fill="none" stroke="#58a6ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/>
+  <!-- bolt -->
+  <path d="M86 46 L52 128 L82 128 L66 204 L122 104 L90 104 L112 46 Z" fill="#e3b341"/>
+  <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', sans-serif">
+    <text x="150" y="104" font-size="62" font-weight="800" fill="#e6edf3" letter-spacing="3">ZEUS Terminal</text>
+    <text x="152" y="152" font-size="34" font-weight="700" fill="#e3b341" letter-spacing="4">宙斯期权终端</text>
+    <text x="152" y="196" font-size="22" fill="#c9d1d9">The self-hosted options trading terminal · 本地部署的全方位期权交易终端</text>
+    <text x="152" y="228" font-size="17" fill="#8b949e" letter-spacing="0.5">Positions &amp; Greeks · Risk · Paper trading · Picker · News · Journal · tastytrade · Alpaca · Public · CSV</text>
+  </g>
+</svg>

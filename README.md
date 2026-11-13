@@ -1,30 +1,54 @@
 <div align="center">
 
-# ⚡ ZEUS Terminal · 宙斯期权终端
-
-### The self-hosted, all-in-one options trading terminal · 本地部署的全方位期权交易终端
-
-*Rule the Greeks. · 驾驭希腊值。*
-
-**Live positions & Greeks · P/L and risk · exit discipline · paper trading with option and stock legs · a four-source news desk (Benzinga · Finviz · WSJ · MarketWatch) · stock picker · earnings & SEC filings · an honest trade journal — tastytrade, Alpaca or Public, or a plain CSV from any broker, running entirely on your own computer, in 中文 / 双语 / English.**
+<img src="docs/assets/banner.svg" alt="ZEUS Terminal · 宙斯期权终端: the self-hosted options trading terminal" width="100%">
 
 **Everything an options trader keeps ten browser tabs open for, in one terminal.**
 
-<sub>If you were looking for a self-hosted options trading dashboard, an options profit calculator with live Greeks, a tastytrade, Alpaca or Public portfolio tracker, an options trading journal, a paper-trading simulator for spreads, a stock screener with support and resistance, or a bilingual US stock market news desk: it is all here, in one app.</sub>
+Live positions & Greeks · P/L and risk · exit discipline · paper trading with option and stock legs · a four-source news desk · stock picker · earnings & SEC filings · an honest trade journal. Connect tastytrade, Alpaca or Public, or upload a CSV from any broker. It runs entirely on your own computer, in 中文 / 双语 / English.
 
-[🌐 Website](https://jackson-cmd.github.io/zeus-options-terminal/) · [中文说明 → README_zh.md](README_zh.md) · [What's new](#-whats-new) · [All features](docs/FEATURES.md) · [User manual](docs/USER_GUIDE.md) · [Quick start](#-quick-start) · [Contributing](#-contributing) · [License](#-license-non-commercial)
+[🌐 Website](https://jackson-cmd.github.io/zeus-options-terminal/) · [中文说明 → README_zh.md](README_zh.md) · [🚀 Quick start](#-quick-start) · [What's new](#-whats-new) · [All features](docs/FEATURES.md) · [User manual](docs/USER_GUIDE.md) · [Contributing](#-contributing)
 
-![Python](https://img.shields.io/badge/python-3.10%2B-3776ab) ![Self-hosted](https://img.shields.io/badge/self--hosted-100%25%20local-2ea043) ![Languages](https://img.shields.io/badge/UI-中文%20%7C%20双语%20%7C%20English-e3b341) ![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial-b31b1b)
+[![CI](https://github.com/jackson-cmd/zeus-options-terminal/actions/workflows/ci.yml/badge.svg)](https://github.com/jackson-cmd/zeus-options-terminal/actions/workflows/ci.yml) ![Python](https://img.shields.io/badge/python-3.10%2B-3776ab) ![Self-hosted](https://img.shields.io/badge/self--hosted-100%25%20local-2ea043) ![Languages](https://img.shields.io/badge/UI-中文%20%7C%20双语%20%7C%20English-e3b341) ![License](https://img.shields.io/badge/license-PolyForm%20Noncommercial-b31b1b)
+
+<img src="docs/assets/demo_en.gif" alt="A 14-second tour of ZEUS Terminal: the positions board, a strategy's P/L grid, the risk view, the K-line chart wall, the news digest and the trade journal" width="100%">
+
+<sub>The trades in the tour are made up; quotes, news and charts are real data from the day it was recorded.</sub>
 
 </div>
+
+## 🚀 Quick start
+
+```bash
+git clone https://github.com/jackson-cmd/zeus-options-terminal
+cd zeus-options-terminal
+./start.sh          # macOS / Linux  (Windows: double-click start.bat)
+```
+
+The first run installs everything into a local virtual environment (Python 3.10+) and opens **http://localhost:8765**. Then:
+
+1. Press **Load the sample** to try every page with a sample portfolio priced from today's quotes, or
+2. open **⚙ Settings → Broker & data** and connect tastytrade, Alpaca or Public (each has a **Test connection** button), or upload a CSV of your trades.
+3. News sources, AI and e-mail alerts are optional, in the same Settings page. Nothing is edited by hand.
+
+Port 8765 taken? Run `PORT=8790 ./start.sh`. Where each broker's keys come from: [Connect your broker](#-connect-your-broker).
+
+## Is it for you?
+
+- You trade **options**: verticals, iron condors, calendars, covered calls, short puts. You want every position's P/L, Greeks and risk on one screen.
+- Your broker is **tastytrade, Alpaca or Public**, or any broker that exports your fills as a CSV.
+- Your positions and keys should **stay on your computer**: no cloud account, no subscription, no telemetry.
+- You read market news in **English or Chinese**, or both.
+- You want rules that keep you honest: take-profit lights, an alarm for spreads without a closing order, a pre-trade checkup, and a journal that does not flatter you.
+
+<sub>If you were looking for a self-hosted options trading dashboard, an options profit calculator with live Greeks, a tastytrade, Alpaca or Public portfolio tracker, an options trading journal, a paper-trading simulator for spreads, a stock screener with support and resistance, or a bilingual US stock market news desk: it is all here, in one app.</sub>
 
 ---
 
 ## Contents
 
-- [🆕 What's new](#-whats-new) · [The story](#the-story) · [Four ways in](#four-ways-in)
+- [🚀 Quick start](#-quick-start) · [Is it for you?](#is-it-for-you) · [🆕 What's new](#-whats-new) · [The story](#the-story) · [Four ways in](#four-ways-in)
 - [🗺️ Feature tour](#️-feature-tour): [Positions](#️-positions--the-command-center) · [Discipline engine](#-discipline-engine--the-part-that-saves-money) · [Picker](#-picker--find-the-next-trade) · [Paper trade](#-paper-trade--practice-before-real-money) · [Market brief](#-market-brief--the-big-picture-without-the-drama) · [Digest](#-digest--four-wires-two-languages) · [Events](#-events) · [Trade journal](#-trade-journal--the-honest-mirror) · [Three languages](#-three-interface-languages-中文--双语--english) · [Bring your own AI](#-bring-your-own-ai) · [Your agents (MCP)](#-plug-in-your-own-agents-mcp)
-- [📸 Screenshots](#-screenshots) · [🚀 Quick start](#-quick-start) · [🔑 What each setting unlocks](#-what-each-setting-unlocks) · [📄 Manual trades: the CSV](#-manual-trades-the-csv)
+- [📸 Screenshots](#-screenshots) · [🔌 Connect your broker](#-connect-your-broker) · [🔑 What each setting unlocks](#-what-each-setting-unlocks) · [📄 Manual trades: the CSV](#-manual-trades-the-csv)
 - [🔒 Privacy & security](#-privacy--security) · [🏗️ Under the hood](#️-under-the-hood) · [❓ FAQ](#-faq) · [🤝 Contributing](#-contributing) · [📜 License](#-license-non-commercial)
 
 ## 🆕 What's new
@@ -195,21 +219,9 @@ It works the other way round too: ZEUS is an MCP server. Point Claude Code, Clau
 
 ---
 
-## 🚀 Quick start
+## 🔌 Connect your broker
 
-```bash
-git clone https://github.com/jackson-cmd/zeus-options-terminal
-cd zeus-options-terminal
-./start.sh          # macOS / Linux  (Windows: double-click start.bat)
-```
-
-The first run creates a virtual environment and installs everything (Python 3.10+). Then open **http://localhost:8765** and click **⚙ Settings**:
-
-1. **Broker & data** — paste your tastytrade OAuth *client secret* and *refresh token*, **or** your Alpaca key ID and secret, **or** your Public secret key, **or** upload your trades CSV. Each has a **Test connection** button. Not ready yet? Press **Load the sample** on the Positions page and look around first.
-2. **News sources** — paste your Benzinga Pro cookies (optional), your Finviz Elite token (optional).
-3. **AI** — pick a provider (optional).
-
-That's it. Nothing to edit by hand. Port 8765 already taken? Run `PORT=8790 ./start.sh`, or change the port in Settings.
+Everything is set in the browser, in **⚙ Settings → Broker & data**: one block per broker, each with a **Test connection** button. Positions and quotes are separate choices, and anything a broker does not carry comes from the free sources. ZEUS only reads; it never places an order.
 
 ### Where to get the tastytrade credentials
 my.tastytrade.com → **Manage → API Access → OAuth Applications** → create an application (keep the *client secret*) → **Manage → Create Grant** (all scopes) → copy the *refresh token*. Paste both into Settings and press **Test connection**.
@@ -273,11 +285,32 @@ date,symbol,asset,side,effect,qty,price,fees,option_type,strike,expiration,multi
 
 ## 🏗️ Under the hood
 
+Where things are:
+
+```
+zeus-options-terminal/
+├── zeus/                 all the code
+│   ├── options_analyzer/   the server (optionstrat_server.py), positions, checkup, paper trade, page assets
+│   ├── heatmap/ · ta_screener/ · ai_picks/ · stock_selector/ · barchart/      picker and screeners
+│   ├── benzinga_digest/ · news_radar/ · market_brief/ · sec_filings/ …        news, brief, events
+│   ├── trade_journal/ · journal_review/ · journal_expiry_whatif/              the journal
+│   ├── zeus_*.py · local_broker.py    settings, brokers (Alpaca, Public), AI, news, MCP, e-mail
+│   └── defaults/           ticker lists seeded on the first start
+├── docs/                 user manual, feature list, screenshots, README images
+├── site/                 the project website (GitHub Pages)
+├── tests/                offline tests: python -m pytest
+├── tools/                privacy pre-commit hook, clean zip export
+├── examples/             CSV template for manual trades
+└── start.sh · start.command · start.bat · requirements.txt
+```
+
+How the pieces talk to each other (paths below are inside `zeus/`):
+
 ```
 browser (PWA, 中文 / 双语 / English)
    │  WebSocket + REST
    ▼
-FastAPI server  ── zeus/options_analyzer/optionstrat_server.py   (all code lives in zeus/)
+FastAPI server  ── options_analyzer/optionstrat_server.py
    ├─ broker ........ tastytrade REST + DXLink stream   │  local_broker.py (manual mode, Cboe + Yahoo)
    │                                                   │  zeus_brokers.py (Alpaca · Public, read-only)
    ├─ news .......... Benzinga (cookies / WS)           │  zeus_news.py (Finviz · WSJ · MarketWatch)
