@@ -1807,10 +1807,10 @@ async def startup():
     # Async initial mid price fetch
     await initial_midprice_fetch()
     # Start persistent stream + periodic refresh + equity prices + mark refresh
-    _tt = _hc.has_tastytrade()            # live broker connected?
+    _tt = _hc.account_source() == "tastytrade"   # tastytrade holds the account?
     _bz = _hc.has_benzinga()              # Benzinga Pro cookies pasted?
     _ai = _hc.ai_schedules_enabled()      # an AI provider configured + schedules on?
-    print(f"[ZEUS] broker={_hc.broker_mode()}  benzinga={_bz}  ai={_hai.provider()}  "
+    print(f"[ZEUS] broker={_hc.account_source()}  quotes={_hc.market_source()}  benzinga={_bz}  ai={_hai.provider()}  "
           f"free-news={','.join(_zeus_news.enabled_sources()) or 'off'}")
     asyncio.create_task(dxlink_stream())              # idles until a tastytrade DXLink token exists
     asyncio.create_task(periodic_refresh())
@@ -1818,12 +1818,11 @@ async def startup():
     asyncio.create_task(equity_price_loop())
     asyncio.create_task(periodic_mark_refresh())
     asyncio.create_task(hourly_journal_refresh())
-    if _tt:
-        # backtest_scheduler (the signal backtest) is not started: it opens trades
-        # from SSP1 screener signals, which this repository does not ship, and it
-        # has no page, so it would only download 264 option chains every weekday.
-        # The code and /api/backtest/* stay for whoever adds a signal source and a page.
-        asyncio.create_task(missing_gtc_loop())       # reads working orders on the broker
+    # backtest_scheduler (the signal backtest) is not started: it opens trades
+    # from SSP1 screener signals, which this repository does not ship, and it
+    # has no page, so it would only download 264 option chains every weekday.
+    # The code and /api/backtest/* stay for whoever adds a signal source and a page.
+    asyncio.create_task(missing_gtc_loop())           # working orders on tastytrade / Alpaca / Public
     if _ai:
         asyncio.create_task(positions_ai_scheduler())
         asyncio.create_task(digest_ai_morning_loop())   # daily 8:30 AI news summary
@@ -1975,6 +1974,7 @@ async def index():
 .top-nav-tab.active { color: #58a6ff; border-bottom-color: #1f6feb; }
 .top-nav-right { margin-left: 10px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 .top-nav-right > * { flex-shrink: 0; white-space: nowrap; }
+#trStatusPanel { white-space: normal; }
 /* narrower windows: tighter tabs first, then the status text and the brand's subtitle go */
 @media (max-width: 1240px) {
   .top-nav-tab { padding: 0 9px; }
@@ -13115,6 +13115,33 @@ window.addEventListener('message', e => {
         """<button class="reload-btn" onclick="triggerFilePick()">⟳ Reload</button>""",
         ""
     )
+    # No journal data yet (first start, or no trades): the stand-alone load screen talks about
+    # fetch_trades.py and http.server. Inside ZEUS, say how the journal fills up and keep checking.
+    html = html.replace(
+        "showLoadError('Auto-load failed: ' + e.message + '. Use the file picker instead.');",
+        "if (window.__zsJournalEmpty) window.__zsJournalEmpty(); "
+        "else showLoadError('Auto-load failed: ' + e.message + '. Use the file picker instead.');")
+    html = html.replace("</head>", """<script>
+(function () {
+  var L = '';
+  try { L = localStorage.getItem('zeusLang') || ''; } catch (e) {}
+  if (!L) L = (navigator.language || '').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
+  function T(zh, en) { return L === 'en' ? en : (L === 'bi' ? zh + '<br><span style="opacity:.7">' + en + '</span>' : zh); }
+  window.__zsJournalEmpty = function () {
+    var ls = document.getElementById('load-screen');
+    if (!ls) return;
+    ls.setAttribute('data-no-i18n', '');
+    ls.innerHTML = '<h1>📓 ' + T('交易日记', 'Trade journal') + '</h1>'
+      + '<p style="max-width:600px;text-align:center;line-height:1.7">' + T(
+        '还没有交易记录。连接券商（⚙ 设置 → 券商与行情）、上传成交 CSV，或在持仓页载入示例组合，日记就会自动生成。第一次生成大约要半分钟，这一页会自己刷新。',
+        'No trades yet. Connect a broker (⚙ Settings → Broker &amp; data), upload a CSV of your fills, or load the sample portfolio on the Positions tab, and the journal builds itself. The first build takes about half a minute; this page refreshes by itself.')
+      + '</p><div id="load-progress" style="display:block;opacity:.7">' + T('等待数据…', 'Waiting for data…') + '</div>'
+      + '<div id="load-error"></div>';
+    clearTimeout(window.__zsJournalTimer);
+    window.__zsJournalTimer = setTimeout(function () { if (typeof tryAutoLoad === 'function') tryAutoLoad(); }, 10000);
+  };
+})();
+</script></head>""", 1)
     html = html.replace("</body>", '<link rel="stylesheet" href="/static/zeus.css">'
                         '<script src="/static/zeus.js"></script></body>')   # 中/双语/EN switch + bilingual labels inside the journal iframe
     return HTMLResponse(content=html)
@@ -13257,6 +13284,7 @@ async def exit_alert_loop():
 _MISSING_GTC_STATE: dict = {"list": [], "expiring_today": [], "at": None}
 _MISSING_GTC_FIRED: dict = {}   # (ticker|exp) -> date; ≤1 push/group/day
 _MISSING_GTC_ACCT: str | None = None
+_MISSING_GTC_SRC: str | None = None
 
 
 async def _run_missing_gtc_check() -> None:
@@ -13268,7 +13296,14 @@ async def _run_missing_gtc_check() -> None:
     Skips when strategies aren't loaded yet, market is closed, or the user has
     muted alerts globally.
     """
-    global _MISSING_GTC_ACCT
+    global _MISSING_GTC_ACCT, _MISSING_GTC_SRC
+    if _hc.account_source() != _MISSING_GTC_SRC:      # switched brokers in Settings: look the account up again
+        _MISSING_GTC_SRC, _MISSING_GTC_ACCT = _hc.account_source(), None
+    if _hc.account_source() == "manual":
+        # uploaded trades: ZEUS can't see the orders resting at your broker, so it can't say one is missing
+        _MISSING_GTC_STATE.update(list=[], expiring_today=[], at=None)
+        _MISSING_GTC_ACCT = None
+        return
     if not state.strategies or not state.client:
         return
     if _notifications_muted():

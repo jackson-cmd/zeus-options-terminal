@@ -208,7 +208,7 @@ async def fetch_daily_async(symbols: Iterable[str], lookback_days: int = 1100,
                             concurrency: int = _CONCURRENCY) -> dict:
     try:
         import zeus_config as _hc
-        if not _hc.has_tastytrade():
+        if _hc.account_source() != "tastytrade":
             return await asyncio.get_event_loop().run_in_executor(
                 None, _yf_daily, list(dict.fromkeys(symbols)), lookback_days, on_progress, on_chunk)
     except ImportError:

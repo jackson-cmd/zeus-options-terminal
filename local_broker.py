@@ -1,7 +1,17 @@
-"""Manual mode broker — ZEUS without a tastytrade account.
+"""Everything that is not tastytrade: uploaded trades, Alpaca, Public, free quotes.
 
-You upload (or type in) your own stock and option trades. This module replays
-them and answers the exact tastytrade REST calls the rest of the app makes:
+The rest of ZEUS makes tastytrade REST calls. Without a tastytrade account this
+module answers them in tastytrade's shapes. Positions, balances, fills and open
+orders come from the account source (Settings → Broker & data):
+
+    manual   your uploaded or typed-in trades, replayed FIFO (below)
+    alpaca   your Alpaca account (paper or live), through zeus_brokers
+    public   your Public account, through zeus_brokers
+
+and quotes, chains and Greeks from the market-data source: Alpaca or Public
+when one is chosen, with the free sources below for anything it lacks.
+
+With uploaded trades this module replays them and answers:
 
     /customers/me/accounts            → one account called MANUAL
     /accounts/MANUAL/positions        → open lots, FIFO, tastytrade schema
@@ -44,6 +54,51 @@ _lock = threading.RLock()
 
 class LocalModeError(RuntimeError):
     """Raised for calls that only a real broker can serve (e.g. streaming)."""
+
+
+def _account_broker():
+    """The Alpaca / Public connector when it holds the account, else None (uploaded trades)."""
+    if hc.account_source() not in ("alpaca", "public"):
+        return None
+    try:
+        import zeus_brokers
+        return zeus_brokers.account()
+    except Exception:
+        return None
+
+
+def _market_broker():
+    """The Alpaca / Public connector when it serves quotes, else None (free sources).
+    After a rate-limit answer (429) the broker rests for a minute and the free sources answer."""
+    src = hc.market_source()
+    if src not in ("alpaca", "public"):
+        return None
+    last = _broker_errors.get(src)
+    if last and " 429" in last[1] and time.time() - last[0] < 60:
+        return None
+    try:
+        import zeus_brokers
+        return zeus_brokers.market()
+    except Exception:
+        return None
+
+
+_broker_errors: dict = {}
+
+
+def _broker_failed(b, e: Exception) -> None:
+    """Remember the last error per broker (Settings shows it) and carry on with the free sources."""
+    _broker_errors[getattr(b, "name", "?")] = (time.time(), f"{type(e).__name__}: {e}"[:300])
+
+
+def broker_errors() -> dict:
+    now = time.time()
+    return {k: v[1] for k, v in _broker_errors.items() if now - v[0] < 900}
+
+
+def account_label() -> str:
+    b = _account_broker()
+    return b.account_label if b else ACCOUNT
 
 
 # ---------------------------------------------------------------------------
@@ -389,15 +444,33 @@ def _inst_key(t: dict) -> str:
 def _iso_tt(local_iso: str) -> str:
     """'2026-03-03T11:02:00' (US/Eastern wall clock) → tastytrade style UTC string."""
     dt = datetime.fromisoformat(local_iso)
-    utc = dt + timedelta(hours=4)  # EDT approximation is enough for ordering/grouping
+    try:
+        from zoneinfo import ZoneInfo
+        utc = dt.replace(tzinfo=ZoneInfo("America/New_York")).astimezone(timezone.utc).replace(tzinfo=None)
+    except Exception:                  # no time-zone database (some Windows installs): EDT is close enough
+        utc = dt + timedelta(hours=4)
     return utc.strftime("%Y-%m-%dT%H:%M:%S.000+00:00")
 
 
 def replay(today: date | None = None) -> dict:
-    """→ {'transactions': [...], 'positions': {key: info}, 'cash_flow': float}"""
-    trades = load_trades()
+    """→ {'transactions': [...], 'positions': {key: info}, 'cash': float, …} for the account source:
+    uploaded trades, or the fills of the Alpaca / Public account."""
     today = today or date.today()
-    key = (trades_path().stat().st_mtime if trades_path().exists() else 0, today.isoformat())
+    b = _account_broker()
+    if b is not None:
+        try:
+            trades = b.trades()
+        except Exception as e:
+            _broker_failed(b, e)
+            trades = []
+        key = (b.name, len(trades), trades[-1]["id"] if trades else "", today.isoformat())
+        return replay_trades(trades, key, today, label=b.account_label)
+    key = ("manual", trades_path().stat().st_mtime if trades_path().exists() else 0, today.isoformat())
+    return replay_trades(load_trades(), key, today)
+
+
+def replay_trades(trades: list[dict], key, today: date | None = None, label: str = ACCOUNT) -> dict:
+    today = today or date.today()
     with _lock:
         if _state_cache["key"] == key and _state_cache["value"] is not None:
             return _state_cache["value"]
@@ -450,7 +523,7 @@ def replay(today: date | None = None) -> dict:
             for lot in lots[k]:
                 realized += (intrinsic - lot[1]) * lot[0] * mult
             lots[k].clear()
-            txns.append(_txn(txn_id, k, meta[k], "Receive Deliver", "Expiration",
+            txns.append(_txn(label, txn_id, k, meta[k], "Receive Deliver", "Expiration",
                              "Sell to Close" if q > 0 else "Buy to Close", abs(q), intrinsic, value,
                              "Credit" if signed_cash >= 0 else "Debit", 0.0, when, None,
                              f"Expired {t['symbol']} {t['expiration']} {t['strike']}{t['option_type']} "
@@ -486,7 +559,7 @@ def replay(today: date | None = None) -> dict:
             else:
                 lots[k].append([remaining, t["price"], t["date"], oid])
         action = ("Buy" if signed > 0 else "Sell") + (" to Open" if eff == "open" else " to Close")
-        txns.append(_txn(txn_id, k, meta[k], "Trade", action, action, t["qty"], t["price"],
+        txns.append(_txn(label, txn_id, k, meta[k], "Trade", action, action, t["qty"], t["price"],
                          t["qty"] * t["price"] * mult, "Debit" if signed > 0 else "Credit", t["fees"],
                          t["date"], oid, t.get("note") or ""))
         txn_id += 1
@@ -519,11 +592,11 @@ def replay(today: date | None = None) -> dict:
     return value
 
 
-def _txn(tid, key, meta, ttype, subtype, action, qty, price, value, effect, fees, when, oid, desc):
+def _txn(label, tid, key, meta, ttype, subtype, action, qty, price, value, effect, fees, when, oid, desc):
     is_opt = meta["asset"] == "option"
     net = value - fees if effect == "Credit" else value + fees
     return {
-        "id": tid, "account-number": ACCOUNT, "symbol": key,
+        "id": tid, "account-number": label, "symbol": key,
         "instrument-type": "Equity Option" if is_opt else "Equity",
         "underlying-symbol": meta["symbol"], "transaction-type": ttype, "transaction-sub-type": subtype,
         "action": action, "description": desc, "quantity": f"{qty:.4f}", "price": f"{price:.4f}",
@@ -571,7 +644,36 @@ def _ysym(sym: str) -> str:
     return _INDEX_MAP.get(s, s.replace("/", "-").replace(".", "-") if not s.startswith("^") else s)
 
 
+_INDEXES = {"VIX", "SPX", "NDX", "RUT", "DJX", "VIX9D", "VVIX", "TNX", "XSP", "OEX", "XEO"}
+
+
+def _is_index(sym: str) -> bool:
+    s = sym.upper()
+    return s.startswith(("^", "$")) or s in _INDEXES
+
+
+def _broker_equities(symbols: list[str]) -> dict:
+    """Stock quotes from Alpaca / Public when that is the market-data source ({} otherwise)."""
+    b = _market_broker()
+    syms = [s for s in symbols if s and not _is_index(s)]
+    if b is None or not syms:
+        return {}
+    try:
+        got = b.stock_snapshots(syms) if b.name == "alpaca" else b.quotes(syms)
+    except Exception as e:
+        _broker_failed(b, e)
+        return {}
+    return {k: v for k, v in got.items() if v and v.get("last")}
+
+
 def equity_quote(sym: str) -> dict:
+    q = _broker_equities([sym.upper()]).get(sym.upper())
+    if q:
+        return q
+    return _free_equity_quote(sym)
+
+
+def _free_equity_quote(sym: str) -> dict:
     def fetch():
         try:
             fi = _yf().Ticker(_ysym(sym)).fast_info
@@ -603,7 +705,8 @@ def equity_quotes_batch(symbols: list[str]) -> dict:
     Uses the last two daily bars: latest close (= live-ish price during the
     session) and the previous session's close."""
     syms = [s.upper() for s in dict.fromkeys(symbols) if s]
-    out: dict = {}
+    out: dict = _broker_equities(syms)
+    syms = [s for s in syms if s not in out]
     missing = []
     now = time.time()
     with _lock:
@@ -754,9 +857,20 @@ def _chain(und: str, exp: str):
     return _cached(("chain", und.upper(), exp), 60, fetch)
 
 
+def _broker_strikes(und: str) -> dict:
+    b = _market_broker()
+    if b is None or _is_index(und):
+        return {}
+    try:
+        return {e: k for e, k in b.strikes(und).items() if e >= date.today().isoformat()}
+    except Exception as e:
+        _broker_failed(b, e)
+        return {}
+
+
 def expirations(und: str) -> list[str]:
     def fetch():
-        ex = sorted(_cboe_strikes(und))
+        ex = sorted(_cboe_strikes(und)) or sorted(_broker_strikes(und))
         if ex:
             return ex
         try:
@@ -771,11 +885,40 @@ def _clean_iv(iv: float) -> float:
     return iv if 0.01 < iv < 5 else 0.0
 
 
+def _broker_options(occs: list[str]) -> dict:
+    """{padded OCC: quote} from Alpaca / Public when that is the market-data source ({} otherwise)."""
+    b = _market_broker()
+    if b is None or not occs:
+        return {}
+    try:
+        got = b.option_snapshots(occs) if b.name == "alpaca" else b.quotes(occs)
+    except Exception as e:
+        _broker_failed(b, e)
+        return {}
+    return {k: v for k, v in got.items() if v and (v.get("bid") or v.get("ask") or v.get("last"))}
+
+
 def option_quote(occ: str) -> dict:
     p = parse_option_symbol(occ)
     if not p:
         return {}
     out = {"bid": 0.0, "ask": 0.0, "last": 0.0, "prev_close": 0.0, "iv": 0.0, "volume": 0, "oi": 0}
+    key = occ_symbol(p["underlying"], p["expiration"], p["type"], p["strike"])
+    bq = _broker_options([key]).get(key)
+    if bq:
+        out.update(bq)
+        if not out.get("last"):
+            out["last"] = out.get("prev_close") or 0.0
+        if not out.get("prev_close") or not out.get("iv") or "delta" not in out:
+            row = _cboe_row(p)          # fill what the broker left out (prior close, IV, Greeks) from Cboe
+            if row:
+                bid, ask, last, prev, iv, vol, oi, delta, gamma, theta, vega = row
+                out["prev_close"] = out.get("prev_close") or prev
+                out["iv"] = out.get("iv") or _clean_iv(iv)
+                out["oi"] = out.get("oi") or int(oi)
+                if "delta" not in out:
+                    out.update(delta=delta, gamma=gamma, theta=theta, vega=vega)
+        return out
     row = _cboe_row(p)
     if row and (row[0] > 0 or row[1] > 0 or row[2] > 0 or row[3] > 0):
         bid, ask, last, prev, iv, vol, oi, delta, gamma, theta, vega = row
@@ -902,7 +1045,7 @@ def _metrics(sym: str) -> dict:
 
 def _nested_chain(und: str) -> dict:
     def fetch():
-        by_exp = _cboe_strikes(und)
+        by_exp = _cboe_strikes(und) or _broker_strikes(und)
         if not by_exp:                                   # Yahoo: one request per expiration
             for e in expirations(und):
                 if (date.fromisoformat(e) - date.today()).days > 400:
@@ -948,7 +1091,18 @@ def _split(params: dict | None, *names) -> list[str]:
     return [s.strip() for s in out]
 
 
+def _opened_map(st: dict) -> dict:
+    return {k: _iso_tt(p["opened"]) for k, p in (st.get("positions") or {}).items() if p.get("opened")}
+
+
 def positions_payload() -> list[dict]:
+    b = _account_broker()
+    if b is not None:
+        try:
+            opened = _opened_map(replay())
+        except Exception:
+            opened = {}
+        return b.tt_positions(opened)
     st = replay()
     out = []
     for k, p in st["positions"].items():
@@ -979,6 +1133,9 @@ def positions_payload() -> list[dict]:
 
 
 def balances_payload() -> dict:
+    b = _account_broker()
+    if b is not None:
+        return b.tt_balances()
     st = replay()
     mv = 0.0
     for k, p in st["positions"].items():
@@ -997,11 +1154,27 @@ def balances_payload() -> dict:
             "starting-cash": f"{st['starting_cash']:.2f}"}
 
 
+def _warm(equities: list[str], options: list[str]) -> None:
+    """Fetch a whole batch of quotes in as few requests as possible before answering item by item."""
+    if len(equities) > 3:
+        equity_quotes_batch(equities)
+    if options and _market_broker() is not None:
+        occs = []
+        for o in options:
+            p = parse_option_symbol(o)
+            if p:
+                occs.append(occ_symbol(p["underlying"], p["expiration"], p["type"], p["strike"]))
+        _broker_options(occs)
+
+
 def handle_get(path: str, params: dict | None = None) -> dict:
     path = path.split("?", 1)[0].rstrip("/")
     if path == "/customers/me/accounts":
-        return {"data": {"items": [{"account": {"account-number": ACCOUNT, "nickname": "Manual",
-                                                "account-type-name": "Individual", "margin-or-cash": "Cash"},
+        b = _account_broker()
+        nick = (b.label + (" (paper)" if getattr(b, "paper", False) else "")) if b else "Manual"
+        return {"data": {"items": [{"account": {"account-number": account_label(), "nickname": nick,
+                                                "account-type-name": "Individual",
+                                                "margin-or-cash": "Margin" if b else "Cash"},
                                     "authority-level": "owner"}]}}
     m = re.match(r"^/accounts/[^/]+/(positions|balances|transactions|orders/live|orders)$", path)
     if m:
@@ -1011,7 +1184,14 @@ def handle_get(path: str, params: dict | None = None) -> dict:
         if what == "balances":
             return {"data": balances_payload()}
         if what.startswith("orders"):
-            return {"data": {"items": []}, "pagination": {"total-items": 0}}
+            b = _account_broker()
+            items = []
+            if b is not None:
+                try:
+                    items = b.tt_orders()
+                except Exception as e:
+                    _broker_failed(b, e)
+            return {"data": {"items": items}, "pagination": {"total-items": len(items)}}
         txns = replay()["transactions"]
         sd = (params or {}).get("start-date")
         ed = (params or {}).get("end-date")
@@ -1028,12 +1208,14 @@ def handle_get(path: str, params: dict | None = None) -> dict:
                                                         "page-offset": page}}
     if path == "/market-data/by-type":
         eqs = _split(params, "equity", "index")
-        if len(eqs) > 3:
-            equity_quotes_batch(eqs)          # warm the cache in one request
-        syms = eqs + _split(params, "equity-option", "cryptocurrency", "future", "future-option")
+        opts = _split(params, "equity-option")
+        _warm(eqs, opts)
+        syms = eqs + opts + _split(params, "cryptocurrency", "future", "future-option")
         return {"data": {"items": [_quote_item(s) for s in syms]}}
     if path == "/market-data":
         syms = _split(params, "symbols[]", "symbols", "symbol")
+        opts = [x for x in syms if parse_option_symbol(x) and (len(x) > 8 or x.startswith("."))]
+        _warm([x for x in syms if x not in opts], opts)
         return {"data": {"items": [_quote_item(s) for s in syms]}}
     m = re.match(r"^/market-data/([^/]+)/quotes$", path)
     if m:
@@ -1050,7 +1232,191 @@ def handle_get(path: str, params: dict | None = None) -> dict:
 
 
 def summary() -> dict:
+    b = _account_broker()
+    if b is not None:
+        out = {"source": b.name, "account": b.account_label, "paper": bool(getattr(b, "paper", False))}
+        try:
+            out["open_positions"] = len(b.tt_positions())
+            bal = b.tt_balances()
+            out["nlv"] = float(bal.get("net-liquidating-value") or 0)
+            out["cash"] = float(bal.get("cash-balance") or 0)
+        except Exception as e:
+            _broker_failed(b, e)
+            out["error"] = str(e)[:200]
+        return out
     st = replay()
-    return {"trades": len(load_trades()), "open_positions": len(st["positions"]),
+    return {"source": "manual", "trades": len(load_trades()), "sample": sample_count(), "open_positions": len(st["positions"]),
             "cash": round(st["cash"], 2), "starting_cash": round(st["starting_cash"], 2),
             "realized": round(st["realized"], 2), "orphan_closes": len(st.get("orphan_closes") or [])}
+
+
+def free_test() -> dict:
+    """Settings → test the free sources: a Yahoo stock quote and Cboe option chains (no account needed)."""
+    t0 = time.time()
+    out: dict = {"ok": False, "delay": "~15 min"}
+    q = _free_equity_quote("AAPL")
+    out["AAPL"] = q.get("last") or None
+    book = _cboe_book("AAPL")
+    out["AAPL_option_quotes"] = len(book["rows"]) if book else 0
+    out["with_greeks"] = sum(1 for r in book["rows"].values() if r[7]) if book else 0
+    spx = _cboe_book("SPX")
+    out["SPX_option_quotes"] = len(spx["rows"]) if spx else 0
+    out["ok"] = bool(out["AAPL"]) and bool(out["AAPL_option_quotes"])
+    out["ms"] = int((time.time() - t0) * 1000)
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Sample portfolio: a first look at ZEUS that is not an empty table.
+# Strikes, expirations and prices are picked from today's free Cboe quotes, so
+# P/L, Greeks and the risk views show sensible numbers. Every sample trade has
+# an id starting with "sample-" and is removed in one click.
+# ---------------------------------------------------------------------------
+SAMPLE_PREFIX = "sample-"
+SAMPLE_CASH = "50000"
+
+
+def _sample_contract(book: dict, und: str, cp: str, target: float, dte_lo: int, dte_hi: int, exp: str | None = None):
+    """(expiration ISO, strike, mid) of the listed contract nearest `target` in the DTE window, or None."""
+    today = date.today()
+    best = None
+    for (root, ymd, c, k), row in book["rows"].items():
+        if root != und or c != cp:
+            continue
+        e = _ymd(ymd)
+        if exp and e != exp:
+            continue
+        dte = (date.fromisoformat(e) - today).days
+        if not dte_lo <= dte <= dte_hi:
+            continue
+        bid, ask = row[0], row[1]
+        if bid <= 0 or ask <= 0:
+            continue
+        monthly = date.fromisoformat(e).weekday() == 4 and 15 <= date.fromisoformat(e).day <= 21
+        score = (abs(k / 1000.0 - target) / max(target, 1e-9), 0 if monthly else 1, dte)
+        if best is None or score < best[0]:
+            best = (score, e, k / 1000.0, round((bid + ask) / 2, 2))
+    return best[1:] if best else None
+
+
+def sample_trades() -> list[dict]:
+    """Build the sample portfolio from live free quotes. Raises if the quotes can't be fetched."""
+    today = date.today()
+
+    def when(days_ago: int, hhmm: str = "10:30") -> str:
+        d = today - timedelta(days=days_ago)
+        while d.weekday() >= 5:
+            d -= timedelta(days=1)
+        return f"{d.isoformat()}T{hhmm}:00"
+
+    out: list[dict] = []
+    n = [0]
+
+    def add(group: str, **kw):
+        n[0] += 1
+        t = {"id": f"{SAMPLE_PREFIX}{group}-{n[0]}", "order_id": f"{SAMPLE_PREFIX}{group}", "note": "sample",
+             "fees": 0.0, "effect": "open", **kw}
+        out.append(normalize_trade(t))
+
+    books = {}
+    for und in ("SPY", "QQQ", "AAPL", "NVDA", "MSFT", "TSLA"):
+        b = _cboe_book(und)
+        if b and b.get("spot"):
+            books[und] = b
+    if len(books) < 3:
+        raise LocalModeError("could not reach the free option quotes (Cboe) to price the sample portfolio")
+
+    # 1. stock: AAPL shares bought three weeks ago, a little below today's price
+    if "AAPL" in books:
+        spot = books["AAPL"]["spot"]
+        add("aapl-stock", date=when(21), symbol="AAPL", asset="stock", side="buy", qty=30, price=round(spot * 0.95, 2))
+    # 2. SPY bull put spread (credit), opened ten days ago for more than it is worth now
+    if "SPY" in books:
+        b, spot = books["SPY"], books["SPY"]["spot"]
+        sp = _sample_contract(b, "SPY", "P", spot * 0.95, 25, 60)
+        lp = sp and _sample_contract(b, "SPY", "P", spot * 0.93, 25, 60, exp=sp[0])
+        if sp and lp and sp[1] > lp[1]:
+            add("spy-bps", date=when(10), symbol="SPY", asset="option", option_type="P", strike=sp[1], expiration=sp[0],
+                side="sell", qty=2, price=round(sp[2] * 1.3, 2))
+            add("spy-bps", date=when(10), symbol="SPY", asset="option", option_type="P", strike=lp[1], expiration=lp[0],
+                side="buy", qty=2, price=round(max(lp[2] * 1.3, 0.05), 2))
+    # 3. NVDA bull call spread (debit), a bit underwater
+    if "NVDA" in books:
+        b, spot = books["NVDA"], books["NVDA"]["spot"]
+        lc = _sample_contract(b, "NVDA", "C", spot, 25, 70)
+        sc = lc and _sample_contract(b, "NVDA", "C", spot * 1.08, 25, 70, exp=lc[0])
+        if lc and sc and sc[1] > lc[1]:
+            add("nvda-bcs", date=when(8, "11:05"), symbol="NVDA", asset="option", option_type="C", strike=lc[1],
+                expiration=lc[0], side="buy", qty=3, price=round(lc[2] * 1.12, 2))
+            add("nvda-bcs", date=when(8, "11:05"), symbol="NVDA", asset="option", option_type="C", strike=sc[1],
+                expiration=sc[0], side="sell", qty=3, price=round(sc[2] * 1.05, 2))
+    # 4. QQQ iron condor
+    if "QQQ" in books:
+        b, spot = books["QQQ"], books["QQQ"]["spot"]
+        sp = _sample_contract(b, "QQQ", "P", spot * 0.94, 30, 60)
+        if sp:
+            e = sp[0]
+            lp = _sample_contract(b, "QQQ", "P", spot * 0.91, 30, 60, exp=e)
+            sc = _sample_contract(b, "QQQ", "C", spot * 1.06, 30, 60, exp=e)
+            lc = _sample_contract(b, "QQQ", "C", spot * 1.09, 30, 60, exp=e)
+            if lp and sc and lc and lp[1] < sp[1] < sc[1] < lc[1]:
+                for leg, side in ((sp, "sell"), (lp, "buy"), (sc, "sell"), (lc, "buy")):
+                    cp = "P" if leg in (sp, lp) else "C"
+                    add("qqq-ic", date=when(12, "14:20"), symbol="QQQ", asset="option", option_type=cp, strike=leg[1],
+                        expiration=e, side=side, qty=1, price=round(leg[2] * (1.15 if side == "sell" else 1.0), 2))
+    # 5. MSFT long call
+    if "MSFT" in books:
+        b, spot = books["MSFT"], books["MSFT"]["spot"]
+        c = _sample_contract(b, "MSFT", "C", spot, 40, 100)
+        if c:
+            add("msft-call", date=when(15), symbol="MSFT", asset="option", option_type="C", strike=c[1], expiration=c[0],
+                side="buy", qty=1, price=round(c[2] * 0.9, 2))
+    # 6. TSLA cash-secured put
+    if "TSLA" in books:
+        b, spot = books["TSLA"], books["TSLA"]["spot"]
+        p = _sample_contract(b, "TSLA", "P", spot * 0.88, 20, 50)
+        if p:
+            add("tsla-csp", date=when(6, "09:50"), symbol="TSLA", asset="option", option_type="P", strike=p[1],
+                expiration=p[0], side="sell", qty=1, price=round(p[2] * 1.25, 2))
+    # 7. a finished trade for the journal: AMD shares, bought and sold at a profit
+    amd = _free_equity_quote("AMD").get("last") or 0
+    if amd:
+        add("amd-swing", date=when(60), symbol="AMD", asset="stock", side="buy", qty=20, price=round(amd * 0.86, 2))
+        t = {"id": f"{SAMPLE_PREFIX}amd-swing-close", "order_id": f"{SAMPLE_PREFIX}amd-swing-close", "note": "sample",
+             "date": when(28, "15:30"), "symbol": "AMD", "asset": "stock", "side": "sell", "effect": "close", "qty": 20,
+             "price": round(amd * 0.95, 2), "fees": 0.0}
+        out.append(normalize_trade(t))
+    return out
+
+
+def sample_count() -> int:
+    return sum(1 for t in load_trades() if str(t.get("id", "")).startswith(SAMPLE_PREFIX))
+
+
+def load_sample() -> dict:
+    trades = sample_trades()
+    with _lock:
+        cur = [t for t in load_trades() if not str(t.get("id", "")).startswith(SAMPLE_PREFIX)]
+        save_trades(sorted(cur + trades, key=lambda t: (t.get("date", ""), t.get("id", ""))))
+    # a round starting balance, so buying power and position sizes look like a real account
+    cash_set = False
+    if str(hc.get("manual_starting_cash") or "0").strip() in ("", "0", "0.0"):
+        hc.update({"manual_starting_cash": SAMPLE_CASH})
+        cash_set = True
+        (hc.home() / "sample_cash").write_text("1", encoding="utf-8")
+    _invalidate()
+    return {"ok": True, "added": len(trades), "starting_cash_set": cash_set}
+
+
+def remove_sample() -> dict:
+    with _lock:
+        cur = load_trades()
+        keep = [t for t in cur if not str(t.get("id", "")).startswith(SAMPLE_PREFIX)]
+        save_trades(keep)
+    marker = hc.home() / "sample_cash"
+    if marker.exists():
+        if str(hc.get("manual_starting_cash") or "") == SAMPLE_CASH:
+            hc.update({"manual_starting_cash": ""})
+        marker.unlink()
+    _invalidate()
+    return {"ok": True, "removed": len(cur) - len(keep)}

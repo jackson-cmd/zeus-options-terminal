@@ -63,6 +63,14 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
 .client h3 button{padding:3px 10px;font-size:12px;flex-shrink:0}
 pre.snip{background:var(--bg);border:1px solid #21262d;border-radius:8px;padding:10px 12px;margin:6px 0 0;font:12px/1.5 ui-monospace,Menlo,monospace;white-space:pre-wrap;word-break:break-all;color:var(--text)}
 code{font:12px ui-monospace,Menlo,monospace;background:var(--bg3);border-radius:4px;padding:1px 5px;color:var(--text)}
+.sub{margin:18px 0 2px;padding:12px 0 0;border-top:1px solid var(--border)}
+.sub h3{font-size:14px;margin:0 0 4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sub h3 a{font-size:12px;font-weight:400}
+.sub p{color:var(--text2);font-size:12.5px;margin:0 0 6px}
+.sub .actions{margin-top:4px}
+.pill.cur{color:#fff;background:var(--accent);border-color:var(--accent)}
+table.cmp{font-size:12px;margin:4px 0 12px}
+table.cmp th,table.cmp td{white-space:normal;vertical-align:top}
 @media (max-width:720px){.row{grid-template-columns:1fr}header .tag{display:none}}
 </style>
 </head>
@@ -91,6 +99,14 @@ const T = {
   test: ['测试连接', 'Test connection'], testing: ['测试中…', 'Testing…'], testmail: ['发一封测试邮件', 'Send a test e-mail'],
   broker: ['券商', 'Broker'], benzinga: ['Benzinga', 'Benzinga'], ai: ['AI', 'AI'], news: ['免费新闻源', 'Free news'],
   mode_tt: ['tastytrade 实时', 'tastytrade live'], mode_manual: ['手动上传模式', 'Manual upload mode'],
+  mode_alpaca: ['Alpaca', 'Alpaca'], mode_public: ['Public 实盘', 'Public live'], paper: ['模拟盘', 'paper'], live: ['实盘', 'live'],
+  quotes: ['行情', 'Quotes'], q_tt: ['tastytrade 实时推送', 'tastytrade streaming'],
+  q_alpaca: ['Alpaca · 股票 IEX 实时 · 期权参考价', 'Alpaca · IEX stocks live · indicative options'],
+  q_public: ['Public 实时', 'Public real time'], q_free: ['免费 · Cboe + Yahoo · 约延迟 15 分钟', 'Free · Cboe + Yahoo · ~15 min delayed'],
+  fallback: ['选了 {x} 但还没填 key，暂时用', '{x} is selected but its keys are missing, so ZEUS uses'],
+  in_use: ['正在使用', 'in use'], get_keys: ['去申请', 'get keys'],
+  testfree: ['测试免费行情', 'Test free quotes'],
+  not_manual: ['现在持仓来自 {x}，下面上传的交易只在「持仓来源」改成 manual 后才用。', 'Positions now come from {x}. Trades uploaded below are used only when "Positions come from" is set to manual.'],
   connected: ['已连接', 'connected'], notconnected: ['未连接', 'not connected'], off: ['关闭', 'off'],
   restart: ['监听地址 / 端口改动需要重启服务后生效。', 'Restart the server for host/port changes to apply.'],
   trades_title: ['手动交易(免费模式)', 'Manual trades (free mode)'],
@@ -160,21 +176,35 @@ function applyStatic() {
   $('#langBtn').value = LANG;
 }
 function load() {
-  return api('/api/settings').then(v => { VIEW = v; render(); });
+  return api('/api/settings').then(v => {
+    VIEW = v; render();
+    // /settings?tab=broker#sub-alpaca or #tradesSec: open at that block
+    const id = decodeURIComponent((location.hash || '').slice(1));
+    const el = id && document.getElementById(id);
+    if (el) setTimeout(() => el.scrollIntoView({ block: 'start' }), 50);
+  });
 }
 function card(k, v, cls) { return '<div class="card"><div class="k">' + esc(k) + '</div><div class="v ' + (cls || '') + '">' + v + '</div></div>'; }
 function renderCards() {
   const s = VIEW.status || {};
   const ai = s.ai || {};
   let h = '';
-  h += card(t('broker'), s.broker_mode === 'tastytrade' ? '● ' + t('mode_tt') : '◐ ' + t('mode_manual') + '<span id="cardTrades" style="display:block;font-size:12px;font-weight:500;opacity:.8"></span>', s.broker_mode === 'tastytrade' ? 'ok' : 'warn');
+  const bm = s.broker_mode || 'manual';
+  let bv = bm === 'tastytrade' ? '● ' + t('mode_tt') : bm === 'alpaca' ? '● ' + t('mode_alpaca') + ' · ' + t(s.alpaca_paper ? 'paper' : 'live')
+    : bm === 'public' ? '● ' + t('mode_public') : '◐ ' + t('mode_manual') + '<span id="cardTrades" style="display:block;font-size:12px;font-weight:500;opacity:.8"></span>';
+  if (s.broker_fallback) bv += '<span style="display:block;font-size:11.5px;font-weight:500" class="warn">' + esc(t('fallback').replace('{x}', s.broker_fallback)) + ' ' + esc(t('mode_manual')) + '</span>';
+  h += card(t('broker'), bv, bm === 'manual' ? 'warn' : 'ok');
+  const ms = s.market_source || 'free';
+  let qv = (ms === 'free' ? '◐ ' : '● ') + t({ tastytrade: 'q_tt', alpaca: 'q_alpaca', public: 'q_public' }[ms] || 'q_free');
+  if (s.market_fallback) qv += '<span style="display:block;font-size:11.5px;font-weight:500" class="warn">' + esc(t('fallback').replace('{x}', s.market_fallback)) + ' ' + esc(t('q_free')) + '</span>';
+  h += card(t('quotes'), qv, ms === 'free' ? '' : 'ok');
   h += card(t('benzinga'), s.benzinga ? '● ' + t('connected') : '○ ' + t('notconnected'), s.benzinga ? 'ok' : '');
   h += card(t('ai'), ai.provider && ai.provider !== 'off' ? '● ' + esc(ai.provider) + ' · ' + esc(ai.fast || '') : '○ ' + t('off'), ai.provider && ai.provider !== 'off' ? 'ok' : '');
   h += card(t('news'), 'Finviz' + (s.finviz_elite ? ' Elite' : '') + ' · WSJ · MarketWatch', 'ok');
   h += card(t('agents_card'), s.mcp ? '● MCP /mcp' + (s.mcp_paper_trades ? ' · ' + t('paper_on') : '') : '○ ' + t('off'), s.mcp ? 'ok' : '');
   $('#cards').innerHTML = h;
   // the number of manual trades (shown here since the top bar no longer carries a mode badge)
-  if (s.broker_mode !== 'tastytrade') api('/api/zeus/status').then(st => {
+  if (s.broker_mode === 'manual') api('/api/zeus/status').then(st => {
     const n = st && st.manual && st.manual.trades, el = $('#cardTrades');
     if (el && n) el.textContent = n + ' ' + t('s_trades');
   }).catch(() => {});
@@ -198,7 +228,9 @@ function field(key, s) {
   } else {
     const enums = { language: ['auto', 'zh', 'bi', 'en'], ai_provider: ['auto', 'claude_cli', 'anthropic', 'openai', 'off'],
       ai_language: ['auto', 'zh', 'en'], news_translate: ['google', 'bing', 'ai', 'off'], desktop_notifications: ['on', 'off'],
-      ai_schedules: ['on', 'off'], finviz_ai_crawl: ['on', 'off'], mcp_server: ['on', 'off'], mcp_paper_trades: ['off', 'on'] };
+      ai_schedules: ['on', 'off'], finviz_ai_crawl: ['on', 'off'], mcp_server: ['on', 'off'], mcp_paper_trades: ['off', 'on'],
+      account_source: ['auto', 'tastytrade', 'alpaca', 'public', 'manual'], market_data: ['auto', 'free', 'alpaca', 'public'],
+      alpaca_paper: ['on', 'off'], alpaca_stock_feed: ['iex', 'delayed_sip', 'sip'], alpaca_options_feed: ['indicative', 'opra'] };
     if (enums[key]) {
       input = '<select data-k="' + key + '">' + enums[key].map(o => '<option' + (String(s.value) === o ? ' selected' : '') + '>' + o + '</option>').join('') + '</select>';
     } else {
@@ -207,7 +239,48 @@ function field(key, s) {
   }
   return '<div class="row"><label>' + esc(label) + labelEn + (help ? '<div class="help">' + esc(help) + '</div>' : '') + '</label><div>' + input + '</div></div>';
 }
-const TESTS = { broker: 'tastytrade', news: 'news', ai: 'ai', email: 'email', agents: 'mcp' };
+const TESTS = { news: 'news', ai: 'ai', email: 'email', agents: 'mcp' };
+// Broker & data: one block per broker, each with what it gives, where to get keys and its own test
+const SUBS = {
+  tt_client_id: { id: 'tastytrade', title: 'tastytrade', link: 'https://my.tastytrade.com', test: 'tastytrade',
+    zh: '实时持仓、DXLink 实时报价推送、交易日记自动同步。需要 tastytrade 账户。',
+    en: 'Live positions, DXLink streaming quotes, automatic journal sync. Needs a tastytrade account.' },
+  alpaca_key_id: { id: 'alpaca', title: 'Alpaca', link: 'https://alpaca.markets', test: 'alpaca',
+    zh: '免费注册，自带模拟盘（不用入金）。持仓、成交、挂单读自你的 Alpaca 账户；免费行情：股票 IEX 实时，期权参考价带希腊值和 IV。ZEUS 只读，从不下单。',
+    en: 'Free sign-up with a paper account (no deposit). Positions, fills and open orders are read from your Alpaca account; free data: IEX stocks in real time, indicative option prices with Greeks and IV. ZEUS only reads, it never places orders.' },
+  public_secret_key: { id: 'public', title: 'Public', link: 'https://public.com/api', test: 'public',
+    zh: '需要 Public 实盘账户（Public 没有模拟盘）。持仓、成交、挂单、实时报价、期权链和希腊值都从 Public 读。ZEUS 只读，从不下单。',
+    en: 'Needs a Public brokerage account (Public has no paper trading). Positions, fills, open orders, real-time quotes, option chains and Greeks are read from Public. ZEUS only reads, it never places orders.' },
+  manual_starting_cash: { id: 'manual', title: ['手动上传（免费）', 'Manual uploads (free)'], test: 'free', testLabel: 'testfree',
+    zh: '不用任何账户：在下面上传或录入你的成交，行情走免费源（Cboe 期权约延迟 15 分钟、带希腊值，Yahoo 股票）。',
+    en: 'No account at all: upload or type in your fills below; quotes come from the free sources (Cboe options about 15 min delayed with Greeks, Yahoo stocks).' },
+};
+function subHead(x) {
+  const s = (VIEW && VIEW.status) || {};
+  const cur = x.id === s.broker_mode;
+  const title = Array.isArray(x.title) ? pick(x.title[0], x.title[1]) : x.title;
+  return '<div class="sub" id="sub-' + x.id + '"><h3>' + esc(title) + (cur ? ' <span class="pill cur">' + t('in_use') + '</span>' : '')
+    + (x.link ? ' <a href="' + x.link + '" target="_blank" rel="noopener">' + t('get_keys') + ' ↗</a>' : '') + '</h3>'
+    + '<p>' + pickBlock(x.zh, x.en) + '</p>'
+    + '<div class="actions"><button data-test="' + x.test + '">' + t(x.testLabel || 'test') + '</button><span class="msg" data-msg="' + x.test + '"></span></div></div>';
+}
+const CMP = [
+  ['', ['持仓', 'Positions'], ['行情', 'Quotes'], ['要什么', 'What you need']],
+  ['tastytrade', ['实时', 'live'], ['实时推送', 'streaming'], ['tastytrade 账户', 'a tastytrade account']],
+  ['Alpaca', ['实时（模拟盘或实盘）', 'live (paper or real)'], ['股票 IEX 实时；期权参考价 + 希腊值', 'IEX stocks live; indicative options + Greeks'], ['免费注册，模拟盘不用入金', 'free sign-up; paper needs no deposit']],
+  ['Public', ['实时', 'live'], ['实时，带期权链和希腊值', 'real time, with chains and Greeks'], ['Public 实盘账户', 'a Public brokerage account']],
+  [['手动 / 免费', 'Manual / free'], ['上传 CSV 或录入', 'upload a CSV or type in'], ['Cboe 期权 + Yahoo 股票，约延迟 15 分钟', 'Cboe options + Yahoo stocks, ~15 min delayed'], ['什么都不用', 'nothing']],
+];
+function cmpTable() {
+  const cell = c => esc(Array.isArray(c) ? pick(c[0], c[1]) : c);
+  return '<table class="cmp">' + CMP.map((r, i) => '<tr>' + r.map(c => (i ? '<td>' : '<th>') + cell(c) + (i ? '</td>' : '</th>')).join('') + '</tr>').join('') + '</table>';
+}
+const TEST_KEYS = { account: ['账户', 'account'], positions: ['持仓', 'positions'], AAPL: ['AAPL', 'AAPL'],
+  SPY_expirations: ['SPY 到期日', 'SPY expirations'], SPY_option_quotes: ['SPY 期权报价', 'SPY option quotes'],
+  AAPL_option_quotes: ['AAPL 期权报价', 'AAPL option quotes'], SPX_option_quotes: ['SPX 期权报价', 'SPX option quotes'],
+  with_greeks: ['带希腊值', 'with Greeks'], stock_feed: ['股票行情', 'stock feed'], options_feed: ['期权行情', 'options feed'],
+  delay: ['延迟', 'delay'], ms: ['用时', 'took'], status: ['状态', 'status'], options_level: ['期权权限', 'options level'],
+  paper: ['模拟盘', 'paper'], accounts: ['账户数', 'accounts'] };
 const TEST_LABEL = { email: 'testmail', agents: 'testmcp' };
 function renderSection() {
   const g = (VIEW.groups || []).find(x => x[0] === ACTIVE) || VIEW.groups[0];
@@ -215,10 +288,11 @@ function renderSection() {
   let h = '<section class="on"><h2>' + esc(pick(g[2], g[1])) + '</h2>';
   if (g[0] === 'news') h += '<p class="intro">' + pickBlock('Benzinga Pro 负责实时 Digest、盘前、市场事件和信号。不填也能用:Digest 自动切到免费双语新闻源 Finviz + WSJ + MarketWatch。', 'Benzinga Pro powers the live digest, pre-market, market events and signals. Without it, the Digest runs on the free bilingual wire: Finviz + WSJ + MarketWatch.') + '</p>';
   if (g[0] === 'ai') h += '<p class="intro">' + pickBlock('自带模型。什么都不配,AI 按钮会提示去设置;其余功能不依赖 AI。', 'Bring your own model. With nothing configured every AI button simply says so; the rest of ZEUS works without AI.') + '</p>';
-  if (g[0] === 'broker') h += '<p class="intro">' + pickBlock('连接 tastytrade 得到实时持仓、实时报价推送和自动交易日记;留空则使用下方的手动上传模式。', 'Connect tastytrade for live positions, streaming quotes and automatic journal sync. Leave it empty to use manual upload mode below.') + '</p>';
+  if (g[0] === 'broker') h += '<p class="intro">' + pickBlock('持仓从哪来、行情从哪来，可以分开选。什么都不填也能用：上传你的成交，行情走免费源。',
+    'Where positions come from and where quotes come from are two separate choices. With nothing filled in ZEUS still works: upload your fills and quotes come from the free sources.') + '</p>' + cmpTable();
   if (g[0] === 'agents') h += '<p class="intro">' + tb('agents_intro') + '</p>';
   if (g[0] === 'email') h += '<p class="intro">' + pickBlock('填好并保存后，每个桌面提醒（止盈、漏挂 GTC、风险雷达、支撑阻力、AI 选股……）都会同时发一封邮件。同一条提醒 30 分钟内只发一次，每小时最多 20 封。Linux 没有桌面通知，也能靠邮件收到提醒；Windows 暂不支持。', 'Once this is filled in and saved, every desktop alert (take-profit, missing GTC, risk radar, support / resistance, AI picks…) is also sent by e-mail. The same alert goes out at most once per 30 minutes, and at most 20 alerts per hour. On Linux, which has no desktop notifications here, this is how alerts reach you; not available on Windows yet.') + '</p>';
-  h += keys.map(k => field(k, VIEW.settings[k])).join('');
+  h += keys.map(k => (g[0] === 'broker' && SUBS[k] ? subHead(SUBS[k]) : '') + field(k, VIEW.settings[k])).join('');
   h += '<div class="actions"><button class="primary" id="saveBtn">' + t('save') + '</button>';
   if (TESTS[g[0]]) h += '<button id="testBtn">' + t(TEST_LABEL[g[0]] || 'test') + '</button>';
   if (g[0] === 'news') h += '<button id="testBz">' + t('test') + ' · Benzinga</button>';
@@ -231,6 +305,7 @@ function renderSection() {
   $('#saveBtn').onclick = save;
   document.querySelectorAll('[data-clear]').forEach(b => b.onclick = () => saveValues({ [b.dataset.clear]: '' }));
   if ($('#testBtn')) $('#testBtn').onclick = () => runTest(TESTS[g[0]], $('#testBtn'));
+  document.querySelectorAll('[data-test]').forEach(b => b.onclick = () => runTest(b.dataset.test, b, document.querySelector('[data-msg="' + b.dataset.test + '"]')));
   if ($('#testBz')) $('#testBz').onclick = () => runTest('benzinga', $('#testBz'));
   if (g[0] === 'broker') bindTrades();
   if (g[0] === 'agents') loadAgents();
@@ -290,19 +365,30 @@ function saveValues(vals) {
     }).catch(e => { const m3 = $('#msg'); if (m3) m3.innerHTML = '<span class="bad">✗ ' + esc(e) + '</span>'; });
 }
 function save() { saveValues(collect()); }
-function runTest(what, btn) {
+function runTest(what, btn, msgEl) {
   const old = btn.textContent; btn.disabled = true; btn.textContent = t('testing');
+  const out = () => msgEl || $('#msg');
   api('/api/zeus/test/' + what, { method: 'POST', headers: H }).then(r => {
-    const m = $('#msg');
-    const detail = Object.entries(r).filter(([k]) => k !== 'ok').map(([k, v]) => k + ': ' + (typeof v === 'object' ? JSON.stringify(v) : v)).join(' · ');
+    const m = out();
+    const fmt = (k, v) => {
+      if (k === 'ms') return pick(TEST_KEYS.ms[0], TEST_KEYS.ms[1]) + ' ' + (v / 1000).toFixed(1) + 's';
+      if (k === 'AAPL' && typeof v === 'number') return 'AAPL $' + v.toFixed(2);
+      if (typeof v === 'boolean') v = v ? '✓' : '✗';
+      return (TEST_KEYS[k] ? pick(TEST_KEYS[k][0], TEST_KEYS[k][1]) : k) + ': ' + (typeof v === 'object' ? JSON.stringify(v) : v);
+    };
+    const detail = Object.entries(r).filter(([k, v]) => k !== 'ok' && v !== null && v !== '').map(([k, v]) => fmt(k, v)).join(' · ');
     if (m) m.innerHTML = (r.ok ? '<span class="ok">✓ OK</span> ' : '<span class="bad">✗</span> ') + esc(detail);
-  }).catch(e => { const m = $('#msg'); if (m) m.innerHTML = '<span class="bad">✗ ' + esc(e) + '</span>'; })
+  }).catch(e => { const m = out(); if (m) m.innerHTML = '<span class="bad">✗ ' + esc(e) + '</span>'; })
     .finally(() => { btn.disabled = false; btn.textContent = old; });
 }
 // ---------------------------------------------------------------- trades
 function tradesHtml() {
   const opt = (v, k) => '<option value="' + v + '">' + t(k) + '</option>';
-  return '<section class="on" id="tradesSec"><h2>' + t('trades_title') + '</h2><p class="intro">' + tb('trades_intro') + '</p>'
+  const bm = ((VIEW && VIEW.status) || {}).broker_mode || 'manual';
+  const label = { tastytrade: 'tastytrade', alpaca: 'Alpaca', public: 'Public' }[bm];
+  return '<section class="on" id="tradesSec"><h2>' + t('trades_title') + '</h2>'
+    + (label ? '<div class="note"><span class="warn">' + esc(t('not_manual').replace('{x}', label)) + '</span></div>' : '')
+    + '<p class="intro">' + tb('trades_intro') + '</p>'
     + '<div id="tradeSummary" class="cards" style="margin-bottom:10px"></div>'
     + '<div class="drop" id="drop">' + tb('drop') + '<input type="file" id="file" accept=".csv,text/csv" style="display:none"></div>'
     + '<div class="actions"><label style="display:flex;gap:6px;align-items:center;font-size:12px;color:var(--text2)"><input type="checkbox" id="replace" style="width:auto"> ' + t('replace') + '</label>'

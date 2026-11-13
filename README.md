@@ -6,7 +6,11 @@
 
 *Rule the Greeks. · 驾驭希腊值。*
 
-**Live positions & Greeks · P/L and risk · exit discipline · paper trading with option and stock legs · a four-source news desk (Benzinga · Finviz · WSJ · MarketWatch) · stock picker · earnings & SEC filings · an honest trade journal — tastytrade API or a plain CSV, running entirely on your own computer, in 中文 / 双语 / English.**
+**Live positions & Greeks · P/L and risk · exit discipline · paper trading with option and stock legs · a four-source news desk (Benzinga · Finviz · WSJ · MarketWatch) · stock picker · earnings & SEC filings · an honest trade journal — tastytrade, Alpaca or Public, or a plain CSV from any broker, running entirely on your own computer, in 中文 / 双语 / English.**
+
+**Everything an options trader keeps ten browser tabs open for, in one terminal.**
+
+<sub>If you were looking for a self-hosted options trading dashboard, an options profit calculator with live Greeks, a tastytrade, Alpaca or Public portfolio tracker, an options trading journal, a paper-trading simulator for spreads, a stock screener with support and resistance, or a bilingual US stock market news desk: it is all here, in one app.</sub>
 
 [中文说明 → README_zh.md](README_zh.md) · [What's new](#-whats-new) · [All features](docs/FEATURES.md) · [User manual](docs/USER_GUIDE.md) · [Quick start](#-quick-start) · [Contributing](#-contributing) · [License](#-license-non-commercial)
 
@@ -18,17 +22,19 @@
 
 ## Contents
 
-- [🆕 What's new](#-whats-new) · [The story](#the-story) · [Two ways to play](#two-ways-to-play)
+- [🆕 What's new](#-whats-new) · [The story](#the-story) · [Four ways in](#four-ways-in)
 - [🗺️ Feature tour](#️-feature-tour): [Positions](#️-positions--the-command-center) · [Discipline engine](#-discipline-engine--the-part-that-saves-money) · [Picker](#-picker--find-the-next-trade) · [Paper trade](#-paper-trade--practice-before-real-money) · [Market brief](#-market-brief--the-big-picture-without-the-drama) · [Digest](#-digest--four-wires-two-languages) · [Events](#-events) · [Trade journal](#-trade-journal--the-honest-mirror) · [Three languages](#-three-interface-languages-中文--双语--english) · [Bring your own AI](#-bring-your-own-ai) · [Your agents (MCP)](#-plug-in-your-own-agents-mcp)
 - [📸 Screenshots](#-screenshots) · [🚀 Quick start](#-quick-start) · [🔑 What each setting unlocks](#-what-each-setting-unlocks) · [📄 Manual trades: the CSV](#-manual-trades-the-csv)
 - [🔒 Privacy & security](#-privacy--security) · [🏗️ Under the hood](#️-under-the-hood) · [❓ FAQ](#-faq) · [🤝 Contributing](#-contributing) · [📜 License](#-license-non-commercial)
 
 ## 🆕 What's new
 
-<sub>Latest release **0.4.2** (2026-11-12). The full history is in the [changelog](CHANGELOG.md).</sub>
+<sub>Latest release **0.5.0** (2026-11-12). The full history is in the [changelog](CHANGELOG.md).</sub>
 
-| | New in 0.4.x, 0.3.x and 0.2.x |
+| | New in 0.5.0, 0.4.x, 0.3.x and 0.2.x |
 |---|---|
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🔌 Alpaca and Public**: connect an Alpaca account (free, paper trading included) or a Public account for live positions, fills, working orders and quotes with Greeks. Positions and quotes are separate choices, so you can also keep your uploaded trades and take quotes from Alpaca. ZEUS only reads; it never places an order. [Connect a broker →](docs/USER_GUIDE.md#22-connect-a-broker) |
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🧪 Sample portfolio**: on a fresh install, one click loads six positions and a closed trade priced with today's real option quotes, so you can try every page before connecting anything. One click removes it. [How to start →](docs/USER_GUIDE.md#21-choose-how-your-positions-get-in) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **❓ Help on every page**: a small ? beside the columns, scores and cards opens a plain explanation of what the item is, how it is calculated and how to use it, and the ? in the top bar lists every button and number on the page. [How it works →](docs/USER_GUIDE.md#31-help-on-every-page) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🔌 Plug in your own AI agents (MCP)**: Claude Code, Claude Desktop, GPT through Codex, Gemini CLI or an agent you build can read your positions, run the pre-trade checkup, price spreads, and read the news and your journal. If you allow it, they can also paper trade. ZEUS is a local MCP server, so no API key is needed. [Connect an agent →](docs/USER_GUIDE.md#18-ai-agents-mcp) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🟩 Heatmap**: the picker's heatmap is back, one click away from the K-line chart wall. [How to use it →](docs/USER_GUIDE.md#69-heatmap) |
@@ -66,18 +72,20 @@ I have lived inside this tool through rallies, crashes and earnings seasons, and
 
 ---
 
-## Two ways to play
+## Four ways in
 
-| | **tastytrade API** — *recommended, the smoothest* | **Free mode** — *no broker account needed* |
-|---|---|---|
-| Positions | Pulled live from your account | Upload a CSV or type trades in (stocks **and** options) |
-| Quotes | Real-time DXLink streaming, sub-second | Options from Cboe delayed quotes (free, ~15 min delayed; after the close they keep the closing bid/ask, IV and Greeks), stocks from Yahoo Finance, automatically switching to Finviz when Yahoo rate-limits |
-| Fills, expirations, assignments | Booked automatically | Replayed FIFO from your fills; expired options settle at intrinsic value |
-| Trade journal | Syncs every hour by itself | Rebuilt instantly from your uploads |
-| Buying power, live orders, missing take-profit orders | ✅ | — |
-| Everything else (picker, digest, events, journal analytics, AI…) | ✅ | ✅ |
+| | **tastytrade API** — *the smoothest* | **Alpaca** — *free, with a paper account* | **Public** | **Free mode** — *no broker account* |
+|---|---|---|---|---|
+| Positions | Pulled live from your account | Pulled live from your paper or live account | Pulled live from your account | Upload a CSV or type trades in (stocks **and** options) |
+| Quotes | Real-time DXLink streaming, sub-second | Free data: IEX stock prices in real time; options at Alpaca's indicative prices with Greeks and IV | Real-time quotes, option chains and Greeks | Options from Cboe delayed quotes (free, ~15 min delayed; after the close they keep the closing bid/ask, IV and Greeks), stocks from Yahoo Finance, automatically switching to Finviz when Yahoo rate-limits |
+| Fills, expirations, assignments | Booked automatically | Read from your fills | Read from your history | Replayed FIFO from your fills; expired options settle at intrinsic value |
+| Trade journal | Syncs every hour by itself | Rebuilt from your fills every hour | Rebuilt from your history every hour | Rebuilt instantly from your uploads |
+| Buying power, live orders, missing take-profit orders | ✅ | ✅ | ✅ | — |
+| Everything else (picker, digest, events, journal analytics, AI…) | ✅ | ✅ | ✅ | ✅ |
 
-> If you have a tastytrade account, connect it. The whole terminal was designed around that feed and it shows: streaming P/L that moves with every tick, real fills, nothing to maintain. Free mode is there so that anyone, with any broker, can still use it.
+> If you have a tastytrade account, connect it. The whole terminal was designed around that feed and it shows: streaming P/L that moves with every tick, real fills, nothing to maintain. Alpaca is the free way to get a live account feed, paper trading included, and Public works for Public customers. ZEUS only reads from them and never places an order. Free mode is there so that anyone, with any broker, can still use it. Positions and quotes are two separate choices in Settings: you can, say, keep uploading your trades and take quotes from Alpaca.
+
+> **Just looking?** On the empty Positions page press **Load the sample**: six positions and one closed trade, priced with that moment's real option quotes, so every page has something to show. One click removes it.
 
 **Benzinga is optional too.** With a Benzinga Pro login you get the live Benzinga wire, pre-market commentary, market events and real-time signals. Without it, the Digest runs on the **free bilingual wire: Finviz + WSJ + MarketWatch**.
 
@@ -197,7 +205,7 @@ cd zeus-options-terminal
 
 The first run creates a virtual environment and installs everything (Python 3.10+). Then open **http://localhost:8765** and click **⚙ Settings**:
 
-1. **Broker & trades** — paste your tastytrade OAuth *client secret* and *refresh token*, **or** upload your trades CSV.
+1. **Broker & data** — paste your tastytrade OAuth *client secret* and *refresh token*, **or** your Alpaca key ID and secret, **or** your Public secret key, **or** upload your trades CSV. Each has a **Test connection** button. Not ready yet? Press **Load the sample** on the Positions page and look around first.
 2. **News sources** — paste your Benzinga Pro cookies (optional), your Finviz Elite token (optional).
 3. **AI** — pick a provider (optional).
 
@@ -206,6 +214,9 @@ That's it. Nothing to edit by hand. Port 8765 already taken? Run `PORT=8790 ./st
 ### Where to get the tastytrade credentials
 my.tastytrade.com → **Manage → API Access → OAuth Applications** → create an application (keep the *client secret*) → **Manage → Create Grant** (all scopes) → copy the *refresh token*. Paste both into Settings and press **Test connection**.
 
+### Where to get Alpaca and Public keys
+**Alpaca:** sign up at alpaca.markets (free) → your **Paper Trading** account → **API Keys → Generate** → copy the key ID (starts with PK) and the secret. For a live account, generate them there (AK…) and set *Alpaca paper account* to *off*. **Public:** public.com → **Account → Settings → API** → generate a secret key. Step by step in the [manual](docs/USER_GUIDE.md#22-connect-a-broker).
+
 ---
 
 ## 🔑 What each setting unlocks
@@ -213,6 +224,9 @@ my.tastytrade.com → **Manage → API Access → OAuth Applications** → creat
 | Setting | Unlocks | Free? |
 |---|---|---|
 | tastytrade OAuth (client secret + refresh token) | Live positions, streaming quotes, automatic journal, buying power, working orders | free with a tastytrade account |
+| Alpaca key ID + secret | Live positions from your paper or live account, fills, working orders; free IEX stock prices and indicative option quotes with Greeks | ✅ free account and data |
+| Public secret key | Live positions, history, working orders, real-time quotes, option chains and Greeks | free with a Public account |
+| Positions come from / Quotes come from | Pick the account source and the quote source separately; anything a broker lacks comes from the free sources | ✅ |
 | Manual trades (CSV / form) | Positions, P/L, journal and analytics without any broker connection | ✅ |
 | Benzinga Pro cookies | Benzinga live digest, pre-market, market events, history | Benzinga Pro subscription |
 | Benzinga data API key | Real-time signals feed, scanner | from your Benzinga Pro session |
@@ -265,6 +279,7 @@ browser (PWA, 中文 / 双语 / English)
    ▼
 FastAPI server  ── options_analyzer/optionstrat_server.py
    ├─ broker ........ tastytrade REST + DXLink stream   │  local_broker.py (manual mode, Cboe + Yahoo)
+   │                                                   │  zeus_brokers.py (Alpaca · Public, read-only)
    ├─ news .......... Benzinga (cookies / WS)           │  zeus_news.py (Finviz · WSJ · MarketWatch)
    ├─ picker ........ heatmap/ · ta_screener/ · ai_picks/ · stock_selector/ · barchart/
    ├─ brief ......... market_brief/ · narratives/
@@ -282,11 +297,13 @@ Runtime data (candles, caches, digests) lives in `~/.zeus-terminal/runtime/`; fo
 
 ## ❓ FAQ
 
-**Do I need tastytrade?** No. Free mode covers stocks and options from any broker through a CSV. tastytrade is simply the smoothest.
+**Do I need tastytrade?** No. Alpaca (free, with a paper account) and Public connect too, and free mode covers stocks and options from any broker through a CSV. tastytrade is simply the smoothest.
+
+**Can I try it without any account?** Yes: press **Load the sample** on the Positions page. The picker, digest, events and TA screener run on free data anyway.
 
 **Do I need Benzinga?** No. The Digest runs on Finviz + WSJ + MarketWatch for free.
 
-**Does it place orders?** Not real ones. The 🧪 Paper Trade tab records simulated trades for practice; real trades happen in your broker.
+**Does it place orders?** Not real ones. It only reads from tastytrade, Alpaca and Public. The 🧪 Paper Trade tab records simulated trades for practice; real trades happen in your broker.
 
 **Does it work on Windows / Linux?** The core does. Desktop notifications are macOS only; on Linux, set up e-mail alerts instead.
 

@@ -345,7 +345,11 @@ async def t_status(a):
     out = {
         "app": f"ZEUS Terminal {hc.APP_VERSION}",
         "now_new_york": _dt.datetime.now(pf._NY).strftime("%Y-%m-%d %H:%M %a"),
-        "broker": "tastytrade (live)" if st.get("broker_mode") == "tastytrade" else "manual (uploaded trades, free quotes)",
+        "broker": {"tastytrade": "tastytrade (live)", "public": "Public (live account)",
+                   "alpaca": "Alpaca (" + ("paper" if st.get("alpaca_paper") else "live") + " account)"}.get(
+                       st.get("broker_mode"), "manual (uploaded trades)"),
+        "quotes": {"tastytrade": "tastytrade (streaming)", "alpaca": "Alpaca", "public": "Public"}.get(
+            st.get("market_source"), "free (Cboe options ~15 min delayed, Yahoo stocks)"),
         "positions_as_of": data.get("generated_at"),
         "account": {"net_liquidating_value": _r(bal.get("net_liquidating_value")),
                     "cash": _r(bal.get("cash_balance")),
