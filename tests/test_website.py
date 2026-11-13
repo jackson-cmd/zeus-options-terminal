@@ -100,6 +100,14 @@ def test_google_search_console_file_stays():
     assert f.read_text(encoding="utf-8").strip() == "google-site-verification: google3ed451f05041f5f9.html"
 
 
+def test_bing_webmaster_tag_stays():
+    """Bing Webmaster Tools re-checks this tag in the English page's head; removing it drops the
+    site's verified ownership there."""
+    assert parse("en").metas["msvalidate.01"] == "38CA98D01ECA41B71334E56072B086B7"
+    html = PAGES["en"].read_text(encoding="utf-8")
+    assert html.index('name="msvalidate.01"') < html.index("</head>")
+
+
 def test_llms_txt_lists_every_page_and_existing_docs():
     """site/llms.txt is the plain-text map that AI search tools read: every page in the sitemap is in
     it, every file it links on GitHub exists, and its docker run stays on this computer."""
