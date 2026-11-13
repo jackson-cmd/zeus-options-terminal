@@ -10,12 +10,12 @@ so a bad download must not replace a good table:
   the empty result is served for RETRY_SECONDS only. Other readers of the disk file
   (market_brief reads etf_trends.json) therefore keep the last good table as well.
 * A refresh holds the process-wide yfinance download turn (zeus_yf) from the cache
-  check to the end of its download. yfinance.download keeps the state of a call in
-  module globals, so downloads that overlap in different threads lose each other's
-  tickers or fail with "dictionary changed size during iteration"; the server
-  starts all three refreshes at the same moment on startup. A request that waited
-  finds the table the refresh before it just wrote, so concurrent requests cause
-  one download.
+  check to the end of its download, so the tables refresh one at a time (the server
+  starts all three refreshes at the same moment on startup) and a request that
+  waited finds the table the refresh before it just wrote: concurrent requests cause
+  one download. On yfinance before 1.4.0 the turn also keeps every other download
+  out, because there yfinance.download keeps the state of a call in module globals
+  and downloads that overlap in different threads lose each other's tickers.
 """
 from __future__ import annotations
 
