@@ -404,6 +404,43 @@ def test_requests_from_other_sites_and_machines_are_refused(app, client):
     assert off.status_code == 403 and "switched off" in off.json()["error"]["message"]
 
 
+def test_docker_host_is_refused_unless_the_container_opts_in(app, monkeypatch):
+    """Behind Docker's port mapping a program on the host arrives from the container's gateway.
+    MCP answers it only inside the image and only with -e ZEUS_MCP_FROM_HOST=1; the Host and
+    Origin checks still apply, and a normal install ignores the variable."""
+    body = json.dumps({"jsonrpc": "2.0", "id": 1, "method": "tools/list"})
+    ok = {"Content-Type": "application/json"}
+    gateway = TestClient(app, base_url="http://127.0.0.1", client=("172.17.0.1", 50000))
+    neighbour = TestClient(app, base_url="http://127.0.0.1", client=("172.17.0.5", 50000))
+    monkeypatch.setattr(hc, "container_gateway", lambda route_file="/proc/net/route": "172.17.0.1")
+
+    monkeypatch.setenv("ZEUS_MCP_FROM_HOST", "1")
+    monkeypatch.setattr(hc, "in_container", lambda: False)       # a normal install
+    r = gateway.post("/mcp", headers=ok, content=body)
+    assert r.status_code == 403 and r.json()["error"]["message"] == "MCP answers only programs on this computer"
+
+    monkeypatch.setattr(hc, "in_container", lambda: True)        # the image, opted in
+    assert gateway.post("/mcp", headers=ok, content=body).status_code == 200
+    assert neighbour.post("/mcp", headers=ok, content=body).status_code == 403          # another container
+    assert gateway.post("/mcp", headers={**ok, "Host": "evil.example:8765"}, content=body).status_code == 403
+    assert gateway.post("/mcp", headers={**ok, "Origin": "https://evil.example"}, content=body).status_code == 403
+    assert gateway.get("/api/zeus/mcp").json()["container"]["http"] is True
+
+    monkeypatch.delenv("ZEUS_MCP_FROM_HOST")                     # the image, default
+    r = gateway.post("/mcp", headers=ok, content=body)
+    msg = r.json()["error"]["message"]
+    assert r.status_code == 403 and "docker exec -i zeus python" in msg and "ZEUS_MCP_FROM_HOST=1" in msg
+    info = gateway.get("/api/zeus/mcp").json()["container"]
+    assert info["http"] is False and info["stdio"][:4] == ["docker", "exec", "-i", "zeus"]
+    assert info["stdio"][-1].endswith("zeus_mcp_stdio.py")
+
+
+def test_settings_info_has_no_container_part_on_a_normal_install(client, monkeypatch):
+    monkeypatch.delenv("ZEUS_CONTAINER", raising=False)
+    monkeypatch.setenv("ZEUS_MCP_FROM_HOST", "1")
+    assert client.get("/api/zeus/mcp").json()["container"] is None
+
+
 def test_status_never_leaks_paths_or_secrets(client):
     err, st = call(client, "get_status")
     text = json.dumps(st)

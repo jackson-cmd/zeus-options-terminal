@@ -2,7 +2,7 @@
 
 [English → FEATURES.md](FEATURES.md) · [使用手册](USER_GUIDE_zh.md) · [新功能](../CHANGELOG_zh.md) · [回到 README](../README_zh.md)
 
-ZEUS 的功能远不止 README 截图里那些。顶栏有 7 个页面，后台有 30 来个自动运行的任务，API 接口超过 200 个。这一页把现在能从界面里用到的功能全部列出来。欢迎提 PR，以后也可能继续加新功能（见[参与贡献](../CONTRIBUTING.md)）。标着 <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> 的是 0.2.0 到 0.4.1 版新加入的（见[更新记录](../CHANGELOG_zh.md)）；每一项怎么用，见[使用手册](USER_GUIDE_zh.md)。
+ZEUS 的功能远不止 README 截图里那些。顶栏有 7 个页面，后台有 30 来个自动运行的任务，API 接口超过 200 个。这一页把现在能从界面里用到的功能全部列出来。欢迎提 PR，以后也可能继续加新功能（见[参与贡献](../CONTRIBUTING.md)）。标着 <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> 的是 0.2.0 到 0.6.0 版新加入的（见[更新记录](../CHANGELOG_zh.md)）；每一项怎么用，见[使用手册](USER_GUIDE_zh.md)。
 
 **每项功能需要什么：**
 
@@ -200,9 +200,9 @@ ZEUS 的功能远不止 README 截图里那些。顶栏有 7 个页面，后台�
 | ✅ | 18 个工具 | 状态；持仓（ZEUS 自己算的盈亏、最大盈亏、盈亏平衡点、获利概率、希腊值、压力测试和出场建议）；任意策略的假设分析；开单前体检；价差推荐；流动性；报价和期权链；大盘概览；事件；新闻；行业轮动；交易点子；单票报告；交易日记；模拟单 | 免费（各工具背后的数据照常） |
 | ✅ | 4 个提示词 | 持仓复盘、开单前检查、早盘简报、交易日记教练：在 Claude Code 和 Gemini CLI 里是斜杠命令 | 免费 |
 | ✅ | 智能体下模拟单 | 智能体可以开仓、平仓模拟单，但要你在设置里允许 | 免费 |
-| ✅ | stdio 桥接 | `zeus/zeus_mcp_stdio.py`，给以命令方式启动工具的客户端（Claude Desktop）用；只用标准库；`--check` 检查连接 | 免费 |
+| ✅ | stdio 桥接 | `zeus/zeus_mcp_stdio.py`，给以命令方式启动工具的客户端（Claude Desktop）用；只用标准库；`--check` 检查连接。ZEUS 跑在 Docker 里时，智能体用 `docker exec` 在容器里启动它，设置页会列出这些命令 | 免费 |
 | ✅ | 新旧客户端都能连 | 当前的无状态协议（2026-07-28）和更早的握手式版本（2025-11-25 及以前） | 免费 |
-| ✅ | 只对本机开放 | 只回应本机程序；没有任何工具能下真实订单或读出已保存的密钥 | 免费 |
+| ✅ | 只对本机开放 | 只回应本机程序；没有任何工具能下真实订单或读出已保存的密钥。用 Docker 时，本机通过 HTTP 连接要加 `-e ZEUS_MCP_FROM_HOST=1` | 免费 |
 
 ## ⚙ 设置
 
@@ -259,6 +259,7 @@ ZEUS 的功能远不止 README 截图里那些。顶栏有 7 个页面，后台�
 | ✅ | 环境变量配置 | 任何设置都能写成 `ZEUS_<KEY>`；用 `ZEUS_HOME` 换设置文件夹的位置 |
 | ✅ | 测试 | `python -m pytest`（离线跑，行情是假的） |
 | ✅ | CI | 每个 PR 都会在 Linux、macOS、Windows 上跑测试（7 个任务）；`main` 只接受全部通过的 PR |
+| ✅ | Docker 镜像 <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | `ghcr.io/jackson-cmd/zeus-options-terminal`，支持 amd64 和 arm64，由 `zeus/Dockerfile` 构建：设置和数据在 `/data` 卷里，用普通用户运行，代码只读。每次发版都会先构建、启动并检查镜像（`tools/docker_smoke.sh`），再推送 `X.Y.Z`、`X.Y` 和 `latest` 三个标签（见[手册 §1.7](USER_GUIDE_zh.md#17-用-docker-运行)） |
 | ✅ | 隐私检查 | `tools/install_git_hook.sh` 会拦下数据文件、密钥和你自己的路径 |
 | ✅ | 干净打包 | `tools/export_clean_zip.sh` 只打包代码 |
 

@@ -6,7 +6,16 @@
 # then open http://localhost:8765. Keep "127.0.0.1:" in -p: ZEUS has no login, so anyone who
 # can reach the port can read your positions. Settings, trades and caches live in the /data
 # volume; the code in /app is read-only for the app's user. Manual: docs/USER_GUIDE.md §1.7.
+#
+# Build it yourself from the top of the repository (the build context), with BuildKit, which
+# reads Dockerfile.dockerignore next to this file:
+#
+#   docker build -f zeus/Dockerfile -t zeus-terminal .
 FROM python:3.12-slim
+
+LABEL org.opencontainers.image.title="ZEUS Terminal" \
+      org.opencontainers.image.source=https://github.com/jackson-cmd/zeus-options-terminal \
+      org.opencontainers.image.licenses=PolyForm-Noncommercial-1.0.0
 
 # Container-only behaviour. ZEUS_CONTAINER marks the image (Settings and the MCP endpoint show
 # the docker commands); HOST makes the server listen on every interface inside the container,

@@ -32,6 +32,18 @@ The first run installs everything into a local virtual environment (Python 3.10+
 
 Port 8765 taken? Run `PORT=8790 ./start.sh`. Where each broker's keys come from: [Connect your broker](#-connect-your-broker).
 
+### 🐳 Run with Docker
+
+No Python needed. The image is on GitHub Packages for Intel and AMD (`amd64`) and for ARM (`arm64`, such as Apple silicon and Raspberry Pi):
+
+```bash
+docker run -d --name zeus --restart unless-stopped \
+  -p 127.0.0.1:8765:8765 -v zeus-data:/data \
+  ghcr.io/jackson-cmd/zeus-options-terminal:latest
+```
+
+Then open **http://localhost:8765**. Your settings, trades and caches stay in the `zeus-data` volume. To update, run `docker pull ghcr.io/jackson-cmd/zeus-options-terminal:latest` and `docker rm -f zeus`, then the same `docker run`; nothing is lost. Keep `127.0.0.1:` in `-p`: ZEUS has no login, so its port must stay on your own computer. Your time zone, AI agents, a Compose file and what the image leaves out: [manual §1.7](docs/USER_GUIDE.md#17-run-with-docker).
+
 ## Is it for you?
 
 - You trade **options**: verticals, iron condors, calendars, covered calls, short puts. You want every position's P/L, Greeks and risk on one screen.
@@ -46,17 +58,18 @@ Port 8765 taken? Run `PORT=8790 ./start.sh`. Where each broker's keys come from:
 
 ## Contents
 
-- [🚀 Quick start](#-quick-start) · [Is it for you?](#is-it-for-you) · [🆕 What's new](#-whats-new) · [The story](#the-story) · [Four ways in](#four-ways-in)
+- [🚀 Quick start](#-quick-start) · [🐳 Run with Docker](#-run-with-docker) · [Is it for you?](#is-it-for-you) · [🆕 What's new](#-whats-new) · [The story](#the-story) · [Four ways in](#four-ways-in)
 - [🗺️ Feature tour](#️-feature-tour): [Positions](#️-positions--the-command-center) · [Discipline engine](#-discipline-engine--the-part-that-saves-money) · [Picker](#-picker--find-the-next-trade) · [Paper trade](#-paper-trade--practice-before-real-money) · [Market brief](#-market-brief--the-big-picture-without-the-drama) · [Digest](#-digest--four-wires-two-languages) · [Events](#-events) · [Trade journal](#-trade-journal--the-honest-mirror) · [Three languages](#-three-interface-languages-中文--双语--english) · [Bring your own AI](#-bring-your-own-ai) · [Your agents (MCP)](#-plug-in-your-own-agents-mcp)
 - [📸 Screenshots](#-screenshots) · [🔌 Connect your broker](#-connect-your-broker) · [🔑 What each setting unlocks](#-what-each-setting-unlocks) · [📄 Manual trades: the CSV](#-manual-trades-the-csv)
 - [🔒 Privacy & security](#-privacy--security) · [🏗️ Under the hood](#️-under-the-hood) · [❓ FAQ](#-faq) · [🤝 Contributing](#-contributing) · [📜 License](#-license-non-commercial)
 
 ## 🆕 What's new
 
-<sub>Latest release **0.5.1** (2026-11-12). The full history is in the [changelog](CHANGELOG.md).</sub>
+<sub>Latest release **0.6.0** (2026-11-12). The full history is in the [changelog](CHANGELOG.md).</sub>
 
-| | New in 0.5.0, 0.4.x, 0.3.x and 0.2.x |
+| | New in 0.6.0, 0.5.x, 0.4.x, 0.3.x and 0.2.x |
 |---|---|
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🐳 Run with Docker**: one `docker run` starts ZEUS from GitHub Packages on Intel, AMD and ARM. Your settings and trades stay in a volume, the port stays on your own computer, and AI agents connect through `docker exec`. [How to run it →](docs/USER_GUIDE.md#17-run-with-docker) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🔌 Alpaca and Public**: connect an Alpaca account (free, paper trading included) or a Public account for live positions, fills, working orders and quotes with Greeks. Positions and quotes are separate choices, so you can also keep your uploaded trades and take quotes from Alpaca. ZEUS only reads; it never places an order. [Connect a broker →](docs/USER_GUIDE.md#22-connect-a-broker) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🧪 Sample portfolio**: on a fresh install, one click loads six positions and a closed trade priced with today's real option quotes, so you can try every page before connecting anything. One click removes it. [How to start →](docs/USER_GUIDE.md#21-choose-how-your-positions-get-in) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **❓ Help on every page**: a small ? beside the columns, scores and cards opens a plain explanation of what the item is, how it is calculated and how to use it, and the ? in the top bar lists every button and number on the page. [How it works →](docs/USER_GUIDE.md#31-help-on-every-page) |
@@ -276,8 +289,9 @@ date,symbol,asset,side,effect,qty,price,fees,option_type,strike,expiration,multi
 - **The code folder holds code only.** Everything the terminal writes while running — position snapshots, the trade journal and its screenshots, news archives, caches, downloads, logs — goes to `~/.zeus-terminal/runtime/`. The runtime folders inside the code are links to that place and are ignored by git.
 - **Sharing safely.** Publish with `git push`, or build a zip with `tools/export_clean_zip.sh`; both contain code only. Do not drag the whole folder into a website or zip it by hand. `tools/install_git_hook.sh` adds a local pre-commit check that refuses links, data files, anything shaped like a key or token, and your own home path, login name or git identity.
 - Saved secrets are **write-only** from the browser: the settings API reports *set / not set* and never sends a secret back.
-- The MCP endpoint for AI agents answers only programs on this computer, and no MCP tool can place a real order or read a saved key. What an agent reads goes to that agent's model provider.
+- The MCP endpoint for AI agents answers only programs on this computer (in Docker they come in through `docker exec`), and no MCP tool can place a real order or read a saved key. What an agent reads goes to that agent's model provider.
 - The server listens on **127.0.0.1** only by default, refuses foreign `Host` headers (DNS rebinding), only accepts cross-origin calls from localhost, and write endpoints need a header that other websites cannot send.
+- **In Docker** the app runs as an ordinary user and cannot change its own code, your data stays in the `/data` volume, and the documented command publishes the port on 127.0.0.1 only. The localhost checks work exactly as they do without Docker.
 - No telemetry. The app only talks to the services you connect plus public market data (Cboe delayed quotes, Yahoo Finance, SEC EDGAR, Finviz, Dow Jones RSS).
 - Free market data is rate-limit aware: company data (sector, industry, market cap) comes from Finviz in batches of 20 tickers, stock quotes fall back to Finviz whenever Yahoo Finance throttles, and a whole option chain is one Cboe request instead of one Yahoo request per expiration.
 - **Found a security problem?** Please report it privately, as [SECURITY.md](.github/SECURITY.md) explains, not in a public issue.
@@ -296,11 +310,12 @@ zeus-options-terminal/
 │   ├── benzinga_digest/ · news_radar/ · market_brief/ · sec_filings/ …        news, brief, events
 │   ├── trade_journal/ · journal_review/ · journal_expiry_whatif/              the journal
 │   ├── zeus_*.py · local_broker.py    settings, brokers (Alpaca, Public), AI, news, MCP, e-mail
+│   ├── Dockerfile          the container image on ghcr.io (and Dockerfile.dockerignore)
 │   └── defaults/           ticker lists seeded on the first start
 ├── docs/                 user manual, feature list, screenshots, README images
 ├── site/                 the project website (GitHub Pages)
 ├── tests/                offline tests: python -m pytest
-├── tools/                privacy pre-commit hook, clean zip export
+├── tools/                privacy pre-commit hook, clean zip export, release notes, Docker image check
 ├── examples/             CSV template for manual trades
 └── start.sh · start.command · start.bat · requirements.txt
 ```
@@ -341,7 +356,9 @@ Runtime data (candles, caches, digests) lives in `~/.zeus-terminal/runtime/`; fo
 
 **Does it work on Windows / Linux?** The core does. Desktop notifications are macOS only; on Linux, set up e-mail alerts instead.
 
-**Where are my settings?** `~/.zeus-terminal/config.json`. Delete the folder to forget everything.
+**Can I run it in Docker?** Yes: [Run with Docker](#-run-with-docker). The image runs on Intel, AMD and ARM. Desktop notifications are not in it; e-mail alerts are.
+
+**Where are my settings?** `~/.zeus-terminal/config.json` (in Docker, the `zeus-data` volume). Delete the folder to forget everything.
 
 **First launch after the close and the picker shows 0 quotes?** Press **Refresh** on the picker; the last session's closing prices fill in within seconds.
 

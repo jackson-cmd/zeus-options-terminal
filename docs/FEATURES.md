@@ -2,7 +2,7 @@
 
 [中文 → FEATURES_zh.md](FEATURES_zh.md) · [User manual](USER_GUIDE.md) · [What's new](../CHANGELOG.md) · [Back to README](../README.md)
 
-ZEUS does far more than the screenshots in the README show. There are 7 pages in the top bar, about 30 jobs that run by themselves in the background, and more than 200 API endpoints. This page lists every feature you can reach from the interface today. Pull requests are welcome, and new features may be added over time ([Contributing](../CONTRIBUTING.md)). Features marked <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> arrived in versions 0.2.0 to 0.4.1 ([changelog](../CHANGELOG.md)); how to use each one is in the [user manual](USER_GUIDE.md).
+ZEUS does far more than the screenshots in the README show. There are 7 pages in the top bar, about 30 jobs that run by themselves in the background, and more than 200 API endpoints. This page lists every feature you can reach from the interface today. Pull requests are welcome, and new features may be added over time ([Contributing](../CONTRIBUTING.md)). Features marked <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> arrived in versions 0.2.0 to 0.6.0 ([changelog](../CHANGELOG.md)); how to use each one is in the [user manual](USER_GUIDE.md).
 
 **What each feature needs:**
 
@@ -200,9 +200,9 @@ ZEUS does far more than the screenshots in the README show. There are 7 pages in
 | ✅ | 18 tools | Status; positions with ZEUS's own P/L, max profit and loss, breakevens, chance of profit, Greeks, stress and exit advice; what-if analysis of any strategy; pre-trade checkup; spread suggestions; liquidity; quotes and option chains; market overview; events; news; sector rotation; trade ideas; ticker report; trade journal; paper trades | Free (each tool's data as usual) |
 | ✅ | 4 prompts | Portfolio review, pre-trade check, morning brief, journal coach: slash commands in Claude Code and Gemini CLI | Free |
 | ✅ | Paper trading by agents | Agents open and close simulated trades, only after you allow it in Settings | Free |
-| ✅ | stdio bridge | `zeus/zeus_mcp_stdio.py` for clients that launch a command (Claude Desktop); standard library only; `--check` tests the connection | Free |
+| ✅ | stdio bridge | `zeus/zeus_mcp_stdio.py` for clients that launch a command (Claude Desktop); standard library only; `--check` tests the connection. With ZEUS in Docker, agents start it inside the container with `docker exec`, and Settings shows those commands | Free |
 | ✅ | Old and new clients | The current stateless protocol (2026-07-28) and the handshake-based revisions (2025-11-25 and earlier) | Free |
-| ✅ | Local only | Answers only programs on this computer; no tool can place a real order or read a saved key | Free |
+| ✅ | Local only | Answers only programs on this computer; no tool can place a real order or read a saved key. In Docker, HTTP from this computer only with `-e ZEUS_MCP_FROM_HOST=1` | Free |
 
 ## ⚙ Settings
 
@@ -259,6 +259,7 @@ Saved secrets are write-only: the page shows *set* or *not set* and never sends 
 | ✅ | Configuration by environment | Any setting as `ZEUS_<KEY>`; move the settings folder with `ZEUS_HOME` |
 | ✅ | Tests | `python -m pytest` (offline; quotes are faked) |
 | ✅ | CI | Every pull request runs the tests on Linux, macOS and Windows (7 jobs); `main` only accepts green pull requests |
+| ✅ | Docker image <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | `ghcr.io/jackson-cmd/zeus-options-terminal` for amd64 and arm64, built from `zeus/Dockerfile`: settings and data in the `/data` volume, a non-root user, read-only code. Each release builds it, starts it and checks it (`tools/docker_smoke.sh`) before pushing `X.Y.Z`, `X.Y` and `latest` ([manual §1.7](USER_GUIDE.md#17-run-with-docker)) |
 | ✅ | Privacy hook | `tools/install_git_hook.sh` refuses data files, keys and your own paths in commits |
 | ✅ | Clean export | `tools/export_clean_zip.sh` builds a zip of the code only |
 

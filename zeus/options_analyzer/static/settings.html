@@ -308,7 +308,8 @@ function renderSection() {
   h += '<span class="msg" id="msg"></span></div>';
   if (g[0] === 'general') h += '<div class="note">' + tb('restart') + '</div>';
   if (g[0] === 'general' && (VIEW.status || {}).container) h += '<div class="note">' + tb('box_general') + '</div>';
-  h += '<div class="note">' + tb('privacy') + '</div></section>';
+  // in the Docker image the settings folder is the /data volume
+  h += '<div class="note">' + ((VIEW.status || {}).container ? tb('privacy').split('~/.zeus-terminal/').join('/data/') : tb('privacy')) + '</div></section>';
   if (g[0] === 'broker') h += tradesHtml();
   if (g[0] === 'agents') h += '<section class="on" id="agentsSec"><h2>' + t('connect') + '</h2><div id="agentsBody"><span class="msg">…</span></div></section>';
   $('#sections').innerHTML = h;

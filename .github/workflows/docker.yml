@@ -14,7 +14,8 @@ on:
     types: [published]
   workflow_dispatch:
   pull_request:
-    paths: ["Dockerfile", ".dockerignore", "requirements.txt", "tools/docker_smoke.sh", ".github/workflows/docker.yml"]
+    paths: ["zeus/Dockerfile", "zeus/Dockerfile.dockerignore", "requirements.txt", "tools/docker_smoke.sh",
+            ".github/workflows/docker.yml"]
 
 permissions:
   contents: read
@@ -71,6 +72,7 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           context: .
+          file: zeus/Dockerfile
           platforms: linux/amd64
           load: true
           tags: zeus-smoke:ci
@@ -115,6 +117,7 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           context: .
+          file: zeus/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: ${{ steps.v.outputs.push == 'true' }}
           tags: ${{ steps.meta.outputs.tags }}

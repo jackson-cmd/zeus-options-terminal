@@ -1,9 +1,12 @@
-# Only what the image needs goes into the build context (see Dockerfile): the code, the
-# requirements and the license. Docs, tests, the website and .git stay out.
+# The build context is the top of the repository; BuildKit reads this file because it sits next
+# to zeus/Dockerfile. Only what the image needs goes in: the code, the requirements and the
+# license. Docs, tests, the website and .git stay out, and so do the two Docker files.
 *
 !LICENSE
 !requirements.txt
 !zeus
+zeus/Dockerfile
+zeus/Dockerfile.dockerignore
 
 # A checkout that has been run has runtime links under zeus/ (into ~/.zeus-terminal/runtime),
 # bytecode and maybe node_modules; none of it goes into the image.
