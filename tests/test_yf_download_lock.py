@@ -1,9 +1,11 @@
-"""Every yfinance download in ZEUS runs one at a time (zeus/zeus_yf.py).
+"""On yfinance before 1.4.0, every yfinance download in ZEUS runs one at a time (zeus/zeus_yf.py).
 
-yfinance.download keeps the state of a call in module globals and clears them when a call
+There yfinance.download keeps the state of a call in module globals and clears them when a call
 starts, so downloads that overlap in different threads lose their own tickers, come back with
-another call's tickers, or fail with "dictionary changed size during iteration". yfinance is
-replaced here by a fake module that counts the downloads running at the same moment."""
+another call's tickers, or fail with "dictionary changed size during iteration". yfinance 1.4.0
+and later keep each call's state to that call, so there downloads start at once and only the
+heatmap table refreshes take turns. yfinance is replaced here by a fake module that reports a
+version and counts the downloads running at the same moment."""
 import ast
 import asyncio
 import datetime
@@ -58,13 +60,25 @@ class FakeYF:
                 self.active -= 1
 
 
-@pytest.fixture()
-def yf(monkeypatch):
+def _install_fake(monkeypatch, version):
     fake = FakeYF()
     module = types.ModuleType("yfinance")
+    module.__version__ = version
     module.download = fake.download
     monkeypatch.setitem(sys.modules, "yfinance", module)
     return fake
+
+
+@pytest.fixture()
+def yf(monkeypatch):
+    """yfinance whose download() keeps its state in module globals (0.2.54 to 1.3.0)."""
+    return _install_fake(monkeypatch, "0.2.65")
+
+
+@pytest.fixture()
+def yf_new(monkeypatch):
+    """yfinance 1.4.0 or later: each download() call keeps its own state."""
+    return _install_fake(monkeypatch, "1.8.0")
 
 
 def _queued() -> int:
@@ -160,6 +174,88 @@ def test_the_fake_sees_overlap_without_the_lock(yf, call_sites, monkeypatch):
     yf.delay = 0.05
     _run_together(call_sites)
     assert yf.peak > 1
+
+
+# ── yfinance 1.4.0 and later ─────────────────────────────────────────────────────────────────
+
+@pytest.mark.parametrize("version, own_state", [
+    ("0.2.54", False), ("0.2.65", False), ("1.3.0", False),
+    ("1.4.0", True), ("1.8.0", True), ("1.10.2", True), ("2.0.0", True),
+    ("", False), (None, False), ("unknown", False),
+])
+def test_only_yfinance_1_4_and_later_count_as_keeping_each_download_to_itself(version, own_state):
+    """An older or unreadable version keeps the lock."""
+    assert zeus_yf.per_call_state(types.SimpleNamespace(__version__=version)) is own_state
+    assert zeus_yf.per_call_state(types.SimpleNamespace()) is False
+
+
+def test_on_yfinance_1_4_downloads_from_the_call_sites_start_at_once(yf_new, call_sites):
+    yf_new.delay = 0.05
+    errors = _run_together(call_sites)
+    assert not errors
+    assert len(yf_new.calls) == len(call_sites)
+    assert yf_new.peak > 1
+
+
+def test_on_yfinance_1_4_a_download_does_not_wait_for_a_table_refresh(yf_new):
+    """A heatmap table refresh holds the turn for the length of its download; quotes, the daily
+    store and the screener do not wait for it, and never get DownloadBusy."""
+    held, done = threading.Event(), threading.Event()
+
+    def refresh():
+        zeus_yf.acquire()
+        held.set()
+        done.wait(5)
+        zeus_yf.release()
+
+    holder = threading.Thread(target=refresh)
+    holder.start()
+    held.wait(5)
+    try:
+        start = time.monotonic()
+        zeus_yf.download(["AAA"], lock_wait=0)
+        assert time.monotonic() - start < 1.0
+    finally:
+        done.set()
+        holder.join(timeout=5)
+    assert _first_tickers(yf_new) == ["AAA"]
+
+
+def test_on_yfinance_1_4_the_heatmap_tables_still_refresh_one_at_a_time_and_once(yf_new, call_sites):
+    """Concurrent requests for the two tables: one download per table, never two at once."""
+    from heatmap import etf_trends, stock_perf
+    yf_new.delay = 0.05
+    jobs = {f"{name} {i}": mod.get for name, mod in (("Gainers / Losers", stock_perf),
+                                                       ("ETF trends", etf_trends)) for i in range(3)}
+    errors = _run_together(jobs)
+    assert not errors
+    assert sorted(_first_tickers(yf_new)) == ["AAA", "XLK"]
+    assert yf_new.peak == 1
+
+
+def test_on_yfinance_1_4_a_download_on_the_event_loop_runs_and_is_reported(yf_new, capsys):
+    held, done = threading.Event(), threading.Event()
+
+    def hold():
+        zeus_yf.acquire()
+        held.set()
+        done.wait(5)
+        zeus_yf.release()
+
+    holder = threading.Thread(target=hold)
+    holder.start()
+    held.wait(5)
+
+    async def on_the_loop():
+        return zeus_yf.download(["AAA"])        # no turn to wait for: it runs, and is reported
+
+    try:
+        assert not asyncio.run(on_the_loop()).empty
+    finally:
+        done.set()
+        holder.join(timeout=5)
+    assert "on the event loop" in capsys.readouterr().out
+    assert _first_tickers(yf_new) == ["AAA"]
 
 
 # ── the lock ─────────────────────────────────────────────────────────────────────────────────
