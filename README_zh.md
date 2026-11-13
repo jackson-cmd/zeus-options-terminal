@@ -327,9 +327,10 @@ zeus-options-terminal/
 ├── docs/                 使用手册、功能清单、截图、README 用的图
 ├── site/                 项目网站（GitHub Pages）
 ├── tests/                离线测试：python -m pytest
-├── tools/                隐私检查钩子、干净打包脚本、发版说明、Docker 镜像检查
+├── tools/                隐私检查钩子、干净打包脚本、发版说明、Docker 镜像和 pip 安装包的检查
 ├── examples/             手动交易的 CSV 模板
-└── start.sh · start.command · start.bat · requirements.txt
+├── .github/              CI 和发版工作流、Issue 表单、CONTRIBUTING、安全政策、行为准则
+└── start.sh · start.command · start.bat · requirements.txt · pyproject.toml
 ```
 
 各部分怎么连起来（下面的路径都在 `zeus/` 里）：
@@ -378,7 +379,7 @@ FastAPI 服务 ── options_analyzer/optionstrat_server.py
 
 ## 🤝 参与贡献
 
-ZEUS 的功能远比这一页能写下的多，而且还在长，以后也可能加新功能。**欢迎提 PR**：修 bug、接新的数据源或券商、改翻译、补文档，或者把[还没接上的部分](docs/FEATURES_zh.md#还没接上的部分欢迎-pr)接起来都可以。动手前先看 [CONTRIBUTING.md](CONTRIBUTING.md)。每个 PR 都会在 Linux、macOS、Windows 上跑一遍测试，`main` 只接受测试全部通过的 PR。
+ZEUS 的功能远比这一页能写下的多，而且还在长，以后也可能加新功能。**欢迎提 PR**：修 bug、接新的数据源或券商、改翻译、补文档，或者把[还没接上的部分](docs/FEATURES_zh.md#还没接上的部分欢迎-pr)接起来都可以。动手前先看 [CONTRIBUTING.md](.github/CONTRIBUTING.md)。每个 PR 都会在 Linux、macOS、Windows 上跑一遍测试，`main` 只接受测试全部通过的 PR。
 
 提问和讨论去 [Discussions](https://github.com/jackson-cmd/zeus-options-terminal/discussions)，bug 走 [Issues](https://github.com/jackson-cmd/zeus-options-terminal/issues/new/choose)，安全问题请私下报告（[SECURITY.md](.github/SECURITY.md)）。大家都遵守[行为准则](.github/CODE_OF_CONDUCT.md)。
 
