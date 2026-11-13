@@ -46,6 +46,11 @@ def _open_when_ready(port: int, timeout: float = 120.0) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
+    for stream in (sys.stdout, sys.stderr):                 # Windows writes pipes in cp1252, which
+        try:                                                # has no 宙斯 and no →
+            stream.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError):
+            pass
     cfg = _settings()
     parser = argparse.ArgumentParser(
         prog="zeus", description="ZEUS Terminal · 宙斯期权终端: the self-hosted options trading terminal.")

@@ -1,6 +1,7 @@
 """pip / pipx install (pyproject.toml): the version comes from APP_VERSION, the dependencies are the
 ones in requirements.txt, the wheel holds the zeus/ folder, and the `zeus` command starts the same
 server as start.sh. CI builds the wheel, installs it in a clean environment and starts it."""
+import os
 import re
 import subprocess
 import sys
@@ -65,6 +66,8 @@ def test_zeus_version_and_help():
     out = subprocess.run([sys.executable, str(ROOT / "zeus" / "zeus_cli.py"), "--version"],
                          capture_output=True, encoding="utf-8")
     assert out.returncode == 0 and out.stdout.strip() == f"ZEUS Terminal {zeus_config.APP_VERSION}"
+    # a Windows pipe writes cp1252, which has no 宙斯: zeus must still print its help
+    env = dict(os.environ, PYTHONIOENCODING="cp1252")
     out = subprocess.run([sys.executable, str(ROOT / "zeus" / "zeus_cli.py"), "--help"],
-                         capture_output=True, encoding="utf-8")
-    assert "--no-browser" in out.stdout and "--port" in out.stdout
+                         capture_output=True, encoding="utf-8", env=env)
+    assert out.returncode == 0 and "--no-browser" in out.stdout and "宙斯期权终端" in out.stdout
