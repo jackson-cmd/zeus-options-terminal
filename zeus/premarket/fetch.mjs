@@ -51,7 +51,10 @@ function isChromeRunning() {
 function loadCookies() {
   if (!fs.existsSync(COOKIE_PATH)) return [];
   const raw = JSON.parse(fs.readFileSync(COOKIE_PATH, 'utf-8'));
-  return raw.filter(c => (c.domain || '').includes('benzinga.com'));
+  return raw.filter(c => {                     // benzinga.com or one of its subdomains, nothing else
+    const d = String(c.domain || '').replace(/^\./, '').toLowerCase();
+    return d === 'benzinga.com' || d.endsWith('.benzinga.com');
+  });
 }
 
 function cookiesExpired() {
