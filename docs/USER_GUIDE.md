@@ -13,6 +13,7 @@ This manual explains every page, button and setting of ZEUS Terminal: what it do
 2. [First-time setup](#2-first-time-setup)
    - [2.1 Choose how your positions get in](#21-choose-how-your-positions-get-in) · [2.2 Connect tastytrade](#22-connect-tastytrade) · [2.3 Free mode: your trades from a CSV](#23-free-mode-your-trades-from-a-csv) · [2.4 News sources](#24-news-sources) · [2.5 AI](#25-ai) · [2.6 Notifications and e-mail](#26-notifications-and-e-mail) · [2.7 Every setting](#27-every-setting)
 3. [The top bar](#3-the-top-bar)
+   - [3.1 Help on every page](#31-help-on-every-page)
 4. [Positions](#4-positions)
    - [4.1 The board](#41-the-board) · [4.2 Status lights and filters](#42-status-lights-and-filters) · [4.3 Board tools](#43-board-tools) · [4.4 Strategy detail](#44-strategy-detail) · [4.5 Risk view](#45-risk-view) · [4.6 AI position review](#46-ai-position-review) · [4.7 How positions are grouped and priced](#47-how-positions-are-grouped-and-priced)
 5. [Discipline tools](#5-discipline-tools)
@@ -224,6 +225,7 @@ Without AI, ZEUS works fully; AI buttons say that AI is not configured.
 | **Trade Journal** | Statistics, analysis and the decision log ([section 11](#11-trade-journal)); a red badge counts decisions waiting for your notes |
 | **🧪 Paper Trade** | Simulated trades with live P/L ([section 8](#8-paper-trade)) |
 | **Language menu** | 中文 · 双语 · English ([section 13](#13-interface-languages)) |
+| **?** | The guide to the page you are on ([3.1](#31-help-on-every-page)) |
 | **⚙** | Opens Settings in an overlay; hover it to see the mode: ● tastytrade live, or ◐ manual upload with the number of manual trades (also on the first card in Settings) |
 | **AI** | Pauses or resumes the scheduled AI jobs |
 | **🔔** | Mutes every notification: take-profit, movers, risk, AI position review |
@@ -232,6 +234,15 @@ Without AI, ZEUS works fully; AI buttons say that AI is not configured.
 | **LIVE** | Green while the live data connection is up |
 
 When the window is too narrow for all the tabs, the tabs scroll sideways (mouse wheel or trackpad) and the open one always stays in view. **Esc** closes the open pop-up (checkup, risk radar, alerts, liquidity, chart) or leaves a detail view, like the browser's Back button; switching to another tab closes pop-ups too.
+
+### 3.1 Help on every page
+
+Every page explains itself:
+
+- **The small ? beside a column, a score or a card** opens a card in three parts: what it is, how it is calculated and how to use it. The ? beside the Picker's **Sort** menu, for example, takes the TA score apart piece by piece, and the ? on the Positions columns explains CoP, B/E %, max profit and loss, and Progress.
+- **The ? in the top bar** opens a guide to every button and number on the page you are on. The TA screener, the pre-trade checkup and the journal review have a round ? at the bottom right instead. Type in the guide's search box to find an item; **👉 Show me on the page** scrolls to it and outlines it.
+- Press **?** anywhere outside a text box to open the guide, and **Esc** to close it.
+- The cards follow the interface language: Chinese, bilingual (the English under the Chinese) or English. A switch at the top of the guide hides the small ? icons.
 
 ---
 
@@ -768,7 +779,8 @@ ZEUS has no telemetry. It talks only to the services you connect (tastytrade, Be
 |---|---|---|
 | Enter | Any ticker or search box | Load or search |
 | B | TA single-ticker page | Open the main recommended spread in Paper Trade |
-| Esc | Anywhere | Close the open pop-up (checkup, risk radar, alerts, liquidity, chart, TA help) or leave a detail view |
+| ? | Anywhere outside a text box | Open the guide to the page you are on ([3.1](#31-help-on-every-page)) |
+| Esc | Anywhere | Close the open pop-up (checkup, risk radar, alerts, liquidity, chart, a help card or the guide) or leave a detail view |
 | Cmd+Shift+R / Ctrl+Shift+R | Anywhere | Reload without the cache (after an update) |
 
 ---
