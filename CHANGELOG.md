@@ -10,12 +10,12 @@ What changed in each version of ZEUS Terminal. New features carry the <img src="
 
 | | Feature | Read more |
 |---|---|---|
-| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **📦 pip and pipx**: `pipx install zeus-options-terminal`, then `zeus`, installs and starts ZEUS without cloning the code. `zeus --port 8790`, `--no-browser` and `--version` work as you would expect, and `zeus-terminal` is the same command. Settings and data stay in `~/.zeus-terminal`, so `pipx upgrade` keeps them. (#PR) | [Install with pipx →](docs/USER_GUIDE.md#18-install-with-pipx) |
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **📦 pip and pipx**: `pipx install zeus-options-terminal`, then `zeus`, installs and starts ZEUS without cloning the code. `zeus --port 8790`, `--no-browser` and `--version` work as you would expect, and `zeus-terminal` is the same command. Settings and data stay in `~/.zeus-terminal`, so `pipx upgrade` keeps them. (#61) | [Install with pipx →](docs/USER_GUIDE.md#18-install-with-pipx) |
 
 ### Project
 
-- `pyproject.toml` builds the wheel from the `zeus/` folder as it is, with the version from `APP_VERSION` and the dependencies of `requirements.txt`; a test keeps them equal. Every pull request builds the wheel, installs it in a clean environment and starts `zeus` from it (`tools/package_smoke.sh`). (#PR)
-- Each release is uploaded to PyPI by the Release workflow through trusted publishing, so no token is stored, and only after the same check has passed. (#PR)
+- `pyproject.toml` builds the wheel from the `zeus/` folder as it is, with the version from `APP_VERSION` and the dependencies of `requirements.txt`; a test keeps them equal. Every pull request builds the wheel, installs it in a clean environment and starts `zeus` from it (`tools/package_smoke.sh`). (#61)
+- Each release is uploaded to PyPI by the Release workflow through trusted publishing, so no token is stored, and only after the same check has passed. (#61)
 
 ## 0.6.0 — 2026-11-12
 
