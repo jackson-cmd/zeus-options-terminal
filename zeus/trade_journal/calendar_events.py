@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import concurrent.futures as cf
 import json
+import os
 import re
 import urllib.request
 from datetime import datetime, time, timedelta
@@ -380,6 +381,8 @@ def refresh() -> dict:
         "earnings_universe_size": len(tickers),
     }
     CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
-    CACHE_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2),
-                          encoding="utf-8")
+    tmp = CACHE_PATH.with_suffix(".json.tmp")      # renamed into place: never half a file
+    tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2),
+                   encoding="utf-8")
+    os.replace(tmp, CACHE_PATH)
     return payload

@@ -134,7 +134,9 @@ def market_regime(max_age_hours: float = 18.0) -> dict:
         d = _compute()
         if d:
             _CACHE.parent.mkdir(parents=True, exist_ok=True)
-            _CACHE.write_text(json.dumps({"_ts": _dt.datetime.now().isoformat(), "data": d}))
+            tmp = _CACHE.with_name(_CACHE.name + ".tmp")     # renamed into place: never half a file
+            tmp.write_text(json.dumps({"_ts": _dt.datetime.now().isoformat(), "data": d}))
+            tmp.replace(_CACHE)
             return d
     except Exception:
         pass

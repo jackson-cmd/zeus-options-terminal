@@ -69,7 +69,7 @@ cd zeus-options-terminal
 
 ### 1.3 Stop, restart, change the port
 
-- **Stop:** press Ctrl+C in the window where the terminal runs.
+- **Stop:** press Ctrl+C in the window where the terminal runs. It stops within a few seconds, even while a refresh is still running.
 - **Restart:** stop, then start again. Changing the listen address or the port in Settings needs a restart.
 - **Port 8765 taken?** Start once with `PORT=8790 ./start.sh` (Windows: `set PORT=8790`, then `start.bat`), or set the port in ⚙ Settings → General. The launchers open the browser on the right port.
 

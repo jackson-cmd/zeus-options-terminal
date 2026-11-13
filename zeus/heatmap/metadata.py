@@ -7,9 +7,12 @@ network on the hot path.
 from __future__ import annotations
 
 import json
+import os
 import time
 from pathlib import Path
 from typing import Optional
+
+import zeus_shutdown
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 _TICKERS_CSV = _REPO_ROOT / "data" / "tickers.csv"
@@ -101,8 +104,12 @@ def _read_cache() -> dict:
 
 
 def _write_cache(data: dict) -> None:
+    """Write to a temporary file, then rename it into place: a write cut off by the
+    server stopping leaves the previous cache, not half a file."""
     _CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
-    _CACHE_PATH.write_text(json.dumps(data, indent=2, sort_keys=True))
+    tmp = _CACHE_PATH.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(data, indent=2, sort_keys=True))
+    os.replace(tmp, _CACHE_PATH)
 
 
 def _yf_fetch_one(ticker: str) -> Optional[dict]:
@@ -241,6 +248,8 @@ def refresh(force: bool = False, max_tickers: Optional[int] = None,
             print(f"[heatmap.metadata] finviz filled {got} ticker(s); {len(to_fetch)} left for Yahoo")
     yf_fails = 0
     for i, t in enumerate(to_fetch, start=1):
+        if zeus_shutdown.stopping():      # keep what is done; the rest is fetched next start
+            break
         meta = _yf_fetch_one(t)
         if meta is None or meta.get("sector") == "Unknown":
             # Yahoo failed outright, or answered a rate-limited partial record
