@@ -8,8 +8,11 @@ during iteration" (0.2.54 to 1.2.1; 1.2.2 to 1.3.0 hold a lock of their own
 around download(), but a failing Ticker.history() still writes into those
 globals), and a table built from such a download stays cached for hours.
 yfinance 1.4.0 and later give every call its own state, so overlapping
-downloads each get exactly their own tickers. Every yf.download in ZEUS goes
-through download() below, which takes the same arguments:
+downloads each get exactly their own tickers. ZEUS asks for 1.8.0, but an
+environment set up earlier keeps its yfinance until it is reinstalled (start.sh
+installs the requirements on its first run only), so the version check below
+stays. Every yf.download in ZEUS goes through download() below, which takes the
+same arguments:
 
     import zeus_yf
     df = zeus_yf.download(tickers, period="5d", progress=False)
