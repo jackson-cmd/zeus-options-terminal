@@ -15,7 +15,7 @@ import pytest
 import zeus_payoff as pf
 from test_analyzer_js import _extract
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parent.parent / "zeus"   # the code
 NODE = shutil.which("node")
 NOW = datetime(2026, 3, 2, 15, 0, tzinfo=timezone.utc).timestamp() * 1000
 EXP = "2026-04-02"

@@ -65,7 +65,7 @@ cd zeus-options-terminal
 - **macOS**：也可以直接双击 `start.command`。**Windows**：双击 `start.bat`。
 - 第一次运行会在 `.venv` 里建虚拟环境、装依赖，要一两分钟；以后启动只要几秒。
 - 大约 4 秒后浏览器自己打开 **<http://localhost:8765>**。第一次打开时，持仓页给出三种开局方式：载入**示例组合**先看看、连接券商、或者上传你的交易（见 [2.1](#21-先选持仓从哪来)）。
-- 第一次启动还会把默认的股票清单放进 `data/`：热力图票池、行业分组、ETF 清单和观察清单。你自己改过的文件永远不会被覆盖。
+- 第一次启动还会把默认的股票清单放进 `zeus/data/`：热力图票池、行业分组、ETF 清单和观察清单。你自己改过的文件永远不会被覆盖。
 
 ### 1.3 停止 重启 换端口
 
@@ -401,7 +401,7 @@ CSV 格式见[第 14 节](#14-手动交易-csv-格式)。tastytrade 导出的文
 
 ### 6.1 K 线墙
 
-整个票池的日线蜡烛图墙（默认约 110 只；改 `data/heatmap_universe.txt` 就能换）。每张卡片有价格、今日涨跌、市值、下次财报日期、板块、EMA50（橙）和 EMA200（蓝）、支撑线（绿）和阻力线（红），★ 表示强支撑阻力。点 **🔎 深度** 打开[单票详情](#64-单票详情)。
+整个票池的日线蜡烛图墙（默认约 110 只；改 `zeus/data/heatmap_universe.txt` 就能换）。每张卡片有价格、今日涨跌、市值、下次财报日期、板块、EMA50（橙）和 EMA200（蓝）、支撑线（绿）和阻力线（红），★ 表示强支撑阻力。点 **🔎 深度** 打开[单票详情](#64-单票详情)。
 
 工具栏：
 
@@ -449,7 +449,7 @@ CSV 格式见[第 14 节](#14-手动交易-csv-格式)。tastytrade 导出的文
 - **隐藏 ETF 组** 和 **图只看显著变化（≥3%）**。
 - 柱状图是每个行业的涨跌，颜色是趋势：趋势向上、超跌反弹（未确认）、高位回调、趋势向下。鼠标悬停看全名和数字。
 - 下面的表列出每个行业 5 天、1 个月、3 个月、6 个月、12 个月的涨跌，行业里站上 50 日和 200 日均线的股票占比，以及成分股。
-- **🔄 重拉数据** 重新下载所有分组的日线（大约一分钟）。改 `data/industry_universe.txt` 就能换分组。
+- **🔄 重拉数据** 重新下载所有分组的日线（大约一分钟）。改 `zeus/data/industry_universe.txt` 就能换分组。
 
 ### 6.7 期权情绪
 
@@ -782,7 +782,7 @@ date,symbol,asset,side,effect,qty,price,fees,option_type,strike,expiration,multi
 | `~/.zeus-terminal/config.json` | 所有设置和密钥（权限 600） |
 | `~/.zeus-terminal/runtime/` | 终端运行时写的所有东西：持仓快照、交易日记和截图、模拟单、新闻存档、缓存、下载、日志 |
 | `~/.zeus-terminal/mail_state.json` | 最近发过哪些邮件提醒（用来去重和限制每小时数量） |
-| 代码里的 `data/` 等运行目录 | 指向 `~/.zeus-terminal/runtime/` 的链接，git 会忽略 |
+| 代码里的 `zeus/data/` 等运行目录 | 指向 `~/.zeus-terminal/runtime/` 的链接，git 会忽略 |
 
 代码文件夹里从来不放你的数据，所以 `git pull`、`git push` 都碰不到它。
 
@@ -836,7 +836,7 @@ ZEUS 没有任何遥测。它只连你自己接入的服务（tastytrade、Alpac
 | 行业轮动或期权情绪是空的 | 行业轮动点 **🔄 重拉数据**。期权情绪要攒几周盘后爬取的数据。 |
 | 模拟盘提示 "No market data yet" | 终端刚启动还在加载，等几秒。用 tastytrade 的话，到设置里点测试连接。 |
 | 更新之后页面还是旧的 | 按 Cmd+Shift+R（Ctrl+Shift+R）强制刷新。 |
-| AI 智能体连不上 | ZEUS 要开着，并且 设置 → AI 智能体（MCP）→ MCP 接口 要是 on。在 ZEUS 文件夹里运行 `python3 zeus_mcp_stdio.py --check`；地址用 `127.0.0.1`，别用 `localhost`。 |
+| AI 智能体连不上 | ZEUS 要开着，并且 设置 → AI 智能体（MCP）→ MCP 接口 要是 on。在 ZEUS 文件夹里运行 `python3 zeus/zeus_mcp_stdio.py --check`；地址用 `127.0.0.1`，别用 `localhost`。 |
 | 智能体说不能下模拟单 | 打开 设置 → AI 智能体（MCP）→ 允许智能体下模拟单。 |
 
 还是解决不了？[提一个 Issue](https://github.com/jackson-cmd/zeus-options-terminal/issues)，写清楚你做了什么、看到了什么（别贴 token、cookie 和账户号）。
@@ -892,13 +892,13 @@ Claude Desktop 以命令的方式启动本地工具，所以要用 ZEUS 自带�
   "mcpServers": {
     "zeus": {
       "command": "python3",
-      "args": ["/path/to/zeus-options-terminal/zeus_mcp_stdio.py"]
+      "args": ["/path/to/zeus-options-terminal/zeus/zeus_mcp_stdio.py"]
     }
   }
 }
 ```
 
-设置页会帮你填好本机的真实路径。随时可以在 ZEUS 文件夹里运行 `python3 zeus_mcp_stdio.py --check` 检查连接。
+设置页会帮你填好本机的真实路径。随时可以在 ZEUS 文件夹里运行 `python3 zeus/zeus_mcp_stdio.py --check` 检查连接。
 
 连上以后直接问就行，比如：「用 zeus 看看我的持仓，哪些该止盈？」「对 NVDA 跑一下开单前体检，再给一个 30 天的牛市看涨价差估价」「这个月有哪些财报落在我的到期日之前？」
 

@@ -4,6 +4,14 @@
 
 ZEUS Terminal 每个版本改了什么。新功能前面挂着 <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> 标记，括号里的数字是对应的 PR 编号。
 
+## 0.5.1 —— 2026-11-12
+
+### 项目
+
+- 所有代码都挪进了一个文件夹 `zeus/`。仓库最上层只留 README、许可证、更新记录、文档、网站、测试和启动脚本，GitHub 页面上 README 一下就能看到：根目录从 57 项减到 20 项。(#45)
+- 启动方式不变（`./start.sh`、`start.command`、`start.bat`），`~/.zeus-terminal` 里的设置和数据不受影响。`git pull` 之后下一次启动，会在 `zeus/` 下建好运行数据的链接，并删掉最上层留下的旧链接。只删指向 `~/.zeus-terminal/runtime` 的链接，文件夹和别的链接一概不碰。(#45)
+- 如果你通过 stdio 桥接连了 Claude Desktop，请到 设置 → AI 智能体 重新复制一次配置：桥接脚本现在是 `zeus/zeus_mcp_stdio.py`。(#45)
+
 ## 0.5.0 —— 2026-11-12
 
 ### 新功能

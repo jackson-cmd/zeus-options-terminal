@@ -13,7 +13,7 @@ import local_broker as lb
 import zeus_brokers as zb
 import zeus_config as hc
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parent.parent / "zeus"   # the code
 KEYS = ("account_source", "market_data", "alpaca_key_id", "alpaca_secret_key", "alpaca_paper", "alpaca_stock_feed",
         "alpaca_options_feed", "public_secret_key", "public_account_id", "tt_client_secret", "tt_refresh_token",
         "manual_starting_cash")

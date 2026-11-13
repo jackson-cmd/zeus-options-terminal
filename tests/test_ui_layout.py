@@ -12,7 +12,7 @@ import pytest
 from heatmap import earnings as earnings_store
 from trade_journal import calendar_events as ce
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parent.parent / "zeus"   # the code
 SERVER = (ROOT / "options_analyzer" / "optionstrat_server.py").read_text(encoding="utf-8")
 ANALYZER = (ROOT / "options_analyzer" / "optionstrat_analyzer.py").read_text(encoding="utf-8")
 HEATMAP = (ROOT / "heatmap" / "heatmap.py").read_text(encoding="utf-8")

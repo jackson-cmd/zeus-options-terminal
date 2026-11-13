@@ -29,7 +29,7 @@
 
 ## 🆕 What's new
 
-<sub>Latest release **0.5.0** (2026-11-12). The full history is in the [changelog](CHANGELOG.md).</sub>
+<sub>Latest release **0.5.1** (2026-11-12). The full history is in the [changelog](CHANGELOG.md).</sub>
 
 | | New in 0.5.0, 0.4.x, 0.3.x and 0.2.x |
 |---|---|
@@ -277,7 +277,7 @@ date,symbol,asset,side,effect,qty,price,fees,option_type,strike,expiration,multi
 browser (PWA, 中文 / 双语 / English)
    │  WebSocket + REST
    ▼
-FastAPI server  ── options_analyzer/optionstrat_server.py
+FastAPI server  ── zeus/options_analyzer/optionstrat_server.py   (all code lives in zeus/)
    ├─ broker ........ tastytrade REST + DXLink stream   │  local_broker.py (manual mode, Cboe + Yahoo)
    │                                                   │  zeus_brokers.py (Alpaca · Public, read-only)
    ├─ news .......... Benzinga (cookies / WS)           │  zeus_news.py (Finviz · WSJ · MarketWatch)
@@ -291,7 +291,7 @@ FastAPI server  ── options_analyzer/optionstrat_server.py
    └─ settings ...... zeus_config.py → ~/.zeus-terminal/config.json
 ```
 
-Runtime data (candles, caches, digests) lives in `~/.zeus-terminal/runtime/`; folders such as `data/` inside the code are only links to it. Configuration can also come from environment variables (`ZEUS_<KEY>`, e.g. `ZEUS_TT_REFRESH_TOKEN`) and the settings folder can be moved with `ZEUS_HOME`.
+Runtime data (candles, caches, digests) lives in `~/.zeus-terminal/runtime/`; folders such as `zeus/data/` inside the code are only links to it. Configuration can also come from environment variables (`ZEUS_<KEY>`, e.g. `ZEUS_TT_REFRESH_TOKEN`) and the settings folder can be moved with `ZEUS_HOME`.
 
 ---
 

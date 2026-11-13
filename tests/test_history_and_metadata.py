@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "options_analyzer"))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "zeus" / "options_analyzer"))
 import history_news_api as hn  # noqa: E402
 
 

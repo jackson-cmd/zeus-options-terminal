@@ -29,7 +29,7 @@
 
 ## 🆕 新功能
 
-<sub>最新版本 **0.5.0**（2026-11-12）。完整的更新历史见[更新记录](CHANGELOG_zh.md)。</sub>
+<sub>最新版本 **0.5.1**（2026-11-12）。完整的更新历史见[更新记录](CHANGELOG_zh.md)。</sub>
 
 | | 0.5.0、0.4.x、0.3.x 和 0.2.x 新加入 |
 |---|---|
@@ -277,7 +277,7 @@ date,symbol,asset,side,effect,qty,price,fees,option_type,strike,expiration,multi
 浏览器（PWA，中文 / 双语 / English）
    │  WebSocket + REST
    ▼
-FastAPI 服务 ── options_analyzer/optionstrat_server.py
+FastAPI 服务 ── zeus/options_analyzer/optionstrat_server.py   （所有代码都在 zeus/ 里）
    ├─ 券商 ......... tastytrade REST + DXLink 推送      │  local_broker.py（手动模式，Cboe + Yahoo）
    │                                                   │  zeus_brokers.py（Alpaca · Public，只读）
    ├─ 新闻 ......... Benzinga（cookie / WS）            │  zeus_news.py（Finviz · WSJ · MarketWatch）
@@ -291,7 +291,7 @@ FastAPI 服务 ── options_analyzer/optionstrat_server.py
    └─ 设置 ......... zeus_config.py → ~/.zeus-terminal/config.json
 ```
 
-运行时数据（K 线、缓存、新闻存档）写在 `~/.zeus-terminal/runtime/`，代码里 `data/` 这类目录只是指向那里的链接。配置也可以用环境变量给（`ZEUS_<KEY>`，比如 `ZEUS_TT_REFRESH_TOKEN`），设置文件夹可以用 `ZEUS_HOME` 换位置。
+运行时数据（K 线、缓存、新闻存档）写在 `~/.zeus-terminal/runtime/`，代码里 `zeus/data/` 这类目录只是指向那里的链接。配置也可以用环境变量给（`ZEUS_<KEY>`，比如 `ZEUS_TT_REFRESH_TOKEN`），设置文件夹可以用 `ZEUS_HOME` 换位置。
 
 ---
 

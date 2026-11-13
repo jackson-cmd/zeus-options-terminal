@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parent.parent / "zeus"   # the code
 NODE = shutil.which("node")
 pytestmark = pytest.mark.skipif(NODE is None, reason="node is not installed")
 

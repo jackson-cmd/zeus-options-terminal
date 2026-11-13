@@ -13,7 +13,7 @@ import pytest
 from fastapi import FastAPI, Query
 from fastapi.testclient import TestClient
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parent.parent / "zeus"   # the code
 sys.path.insert(0, str(ROOT / "options_analyzer"))
 
 import paper_trade_api as pta  # noqa: E402

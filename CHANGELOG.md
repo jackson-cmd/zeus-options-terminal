@@ -4,6 +4,14 @@
 
 What changed in each version of ZEUS Terminal. New features carry the <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> badge. Numbers in parentheses are the pull requests.
 
+## 0.5.1 — 2026-11-12
+
+### Project
+
+- All code now lives in one folder, `zeus/`. The top of the repository keeps the README, license, changelogs, docs, website, tests and start scripts, so the README shows up near the top of the GitHub page: the root went from 57 entries to 20. (#45)
+- Starting is unchanged (`./start.sh`, `start.command`, `start.bat`), and settings and data in `~/.zeus-terminal` are not touched. After `git pull`, the next start makes the runtime links under `zeus/` and removes the old ones at the top. It only removes links that point into `~/.zeus-terminal/runtime`; folders and other links are never touched. (#45)
+- If you connected Claude Desktop through the stdio bridge, copy the snippet from Settings → AI agents again: the bridge is now `zeus/zeus_mcp_stdio.py`. (#45)
+
 ## 0.5.0 — 2026-11-12
 
 ### New features

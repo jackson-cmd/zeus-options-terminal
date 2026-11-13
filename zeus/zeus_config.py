@@ -27,7 +27,7 @@ from typing import Any
 
 APP_NAME = "ZEUS Terminal"
 APP_NAME_ZH = "宙斯期权终端"
-APP_VERSION = "0.5.0"
+APP_VERSION = "0.5.1"
 APP_TAGLINE = "Self-hosted, all-in-one options trading terminal"
 APP_TAGLINE_ZH = "本地部署的全方位期权交易终端"
 REPO_ROOT = Path(__file__).resolve().parent
@@ -592,4 +592,32 @@ def relocate_runtime_dirs() -> list[str]:
         except OSError:
             link.mkdir(parents=True, exist_ok=True)
             left.append(rel)
+    _drop_old_links(base)
     return left
+
+
+def _drop_old_links(base: Path) -> None:
+    """Before 0.5.1 the code sat at the top of the repository, so these links sat there too
+    (data, options_analyzer/data, …). A `git pull` moves the code into zeus/ but leaves those
+    links behind. Remove a left-over only when it is a link into the runtime folder: never a
+    real folder, never anything else."""
+    if REPO_ROOT.name != "zeus":
+        return
+    top = REPO_ROOT.parent
+    try:
+        base_real = base.resolve()
+    except OSError:
+        return
+    for rel in RUNTIME_DIRS:
+        old = top / rel
+        try:
+            if not old.is_symlink():
+                continue
+            target = Path(os.readlink(old))
+            if not target.is_absolute():
+                target = (old.parent / target)
+            target = target.resolve()
+            if target == base_real or base_real in target.parents:
+                old.unlink()
+        except OSError:
+            continue

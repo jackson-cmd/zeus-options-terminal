@@ -65,7 +65,7 @@ cd zeus-options-terminal
 - **macOS:** you can also double-click `start.command`. **Windows:** double-click `start.bat`.
 - The first run creates a virtual environment in `.venv` and installs the requirements. This takes a minute or two; later starts take seconds.
 - After about four seconds the browser opens **http://localhost:8765**. On the very first start the Positions page offers three ways in: load the **sample portfolio** to look around, connect a broker, or upload your trades ([2.1](#21-choose-how-your-positions-get-in)).
-- On first start ZEUS also seeds the default ticker lists into `data/`: the heatmap universe, the industry groups, the ETF list and the watchlists. Your own edits to those files are never overwritten.
+- On first start ZEUS also seeds the default ticker lists into `zeus/data/`: the heatmap universe, the industry groups, the ETF list and the watchlists. Your own edits to those files are never overwritten.
 
 ### 1.3 Stop, restart, change the port
 
@@ -401,7 +401,7 @@ The picker has three sub-views at the top: **📈 K-line chart wall**, **🟩 He
 
 ### 6.1 K-line chart wall
 
-A wall of daily candle charts for your universe (about 110 tickers by default; edit `data/heatmap_universe.txt` to change it). Each card shows the price, today's change, market cap, next earnings date, sector, EMA 50 (orange) and EMA 200 (blue), support (green) and resistance (red) lines, and ★ for strong levels. Click **🔎 depth** for the [ticker detail](#64-ticker-detail).
+A wall of daily candle charts for your universe (about 110 tickers by default; edit `zeus/data/heatmap_universe.txt` to change it). Each card shows the price, today's change, market cap, next earnings date, sector, EMA 50 (orange) and EMA 200 (blue), support (green) and resistance (red) lines, and ★ for strong levels. Click **🔎 depth** for the [ticker detail](#64-ticker-detail).
 
 Toolbar:
 
@@ -449,7 +449,7 @@ Opens from a chart card (🔎 depth) or from a ticker link:
 - **Hide ETF groups** and **chart only significant moves (≥ 3 %)**.
 - The bar chart shows each group's move, colored by trend: uptrend, oversold bounce (unconfirmed), pullback from highs, downtrend. Hover a bar for the full name and numbers.
 - The table lists every group with 5-day, 1-, 3-, 6- and 12-month returns, the share of its stocks above the 50- and 200-day averages, and its members.
-- **🔄 Reload data** downloads fresh daily prices for all groups (about a minute). Edit `data/industry_universe.txt` to change the groups.
+- **🔄 Reload data** downloads fresh daily prices for all groups (about a minute). Edit `zeus/data/industry_universe.txt` to change the groups.
 
 ### 6.7 Options sentiment
 
@@ -782,7 +782,7 @@ Fills are replayed in time order, first in, first out. Expired options settle at
 | `~/.zeus-terminal/config.json` | Every setting and secret (permission 600) |
 | `~/.zeus-terminal/runtime/` | Everything the terminal writes: position snapshots, the journal and its screenshots, paper trades, news archives, caches, downloads, logs |
 | `~/.zeus-terminal/mail_state.json` | Which alerts were mailed recently (for repeats and the hourly cap) |
-| `data/` and the other runtime folders in the code | Links into `~/.zeus-terminal/runtime/`, ignored by git |
+| `zeus/data/` and the other runtime folders in the code | Links into `~/.zeus-terminal/runtime/`, ignored by git |
 
 The code folder never holds your data, so `git pull` and `git push` cannot touch it.
 
@@ -836,7 +836,7 @@ ZEUS has no telemetry. It talks only to the services you connect (tastytrade, Al
 | Sector rotation or options sentiment is empty | Press **🔄 Reload data** for rotation. Options sentiment needs a few weeks of after-close crawls. |
 | Paper Trade says "No market data yet" | The terminal is still loading after start; wait a few seconds. With tastytrade, press Test connection in Settings. |
 | The page looks old after an update | Reload with Cmd+Shift+R (Ctrl+Shift+R). |
-| An AI agent cannot connect | ZEUS must be running, and Settings → AI agents (MCP) → MCP server must be on. Run `python3 zeus_mcp_stdio.py --check` in the ZEUS folder; use `127.0.0.1`, not `localhost`. |
+| An AI agent cannot connect | ZEUS must be running, and Settings → AI agents (MCP) → MCP server must be on. Run `python3 zeus/zeus_mcp_stdio.py --check` in the ZEUS folder; use `127.0.0.1`, not `localhost`. |
 | An agent says it may not paper trade | Turn on Settings → AI agents (MCP) → Agents may place paper trades. |
 
 Still stuck? [Open an issue](https://github.com/jackson-cmd/zeus-options-terminal/issues) with what you did and what you saw (leave out tokens, cookies and account numbers).
@@ -892,13 +892,13 @@ Claude Desktop starts local tools as a command, so it uses the bridge that ships
   "mcpServers": {
     "zeus": {
       "command": "python3",
-      "args": ["/path/to/zeus-options-terminal/zeus_mcp_stdio.py"]
+      "args": ["/path/to/zeus-options-terminal/zeus/zeus_mcp_stdio.py"]
     }
   }
 }
 ```
 
-The Settings page fills in the real paths for this computer. To check the connection at any time, run `python3 zeus_mcp_stdio.py --check` in the ZEUS folder.
+The Settings page fills in the real paths for this computer. To check the connection at any time, run `python3 zeus/zeus_mcp_stdio.py --check` in the ZEUS folder.
 
 Then just ask, for example: "Use zeus: which of my positions should I take profit on?", "Run the pre-trade checkup on NVDA and price a 30-day bull call spread", "Which earnings land before my expirations this month?"
 

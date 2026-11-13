@@ -16,7 +16,7 @@ from pathlib import Path
 
 import pytest
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parent.parent / "zeus"   # the code
 sys.path.insert(0, str(ROOT / "options_analyzer"))   # checkup, as the server imports it
 STATIC = ROOT / "options_analyzer" / "static"
 HELP = STATIC / "zeus_help.js"
