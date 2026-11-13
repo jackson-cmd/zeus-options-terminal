@@ -1978,11 +1978,13 @@ async def index():
 /* narrower windows: tighter tabs first, then the status text and the brand's subtitle go */
 @media (max-width: 1240px) {
   .top-nav-tab { padding: 0 9px; }
+  html.zs-lang-bi .top-nav-tab { padding: 0 6px; }   /* bilingual labels carry an English word too */
   .top-nav-right { margin-left: 6px; gap: 6px; }
 }
 @media (max-width: 1100px) {
   .top-nav-brand > span, #trStatusCur { display: none; }
   .top-nav-tab { padding: 0 8px; }
+  html.zs-lang-bi .top-nav-tab { padding: 0 6px; }
 }
 .top-tab-panel { display: none; flex: 1; min-height: 0; }
 .top-tab-panel.active { display: flex; flex-direction: column; }

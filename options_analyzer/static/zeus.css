@@ -23,3 +23,54 @@ html.zs-lang-bi [data-zs-en]::after { content: attr(data-zs-en); font-size: 0.76
   margin-left: 0.38em; letter-spacing: 0; text-transform: none; white-space: nowrap; }
 html.zs-lang-bi th[data-zs-en]::after, html.zs-lang-bi h1[data-zs-en]::after, html.zs-lang-bi h2[data-zs-en]::after { display: block; margin-left: 0; }
 .zs-sub-en { color: #8b949e; font-size: 0.92em; }
+/* help (zeus_help.js): the small ? beside a column, a score or a card, and the help card / page guide */
+.zs-q { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; margin-left: 4px;
+  border-radius: 50%; border: 1px solid #3d444d; color: #8b949e; background: transparent; box-sizing: border-box;
+  font: 700 9.5px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; letter-spacing: 0; text-transform: none;
+  cursor: help; vertical-align: middle; flex: none; user-select: none; }
+.zs-q::before { content: "?"; }
+.zs-q:hover, .zs-q:focus-visible { border-color: #58a6ff; color: #58a6ff; background: rgba(88, 166, 255, 0.14); outline: none; }
+html.zs-noq .zs-q { display: none; }
+#zsHelpBtn { font-size: 13px; font-weight: 800; min-width: 26px; }
+#zsHelpFab { position: fixed; right: 16px; bottom: 16px; z-index: 9990; width: 34px; height: 34px; border-radius: 50%;
+  border: 1px solid #30363d; background: #21262d; color: #e6edf3; font: 800 15px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  cursor: pointer; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45); }
+#zsHelpFab:hover { border-color: #58a6ff; color: #58a6ff; }
+#zsHelpOverlay { position: fixed; inset: 0; z-index: 100000; background: rgba(1, 4, 9, 0.62); display: none;
+  align-items: center; justify-content: center; padding: 18px; }
+#zsHelpOverlay.on { display: flex; }
+.zs-help-card { background: #161b22; color: #e6edf3; border: 1px solid #30363d; border-radius: 12px; width: min(640px, 100%);
+  max-height: 86vh; overflow: auto; box-shadow: 0 10px 50px rgba(0, 0, 0, 0.6); text-align: left;
+  font: 13px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; }
+.zs-help-head { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; gap: 8px; padding: 12px 16px 10px;
+  background: #161b22; border-bottom: 1px solid #30363d; }
+.zs-help-title { flex: 1; min-width: 0; font-size: 15px; font-weight: 700; }
+.zs-help-head button { background: #21262d; color: #e6edf3; border: 1px solid #30363d; border-radius: 6px; padding: 3px 10px;
+  cursor: pointer; font-size: 12px; white-space: nowrap; }
+.zs-help-head button:empty { display: none; }
+.zs-help-head button:hover { border-color: #58a6ff; }
+.zs-help-body { padding: 6px 18px 18px; }
+.zs-help-sec { margin-top: 12px; }
+.zs-help-k { color: #8b949e; font-size: 11px; font-weight: 700; letter-spacing: 0.4px; margin-bottom: 2px; }
+.zs-help-en { color: #9da7b3; font-size: 12px; margin-top: 5px; }
+.zs-help-body b { color: #f0f6fc; }
+.zs-help-body ul { margin: 4px 0; padding-left: 18px; }
+.zs-help-body li { margin: 2px 0; }
+.zs-help-foot { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 16px; padding-top: 10px; border-top: 1px solid #21262d; }
+.zs-help-show { background: #1f6feb; color: #fff; border: 1px solid #1f6feb; border-radius: 6px; padding: 4px 12px; font-size: 12px; cursor: pointer; }
+.zs-help-man { color: #58a6ff; font-size: 12px; text-decoration: none; margin-left: auto; }
+.zs-help-man:hover { text-decoration: underline; }
+.zs-help-tools { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 8px 0 4px; }
+.zs-help-filter { flex: 1; min-width: 180px; background: #0d1117; color: #e6edf3; border: 1px solid #30363d; border-radius: 6px;
+  padding: 5px 9px; font-size: 12.5px; }
+.zs-help-filter:focus { outline: none; border-color: #58a6ff; }
+.zs-help-icons { color: #8b949e; font-size: 12px; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; white-space: nowrap; }
+.zs-help-grp { margin: 14px 0 2px; color: #8b949e; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; }
+.zs-help-row { display: block; width: 100%; text-align: left; background: transparent; color: #e6edf3; border: 0;
+  border-top: 1px solid #21262d; padding: 7px 6px; cursor: pointer; font: inherit; border-radius: 0; }
+.zs-help-row:hover, .zs-help-row:focus-visible { background: #1c2128; outline: none; }
+.zs-help-row .t { font-weight: 600; }
+.zs-help-row .s { display: block; color: #8b949e; font-size: 12px; line-height: 1.5; }
+.zs-help-none { color: #8b949e; padding: 16px 4px; }
+.zs-help-flash { outline: 2px solid #58a6ff !important; outline-offset: 2px; box-shadow: 0 0 0 6px rgba(88, 166, 255, 0.28) !important; }
+@media (max-width: 700px) { #zsHelpOverlay { padding: 0; align-items: stretch; } .zs-help-card { max-height: none; border-radius: 0; } }

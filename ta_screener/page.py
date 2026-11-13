@@ -74,25 +74,6 @@ canvas.spark { background:#0a0d12; border:1px solid var(--border); border-radius
          background:var(--bg3); border:1px solid var(--border); color:var(--text2); font-size:10px; font-weight:700;
          cursor:pointer; vertical-align:middle; line-height:1; user-select:none; flex:none; }
 .hicon:hover { border-color:var(--blue); color:var(--blue); background:rgba(88,166,255,.14); }
-#helpModal { position:fixed; inset:0; z-index:99; background:rgba(1,4,9,.62); display:none;
-             align-items:center; justify-content:center; padding:18px; }
-#helpModal.on { display:flex; }
-#helpCard { background:var(--bg2); border:1px solid var(--border); border-radius:12px; width:min(580px,100%);
-            max-height:84vh; overflow:auto; padding:0 20px 20px; box-shadow:0 10px 50px rgba(0,0,0,.6); }
-.help-h { display:flex; align-items:center; justify-content:space-between; gap:10px; position:sticky; top:0;
-          background:var(--bg2); padding:14px 0 8px; margin-bottom:6px; border-bottom:1px solid var(--border); z-index:1; }
-.help-h b { font-size:15px; }
-.help-x { background:var(--bg3); border:1px solid var(--border); color:var(--text); border-radius:6px;
-          padding:4px 10px; cursor:pointer; font-size:13px; white-space:nowrap; }
-.help-x:hover { border-color:var(--blue); }
-#helpBody { font-size:12.5px; line-height:1.78; color:var(--text); }
-#helpBody p { margin:7px 0; }
-#helpBody ul { margin:5px 0; padding-left:18px; }
-#helpBody li { margin:4px 0; }
-#helpBody .k { color:var(--gold); font-weight:700; }
-#helpBody code { background:var(--bg3); padding:1px 5px; border-radius:4px; font-size:11px; }
-#helpBody .formula { background:var(--bg3); border-left:3px solid var(--blue); border-radius:5px;
-                     padding:9px 11px; margin:8px 0; font-size:13px; font-weight:600; line-height:1.7; }
 #helpBody .ex { background:rgba(63,185,80,.08); border-radius:5px; padding:7px 10px; margin:8px 0; font-size:11.5px; color:var(--text2); }
 </style>
 </head>
@@ -203,153 +184,17 @@ canvas.spark { background:#0a0d12; border:1px solid var(--border); border-radius
 </div>
 </div>
 
-<!-- 大白话帮助弹窗(点任意 ? 图标打开) -->
-<div id="helpModal" onclick="if(event.target===this)closeHelp()">
-  <div id="helpCard">
-    <div class="help-h"><b id="helpTitle"></b><button class="help-x" onclick="closeHelp()">✕ 关闭</button></div>
-    <div id="helpBody"></div>
-  </div>
-</div>
-
 <script>
 let DATA = null, ROWS = [], FILTERS = new Set(['all']), SORT = {key:'score', dir:-1}, LIMIT = 400, OPEN = null, _lastGen = null;
 const F = k => FILTERS.has(k);   // 多选:多个 chip 同时生效(AND);默认只看「高把握」
 
-// ═══════════════ 大白话帮助:每个板块旁的 ? 图标 → 弹窗讲清缩写/口径/评分 ═══════════════
-// 用反引号模板串写正文(避开"JS 嵌 Python 串里 \' 被吃"的老坑)。key 与各 h4 的 hIcon 对应。
-const HELP = {
-  srzones: { t: 'S/R 支撑阻力区 — 每一列怎么读', h: `
-    <p><b>这是什么:</b>把<b>日线 / 周线 / 月线</b>三个周期上的「拐点(pivot 高低点)」按价格聚成一条条<b>价格带</b>。多个拐点扎堆的价位,就是市场反复看的<span class="k">支撑 / 阻力</span>。</p>
-    <ul>
-      <li><span class="k">Conf(把握度,confluence=共振周期数)</span>:这条带被<b>几个周期</b>一起确认。<code>x2</code>=两个周期(如日+周)都在这价位出过拐点;<code>⭐x3</code>=日+周+月三个周期<b>全都</b>确认 = 「<b>黄金带</b>」,最硬。周期越多越可靠。</li>
-      <li><span class="k">中枢</span>:这条带里所有拐点的<b>平均价</b> = 带子的中心价。</li>
-      <li><span class="k">区间</span>:带子的<b>下沿 – 上沿</b>(最低拐点价 – 最高拐点价)。今天价格落进这个区间就算「进带 / 触及」。</li>
-      <li><span class="k">周期(DMW)</span>:这条带的拐点来自哪些周期。<b>D = 日线(Daily)</b>、<b>W = 周线(Weekly)</b>、<b>M = 月线(Monthly)</b>。所以 <code>DMW</code> = 日+周+月三个都有(最强);<code>DW</code> = 日+周;<code>MW</code> = 周+月。字母按 D→M→W 排。</li>
-      <li><span class="k">pivots</span>:这条带里聚了<b>几个拐点</b>。越多 = 这价位被反复测试越多次。</li>
-      <li><span class="k">距离</span>:今天收盘价 → 这条带中枢的百分比。<b>负数 = 在现价下方(是支撑)</b>;正数 = 在现价上方(是阻力)。例:<code>−23.8%</code> = 这条支撑带比现价低 23.8%。</li>
-    </ul>
-    <p>上方走势图里:<b style="color:var(--gold)">金色带 = 黄金 x3</b>,蓝色带 = x2,白线 = 收盘价。图右上「短·3月 / 中·1年 / 长·2年」切看不同窗口。</p>` },
-
-  edge: { t: '概率 edge — 同样市场环境下,历史胜率', h: `
-    <p><b>这是什么:</b>给该票过去约 1 年的<b>每一天</b>都贴两个标签——<b>市场状态(regime)</b> + <b>强弱档(Q 桶)</b>——再统计「<b>历史上处在同样环境时,5 个交易日后股价收高的比例</b>」。是<b>频率统计,不是预测</b>。</p>
-    <p><b>「现在:牛市 / 高波 + Q1」怎么读:</b></p>
-    <ul>
-      <li><span class="k">牛市 / 熊市</span>:收盘价<b>站上 200 日均线 = 牛市</b>;跌破 = 熊市。</li>
-      <li><span class="k">高波 / 低波</span>:当前 ATR(真实波动幅度)在它<b>自己过去一年</b>里偏高(上半区)= <b>高波</b>(最近上下甩得比平时凶);偏低 = 低波。<b>高波≠看涨,只说明波动大。</b></li>
-      <li><span class="k">Q1 ~ Q5(强弱档)</span>:把「动量 + RSI + 离均线」合成一个强弱分,按过去一年排名切 5 档。<b>Q1 = 最弱档(最超卖 / 动能最差)</b>,Q5 = 最强档。</li>
-    </ul>
-    <p><b>未来5根胜率 47.5% · n=101 · t=−0.5 不显著:</b>历史上处在这一格时,5 天后收高 47.5%;<b>n</b> = 出现过 101 次;<b>t</b> = 统计显著度,<b>|t|&gt;2 才算可信</b>;t=−0.5 → <b>不显著</b> = 跟掷硬币(50%)没区别,<b>没有方向优势</b>。</p>
-    <p>👉 <b>无方向 edge → 做 IV:</b>既然没方向,就别赌涨跌,改赌「波动」——铁鹰(IC)/ 勒(Strangle)这类中性策略。</p>
-    <p><b>历史最强:牛市/低波+Q2 → 多 92.3%(n=26,t=8.1):</b>这票全部 20 格里最强的一格——它处在「牛市/低波+Q2」时,5 天后涨概率 92.3%(26 次样本,t=8.1 非常显著)。<b>这是它最该做多的环境。</b></p>
-    <p><b>52周位置 78.9%:</b>现价在过去 52 周最高–最低区间里的位置。0% = 贴一年最低,100% = 贴一年最高。</p>
-    <p><b>本票 S/R 触及历史(walk-forward,不偷看未来):</b>只看这只票自己——</p>
-    <ul>
-      <li><b>支撑→4周+5% 68.8%(n=64·lift+9.7)</b>:历史上每次测试支撑后,<b>4 周内涨过 +5%</b> 的比例 68.8%(64 次)。</li>
-      <li><b>阻力→1周−1% 92.1%(n=76·lift+4)</b>:每次测试阻力后,<b>当周内跌过 −1%</b> 的比例 92.1%(76 次)。</li>
-      <li><span class="k">lift</span> = 这胜率比「该票<b>每天都无脑买入</b>」的基线胜率<b>高出多少个点</b>。<b>lift≥10 才算真本事</b>,否则只是「这票本来就一直涨」的水分。</li>
-    </ul>` },
-
-  dip: { t: '抄底设置 — 你自己的打法清单', h: `
-    <p>这是按<b>你自己的抄底逻辑</b>做的「是否符合」清单。三个条件<b>全中 → 标 🎯 抄底</b>。</p>
-    <ul>
-      <li><span class="k">长期多头(站上200日线 +16.4%)</span>:收盘价在 <b>200 日均线上方</b>、<b>且 200 日线在往上走</b> = 长期趋势向上。<code>+16.4%</code> = 现价比 200 日线高多少。(跌破 200 线 → 标 🔻 长期偏空。)</li>
-      <li><span class="k">跌到支撑位(测试 S/R 支撑)</span>:今天<b>最低价打进了某条支撑带</b>。带「·历史达标」= 这票历史上「测试支撑→反弹」回测达标(可信)。</li>
-      <li><span class="k">回调</span>:短期跌了一段——<b>今天大跌</b>(≤−2.5%)<b>或</b>近 10 天跌了一段(≤−5%)。</li>
-    </ul>
-    <p>三者都满足 = <b>长期向上 + 短期回调 + 跌到支撑</b> = 你最想抄底的位置。</p>
-    <p>(列表里「趋势 短·中·长」= <b>SMA20 / SMA50 / SMA200</b>:价在均线上方且均线上行 ▲bull,下方且下行 ▼bear,其余 — 中性。)</p>` },
-
-  score: { t: '评分系统 v4 — 化简版(0–100,只加不减,bull 偏向)', h: `
-    <p><b>v4(2026-06-13 化简):只留对方向有预测力的价格信号 + 催化,砍掉群体噪音。</b>实验(归档 1 万样本)证 <b>PCR/OI/GEX 对未来收益 spread≈±1% = 噪音</b>、统计 edge 也微弱 → 期权三块降为<b>只展示不计分</b>、统计 edge <b>整块删</b>。<b>bull 偏向:牛市/中性只推 bull,bear 只在熊市 regime 才出现</b>(数据:未来20日均 +3%/55% 上涨,做空逆潮水)。</p>
-    <div class="formula">评分 = ① S/R 支撑阻力(0–40)<br>　　 + ③ 穿越 EMA100/200(0–20)<br>　　 + ④ 大中小趋势(0–25)<br>　　 + ⑤ MACD 趋势态(0–15)　= 满分 100,纯价格信号</div>
-    <ul>
-      <li><b>① S/R 支撑阻力(0–40)——回测里贡献最大的一块</b>:今天打进同向 zone 给 <b>16</b> 基础分;<b>多周期共振</b>(⭐x3 黄金 +10 / x2 +5);<b>zone 内 pivot 越多</b>每多 1 个 +3(最多 +9);历史回测达标再 +5。bull 偏向下只认<b>触支撑反弹</b>。</li>
-      <li><b>③ 穿越 EMA100/200(0–20)</b>:今天<b>上穿</b> EMA100/200 = 看多,穿越本身 <b>12</b> 分;该信号历史达标再 +8。</li>
-      <li><b>④ 大中小趋势(0–25)——顺势是你真正的 edge(动量 55% 胜)</b>:长(SMA200)+12 / 中(SMA50)+8 / 短(SMA20)+5,同向才加。</li>
-      <li><b>⑤ MACD 趋势态(0–15)</b>:多头排列=看多加。</li>
-      <li><b>🔇 期权 OI/Vol、PCR、GEX、统计 edge:只展示不计分</b>(实验证对方向是噪音,别人的仓位不预测你)。期权结构数值仍在「期权结构」块完整给你看。</li>
-      <li><b>Finviz 形态 / Barchart screener 额外分已删</b>(用户:没用;Barchart 你自己上平台选票照旧)。评分=纯价格信号。</li>
-    </ul>
-    <p><b>方向怎么定:</b>多、空两边<b>各算一遍总分,哪边高跟哪边</b>。两边都是 0 → 无方向 0 分。</p>
-    <p class="muted">不再计分(仅展示):RSI 超卖反转/超买回落、MaxPain、异动期权流、SSP 的 STK/X20/X50、放量/缩量。表格里的「保守胜率」列 = 胜率按样本量打折(Wilson 下界),仅供参考。</p>` },
-
-  tasig: { t: 'TA 信号实测 — 经典指标逐票回测', h: `
-    <p>6 个经典技术信号,每个都用<b>这票自己的历史</b>回测胜率(口径同 SSP / 评分),<b>达标才进评分</b>:</p>
-    <ul>
-      <li><span class="k">MACD金叉</span>(快线上穿慢线)→ 假设看多;<span class="k">MACD死叉</span>(下穿)→ 看空;</li>
-      <li><span class="k">RSI超卖反转</span>(RSI 上穿 30)→ 看多;<span class="k">RSI超买回落</span>(下穿 70)→ 看空;</li>
-      <li><span class="k">放量上攻</span>(量 ≥ 2× 20日均量,且收阳涨 ≥1%)→ 看多;</li>
-      <li><span class="k">缩量</span>(近10日均量 &lt; 0.7× 前10日)→ 看空(这是假设,常不达标)。</li>
-    </ul>
-    <p><b>表格列:</b><b>今日</b> = 今天是否触发(✓);<b>N</b> = 历史样本数;<b>胜率</b> = 该信号在这票上的历史胜率;<b>状态</b> = 达标 / 未达标。</p>
-    <p><b>达标 = N 够(≥15) 且 胜率≥60% 且 lift≥10</b>(lift = 超「每天无脑买」基线多少点)。「未达标(lift+3.2)」= 胜率不够或没超基线够多 → <b>不计分</b>。</p>
-    <p><b>下方:</b>当前 <b>RSI</b>(≥75 红 = 超买 / ≤25 红 = 超卖)、<b>MACD 多/空头</b>、<b>量比</b>(近10日均量 ÷ 前10日)。RSI 极端时推荐卡标 ⛔ 提醒(<b>v3 不扣分</b>)。</p>
-    <p class="muted">v3 进评分的只有:<b>跌穿EMA100/200</b>(穿越块)和 <b>MACD 趋势态</b>(多头/空头排列,5 分);金叉/死叉、RSI 反转、放量/缩量这些<b>仅展示</b>。表中胜率仍为该票实测,供参考。</p>` },
-
-  ssp: { t: 'SSP EMA 胜率 — 你的 TV 脚本移植', h: `
-    <p>这是你那套 PineScript「Spread Signal Pruned」的 Python 移植,<b>周桶口径与 TV 完全一致</b>。看多 5 个、看空 2 个信号:</p>
-    <ul>
-      <li><span class="k">STK</span> = 多头均线全多头排列(EMA20&gt;50&gt;100&gt;200)且 RSI&lt;70;</li>
-      <li><span class="k">X20 / X50 / X100 / X200</span> = 收盘<b>上穿</b> EMA20 / 50 / 100 / 200;</li>
-      <li><span class="k">V1</span> = 跌穿 EMA20 且空头排列;<span class="k">V2</span> = 反抽 EMA20 失败的阴线。</li>
-    </ul>
-    <p><b>表格:</b>今日 ✓ = 今天触发;<b>N</b> = 历史样本;<b>胜率</b>;<b>状态</b> = 达标 / 未达标。</p>
-    <p><b>赢的口径:</b>Bull = 信号后 <b>4 个周桶内任一周 High ≥ 入场 +5%</b>;Bear = <b>信号周 Low ≤ 入场 −1%</b>。</p>
-    <p><b>达标</b> = N≥20(空头 15)且胜率≥60%(再过 lift≥10 真 edge 检验)。<b>今日触发 + 达标 = alert,才进评分。</b></p>` },
-
-  opt: { t: '期权结构 — OI/Vol 方向结构(20)+ PCR(5)+ GEX(5)', h: `
-    <p>用该票最近 <b>2 个月度期权链</b>自己算。v3 里期权占 <b>30 分</b>,分三块,<b>全部只加不减</b>(方向不合 = 0 分,不扣):</p>
-    <ul>
-      <li><span class="k">② OI/Vol 方向结构(0–20,大块)</span>:<b>call 的量(未平仓 OI + 当日 Volume)堆在现价上方 = 市场在赌往上;put 堆在现价下方 = 赌往下</b>。每个 strike 的量按<b>离现价的距离衰减</b>(5% 处权重 ~0.72,10% 处 ~0.51,太远的目标不算数)。看涨侧占比 ≤45% → 0 分,线性涨到 80% → 满 20。</li>
-      <li><span class="k">PCR(OI)= Put/Call 未平仓比(0–5)</span>:&lt;1 = call 重仓 → <b>看多</b>方向加分;&gt;1 = put 重仓 → <b>看空</b>加分(1.0±0.3 打满)。</li>
-      <li><span class="k">GEX(Gamma 敞口)区位(0–5,只用 ≤60 天到期的链)</span>:现价在 gamma 翻转位<b>上方</b> = 正 gamma 区(做市商压波动,稳)→ <b>看多</b>加分;<b>下方</b> = 负 gamma 区(下跌自我加速)→ <b>看空</b>加分;3% 距离打满。</li>
-    </ul>
-    <p class="muted">下方表格里的 MaxPain / OI 重心 / bias 合计:<b>仅展示参考,不计分</b>。</p>` },
-
-  oaflow: { t: '异动期权流 — Benzinga 大单情绪', h: `
-    <p>来自 Benzinga <b>预先分类好情绪</b>的<b>大单期权流</b>,统计近 5 天看多 / 看空各砸了多少<b>权利金($)</b>。</p>
-    <ul>
-      <li><span class="k">看多 / 看空权利金</span>:各方向大单合计花的钱($M = 百万),及笔数。</li>
-      <li><span class="k">净多空(权利金)</span> =(看多权利金 − 看空权利金)÷ 总额。<b>&gt;+5% 偏多、&lt;−5% 偏空</b>。</li>
-    </ul>
-    <p>权利金 / 笔数够门槛才<b>按方向修正评分,封顶 ±5</b>;不够只展示不计分。<b>噪声大,只当佐证、不主导。</b></p>` },
-
-  rec: { t: '期权推荐 — debit 借记价差', h: `
-    <p>按主方向给的<b>借记价差(debit spread)</b>候选,自动挑到期 / 行权价:</p>
-    <ul>
-      <li><span class="k">📈 BCS = Bull Call Spread</span>(看多:买低 call + 卖高 call);<span class="k">📉 看空</span>只提示方向(不推荐开 bear 单)。看多 BCS:35-45 DTE(目标 40, 优先月权)、ATM 长腿 / 短腿 +10%(默认)·+5%(可选)。</li>
-    </ul>
-    <p><b>列含义:</b><b>腿型</b> = 变体;<b>到期</b>(<code>d</code> = 剩余天数,<code>·月</code> = 标准月期权);<b>strikes</b> = 买腿 / 卖腿行权价;<b>借记</b> = 净付出权利金(每股);<b>最大亏</b> = 借记×100(=最坏全亏的钱);<b>最大盈</b> =(价差宽度−借记)×100;<b>R/R</b> = 赔率(最大盈 ÷ 最大亏,越高越好);<b>POP</b> = <b>盈利概率</b>(到期价越过盈亏平衡点的概率,用 long 腿隐波按 lognormal 估,绿≥50%);<b>BE vs今价</b> = 盈亏平衡点相对现价 %,<b>绿 = 平衡点在现价下方(更稳)</b>。</p>
-    <p class="muted">注:R/R 高的 POP 通常低(赔率与概率反向),自己权衡 —— 高 POP 稳但赚得少,高 R/R 博但概率低。</p>
-    <p><b>✓推荐:</b>看多 = 盈亏平衡 ≤ 今价里 R/R 最高那个(赌不跌破今价);看空 = R/R 最高。</p>
-    <p><span class="k">⚡模拟盘</span> = 一键把价差载入 模拟盘 看盈亏 / 模拟下单(快捷键 <b>B</b>);<span class="k">📋</span> = 复制订单票;<span class="k">⚠️财报</span> = 到期前有财报。</p>
-    <div class="ex">止损按你的规矩:<b>整个价差净权利金的 50%</b>(看整体、不看单腿)。</div>` },
-
-  finviz: { t: 'Finviz — 技术 / 表现 / 基本面', h: `
-    <p>来自 Finviz 的补充数据(右侧栏):</p>
-    <ul>
-      <li><b>技术:</b><span class="k">RSI(14)</span>、<span class="k">ATR(14)</span>(日均真实波幅)、<span class="k">SMA20/50/200</span>(显示的是<b>现价距该均线的 %</b>,绿 = 在均线上方)、<span class="k">波动率</span>。</li>
-      <li><b>表现:</b>周 / 月 / 季 / 半年 / 年 / YTD 涨跌幅。</li>
-      <li><b>基本面:</b><span class="k">P/E</span>(市盈)、<span class="k">Fwd P/E</span>(预期市盈)、<span class="k">PEG</span>、市值、<span class="k">P/S</span>(市销)、<span class="k">P/B</span>(市净)、<span class="k">Beta</span>(相对大盘波动)、股息率。</li>
-      <li><b>分析师评级(近5):</b>日期 / 动作(升级·维持·降级)/ 机构 / 评级 / 目标价。</li>
-    </ul>` },
-};
+// The ? beside each block of a ticker's detail opens a card from /static/zeus_help.js (Chinese and
+// English, loaded by zeus.js), whose ids are 'ta.' + the key given here.
 function hIcon(k) {
   return '<span class="hicon" onclick="event.stopPropagation();showHelp(\'' + k + '\')" title="点我看这块怎么读">?</span>';
 }
 function showHelp(k) {
-  const m = HELP[k]; if (!m) return;
-  document.getElementById('helpTitle').textContent = m.t;
-  document.getElementById('helpBody').innerHTML = m.h;
-  const card = document.getElementById('helpCard'); if (card) card.scrollTop = 0;
-  document.getElementById('helpModal').classList.add('on');
-}
-function closeHelp() { document.getElementById('helpModal').classList.remove('on'); }
-if (!window._helpEscBound) {
-  window._helpEscBound = true;
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') closeHelp();
-  });
+  if (window.zeusHelp) window.zeusHelp.open('ta.' + k);
 }
 
 function fmtPct(v, signed) {

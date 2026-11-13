@@ -1,5 +1,5 @@
 /* ZEUS Terminal shell: settings button, settings overlay, three interface languages
- * (中文 / 双语 bilingual / English), manual-mode onboarding.
+ * (中文 / 双语 bilingual / English), manual-mode onboarding, and the ? help (zeus_help.js).
  * Loaded after the original app scripts; touches nothing unless needed. */
 (function () {
   'use strict';
@@ -420,6 +420,16 @@
     meta.parentNode.insertBefore(b, meta);
   }
 
+  // ------------------------------------------------------------------ help
+  // zeus_help.js: the ? cards beside columns and scores, and the page guide behind the ? button.
+  // Loaded after the page is up so it never delays it.
+  function loadHelp() {
+    if (window.zeusHelp || document.getElementById('zsHelpJs') || !document.body) return;
+    var s = document.createElement('script');
+    s.id = 'zsHelpJs'; s.src = '/static/zeus_help.js'; s.async = true;
+    document.body.appendChild(s);
+  }
+
   function boot() {
     LANG = pickLang();
     setLangClass();
@@ -430,6 +440,7 @@
     refreshStatus(false);
     setInterval(function () { refreshStatus(true); }, 60000);
     startI18n();
+    loadHelp();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();

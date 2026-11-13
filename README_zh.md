@@ -25,10 +25,11 @@
 
 ## 🆕 新功能
 
-<sub>最新版本 **0.3.1**（2026-11-12）。完整的更新历史见[更新记录](CHANGELOG_zh.md)。</sub>
+<sub>最新版本 **0.4.0**（2026-11-12）。完整的更新历史见[更新记录](CHANGELOG_zh.md)。</sub>
 
-| | 0.3.0 和 0.2.x 新加入 |
+| | 0.4.0、0.3.x 和 0.2.x 新加入 |
 |---|---|
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **❓ 每个页面都有说明**：表头、分数、卡片旁边的小 ? 用大白话讲清这一项是什么、怎么算、怎么用；顶栏的 ? 列出这个页面上的每个按钮和数字。[怎么用 →](docs/USER_GUIDE_zh.md#31-每个页面的说明) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🔌 接入你自己的 AI 智能体（MCP）**：Claude Code、Claude Desktop、通过 Codex 用的 GPT、Gemini CLI 或你自己写的智能体，都能读你的持仓、跑开单前体检、给价差估价、读新闻和交易日记；你允许的话还能下模拟单。ZEUS 本身就是一个本地 MCP 服务器，不需要 API key。[连接智能体 →](docs/USER_GUIDE_zh.md#18-ai-智能体mcp) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🟩 热力图**：选股页的热力图回来了，和 K 线墙一键切换。[怎么用 →](docs/USER_GUIDE_zh.md#69-热力图) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🧪 模拟盘**：在实时期权链上搭任何策略，期权腿和股票腿都能加，存成模拟单后跟踪盈亏。[怎么用 →](docs/USER_GUIDE_zh.md#8-模拟盘) |

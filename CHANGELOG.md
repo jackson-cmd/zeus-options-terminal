@@ -4,6 +4,19 @@
 
 What changed in each version of ZEUS Terminal. New features carry the <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> badge. Numbers in parentheses are the pull requests.
 
+## 0.4.0 — 2026-11-12
+
+### New features
+
+| | Feature | Read more |
+|---|---|---|
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **❓ Help on every page**: a small ? beside the columns, scores and cards opens a card that says what the item is, how it is calculated and how to use it, written in Chinese and English. The ? in the top bar (a round ? on the TA screener, the pre-trade checkup and the journal review) lists every button and number on the page you are on, with search and **Show me on the page**. Press ? to open it. (#32) | [Manual §3.1](docs/USER_GUIDE.md#31-help-on-every-page) |
+
+### Fixed
+
+- TA screener: the help behind its ? icons was in Chinese only and partly out of date; it still described option and order-flow points that the score no longer counts. Its ? icons now open the new cards in the interface language, checked against the scoring code, and the score column has a ? of its own. (#32)
+- Top bar: in bilingual mode the tabs sit a little closer below 1240 px, so all six still fit next to the new ? button. (#32)
+
 ## 0.3.1 — 2026-11-12
 
 ### Fixed

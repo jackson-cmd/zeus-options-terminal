@@ -32,6 +32,7 @@ ZEUS does far more than the screenshots in the README show. There are 7 pages in
 |---|---|---|---|
 | ✅ | Page tabs | Positions · 🎯 Picker · 📋 Digest · 📅 Events · Trade Journal · 🧪 Paper Trade; in a narrow window they scroll sideways instead of wrapping | Free |
 | ✅ | Language menu | 中文 · 双语 (bilingual) · English, switch any time | Free |
+| ✅ | ? Guide <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | Lists every button and number on the page you are on, with search and “show me”; small ? icons beside columns, scores and cards open a card: what it is, how it is calculated, how to use it. Chinese, bilingual or English | Free |
 | ✅ | ⚙ Settings | Opens the settings page; everything is configured in the browser. Hover ⚙ to see the mode (tastytrade, or ◐ manual with the number of manual trades); the first card in Settings shows it too | Free |
 | ✅ | AI pause | Pauses the scheduled AI jobs (picks, brief, summaries) with one click | AI |
 | ✅ | 🔔 Mute | Silences every notification: take-profit, movers, risk, AI position review | Free |

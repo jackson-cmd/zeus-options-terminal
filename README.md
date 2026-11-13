@@ -25,10 +25,11 @@
 
 ## 🆕 What's new
 
-<sub>Latest release **0.3.1** (2026-11-12). The full history is in the [changelog](CHANGELOG.md).</sub>
+<sub>Latest release **0.4.0** (2026-11-12). The full history is in the [changelog](CHANGELOG.md).</sub>
 
-| | New in 0.3.0 and 0.2.x |
+| | New in 0.4.0, 0.3.x and 0.2.x |
 |---|---|
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **❓ Help on every page**: a small ? beside the columns, scores and cards opens a plain explanation of what the item is, how it is calculated and how to use it, and the ? in the top bar lists every button and number on the page. [How it works →](docs/USER_GUIDE.md#31-help-on-every-page) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🔌 Plug in your own AI agents (MCP)**: Claude Code, Claude Desktop, GPT through Codex, Gemini CLI or an agent you build can read your positions, run the pre-trade checkup, price spreads, and read the news and your journal. If you allow it, they can also paper trade. ZEUS is a local MCP server, so no API key is needed. [Connect an agent →](docs/USER_GUIDE.md#18-ai-agents-mcp) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🟩 Heatmap**: the picker's heatmap is back, one click away from the K-line chart wall. [How to use it →](docs/USER_GUIDE.md#69-heatmap) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🧪 Paper Trade**: build any strategy on the live option chain with option *and* stock legs, save it as a simulated trade and follow its P/L. [How to use it →](docs/USER_GUIDE.md#8-paper-trade) |
