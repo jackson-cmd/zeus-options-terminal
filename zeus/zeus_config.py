@@ -27,7 +27,7 @@ from typing import Any
 
 APP_NAME = "ZEUS Terminal"
 APP_NAME_ZH = "宙斯期权终端"
-APP_VERSION = "0.5.2"
+APP_VERSION = "0.6.0"
 APP_TAGLINE = "Self-hosted, all-in-one options trading terminal"
 APP_TAGLINE_ZH = "本地部署的全方位期权交易终端"
 REPO_ROOT = Path(__file__).resolve().parent
@@ -49,6 +49,37 @@ def home() -> Path:
 
 def config_path() -> Path:
     return home() / "config.json"
+
+
+# ---------------------------------------------------------------------------
+# Running in the ZEUS Docker image. Its Dockerfile sets ZEUS_CONTAINER=1, and Docker and Podman
+# leave a marker file in every container. Both are required, so setting the variable on a normal
+# install changes nothing.
+# ---------------------------------------------------------------------------
+CONTAINER_MARKERS = ("/.dockerenv", "/run/.containerenv")
+
+
+def in_container() -> bool:
+    return os.environ.get("ZEUS_CONTAINER") == "1" and any(os.path.exists(p) for p in CONTAINER_MARKERS)
+
+
+def container_gateway(route_file: str = "/proc/net/route") -> str:
+    """The container's default gateway, i.e. Docker's bridge address. Programs on the host that
+    reach ZEUS through a published port (-p 127.0.0.1:8765:8765) arrive from this address."""
+    import socket
+    import struct
+    try:
+        rows = Path(route_file).read_text(encoding="ascii").splitlines()[1:]
+    except (OSError, ValueError):
+        return ""
+    for row in rows:
+        f = row.split()
+        try:
+            if len(f) > 3 and f[1] == "00000000" and int(f[3], 16) & 0x2:   # default route via a gateway
+                return socket.inet_ntoa(struct.pack("=L", int(f[2], 16)))  # the kernel prints it in host order
+        except (ValueError, OSError, struct.error):
+            continue
+    return ""
 
 
 # ---------------------------------------------------------------------------
@@ -410,6 +441,7 @@ def status() -> dict:
         "mcp": get_bool("mcp_server"),
         "mcp_paper_trades": get_bool("mcp_paper_trades"),
         "config_file": str(config_path()),
+        "container": in_container(),
     }
 
 
@@ -590,7 +622,10 @@ def relocate_runtime_dirs() -> list[str]:
             link.parent.mkdir(parents=True, exist_ok=True)
             link.symlink_to(target, target_is_directory=True)
         except OSError:
-            link.mkdir(parents=True, exist_ok=True)
+            try:
+                link.mkdir(parents=True, exist_ok=True)
+            except OSError:
+                pass        # a read-only code folder: the Docker image makes these links when it is built
             left.append(rel)
     _drop_old_links(base)
     return left

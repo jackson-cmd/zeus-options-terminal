@@ -140,6 +140,15 @@ const T = {
   c_try: ['连上以后直接问就行，比如「用 zeus 看看我的持仓，哪些该止盈？」。Claude Code 里还有现成的斜杠命令：', 'Once connected, just ask, for example "Use zeus to review my positions: which ones should I take profit on?". Claude Code also gets ready-made slash commands:'],
   tools_n: ['个工具（✎ = 只在允许模拟单时可用）', 'tools (✎ = only when paper trades are allowed)'],
   mcp_off: ['MCP 接口已关闭：把上面的开关改成 on 并保存，智能体才连得上。', 'The MCP server is off: set the switch above to on and save, or agents cannot connect.'],
+  box_mcp: ['ZEUS 在 Docker 容器里运行：本机的智能体通过 docker exec 在容器里启动 stdio 桥接。下面命令里的 zeus 是你用 --name 给容器起的名字。想改用 HTTP 地址，启动容器时加上 -e ZEUS_MCP_FROM_HOST=1。',
+            'ZEUS runs in a Docker container: agents on this computer start the stdio bridge inside it with docker exec. In the commands below, zeus is the name you gave the container with --name. To use the HTTP address instead, start the container with -e ZEUS_MCP_FROM_HOST=1.'],
+  box_mcp_http: ['ZEUS 在 Docker 容器里运行，启动时加了 -e ZEUS_MCP_FROM_HOST=1，本机的程序可以连下面的 HTTP 地址。端口只发布在 127.0.0.1 上（-p 127.0.0.1:8765:8765），否则局域网里的机器也能连。',
+                 'ZEUS runs in a Docker container started with -e ZEUS_MCP_FROM_HOST=1, so programs on this computer can use the HTTP address below. Publish the port on 127.0.0.1 only (-p 127.0.0.1:8765:8765), or machines on your network can connect too.'],
+  box_general: ['ZEUS 在 Docker 容器里运行：容器里固定监听 8765 端口，本机用哪个端口由启动时的 -p 决定，这里改端口不起作用。设置和数据都在容器的 /data 卷里。',
+                'ZEUS runs in a Docker container: inside it the port is always 8765, and the port on this computer is the one you publish with -p, so changing the port here has no effect. Settings and data live in the container\'s /data volume.'],
+  c_stdio: ['启动命令（stdio）', 'Command (stdio)'],
+  c_gemini_json: ['Gemini CLI：把这段并进 ~/.gemini/settings.json', 'Gemini CLI: merge this into ~/.gemini/settings.json'],
+  c_check: ['检查连接：在终端里运行，会列出全部工具', 'Check the connection: run this in a terminal, it lists the tools'],
   privacy: ['隐私:所有 token、密码、交易都只保存在本机 ~/.zeus-terminal/(权限 600),不在代码仓库里,也不会上传到任何地方;浏览器端读不回已保存的密钥。',
             'Privacy: every token, password and trade is stored only on this computer in ~/.zeus-terminal/ (mode 600), never inside the code repository, never uploaded anywhere; saved secrets cannot be read back by the browser.'],
 };
@@ -298,6 +307,7 @@ function renderSection() {
   if (g[0] === 'news') h += '<button id="testBz">' + t('test') + ' · Benzinga</button>';
   h += '<span class="msg" id="msg"></span></div>';
   if (g[0] === 'general') h += '<div class="note">' + tb('restart') + '</div>';
+  if (g[0] === 'general' && (VIEW.status || {}).container) h += '<div class="note">' + tb('box_general') + '</div>';
   h += '<div class="note">' + tb('privacy') + '</div></section>';
   if (g[0] === 'broker') h += tradesHtml();
   if (g[0] === 'agents') h += '<section class="on" id="agentsSec"><h2>' + t('connect') + '</h2><div id="agentsBody"><span class="msg">…</span></div></section>';
@@ -318,18 +328,31 @@ function snip(label, code, id) {
 function loadAgents() {
   api('/api/zeus/mcp').then(m => {
     const url = m.url;
-    const desktop = JSON.stringify({ mcpServers: { zeus: { command: m.python, args: [m.bridge] } } }, null, 2);
+    const box = m.container;   // the Docker image: the stdio bridge runs inside the container, through docker exec
+    const launch = box ? { command: box.stdio[0], args: box.stdio.slice(1) } : { command: m.python, args: [m.bridge] };
+    const desktop = JSON.stringify({ mcpServers: { zeus: launch } }, null, 2);
     const body = JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'get_status', arguments: {},
       _meta: { 'io.modelcontextprotocol/protocolVersion': '2026-07-28', 'io.modelcontextprotocol/clientCapabilities': {} } } });
     const curl = 'curl -s ' + url + " -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream'"
       + " -H 'MCP-Protocol-Version: 2026-07-28' -H 'Mcp-Method: tools/call' -H 'Mcp-Name: get_status' -d '" + body + "'";
     let h = m.enabled ? '' : '<div class="note"><span class="warn">' + tb('mcp_off') + '</span></div>';
-    h += snip(t('endpoint'), url, 'snUrl');
-    h += snip(t('c_claude'), 'claude mcp add --transport http --scope user zeus ' + url, 'snClaude');
-    h += snip(t('c_codex'), 'codex mcp add zeus --url ' + url, 'snCodex');
-    h += snip(t('c_gemini'), 'gemini mcp add --transport http --scope user zeus ' + url, 'snGemini');
-    h += snip(t('c_desktop'), desktop, 'snDesktop');
-    h += snip(t('c_own'), curl, 'snCurl');
+    if (box) h += '<div class="note">' + tb(box.http ? 'box_mcp_http' : 'box_mcp') + '</div>';
+    if (box && !box.http) {
+      const cmd = box.stdio.join(' ');
+      h += snip(t('c_stdio'), cmd, 'snUrl');
+      h += snip(t('c_claude'), 'claude mcp add --scope user zeus -- ' + cmd, 'snClaude');
+      h += snip(t('c_codex'), 'codex mcp add zeus -- ' + cmd, 'snCodex');
+      h += snip(t('c_gemini_json'), desktop, 'snGemini');
+      h += snip(t('c_desktop'), desktop, 'snDesktop');
+      h += snip(t('c_check'), cmd + ' --check', 'snCurl');
+    } else {
+      h += snip(t('endpoint'), url, 'snUrl');
+      h += snip(t('c_claude'), 'claude mcp add --transport http --scope user zeus ' + url, 'snClaude');
+      h += snip(t('c_codex'), 'codex mcp add zeus --url ' + url, 'snCodex');
+      h += snip(t('c_gemini'), 'gemini mcp add --transport http --scope user zeus ' + url, 'snGemini');
+      h += snip(t('c_desktop'), desktop, 'snDesktop');
+      h += snip(t('c_own'), curl, 'snCurl');
+    }
     h += '<p class="intro" style="margin-top:16px">' + tb('c_try') + ' '
       + m.prompts.map(p => '<code>/mcp__zeus__' + esc(p.name) + '</code>').join(' ') + '</p>';
     h += '<p class="intro">' + m.tools.length + ' ' + t('tools_n') + ': '

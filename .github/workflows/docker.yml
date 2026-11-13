@@ -1,0 +1,148 @@
+name: Docker
+
+# The container image ghcr.io/jackson-cmd/zeus-options-terminal (GitHub Packages).
+#
+# A release builds the image for amd64 and arm64, starts the amd64 one and checks it
+# (tools/docker_smoke.sh), then pushes it as X.Y.Z, X.Y and latest with a signed build
+# provenance. Releases published by the Release workflow start this run themselves (its
+# GITHUB_TOKEN cannot raise a release event for other workflows); a release published by hand
+# raises the event. Run by hand on a tag v<version> to rebuild that release's image; run on a
+# branch it only builds and checks. Pull requests that touch the image are built and checked
+# for both platforms, and nothing is pushed.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+  pull_request:
+    paths: ["Dockerfile", ".dockerignore", "requirements.txt", "tools/docker_smoke.sh", ".github/workflows/docker.yml"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docker-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  IMAGE: ghcr.io/${{ github.repository }}
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      packages: write        # push to ghcr.io
+      id-token: write        # sign the provenance
+      attestations: write    # store it with the repository
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Version and tags
+        id: v
+        env:
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          version="$(python3 tools/release_notes.py version)"
+          push=false
+          newest=false
+          if [ "$REF_TYPE" = tag ]; then
+            if [ "$REF_NAME" != "v$version" ]; then
+              echo "::error::tag $REF_NAME does not match APP_VERSION $version"
+              exit 1
+            fi
+            push=true
+            top="$(git ls-remote --tags --refs origin 'v*' | sed 's#.*refs/tags/v##' | sort -V | tail -1)"
+            [ "$top" = "$version" ] && newest=true
+          fi
+          {
+            echo "version=$version"
+            echo "minor=${version%.*}"
+            echo "push=$push"
+            echo "newest=$newest"
+          } >> "$GITHUB_OUTPUT"
+          echo "Version $version · push $push · latest $newest" >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: docker/setup-qemu-action@v4
+      - uses: docker/setup-buildx-action@v4
+
+      - name: Build for the check (amd64)
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          platforms: linux/amd64
+          load: true
+          tags: zeus-smoke:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Start the image and check it
+        run: bash tools/docker_smoke.sh zeus-smoke:ci
+
+      - name: Image metadata
+        id: meta
+        uses: docker/metadata-action@v6
+        env:
+          DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=raw,value=${{ steps.v.outputs.version }}
+            type=raw,value=${{ steps.v.outputs.minor }}
+            type=raw,value=latest,enable=${{ steps.v.outputs.newest == 'true' }}
+          labels: |
+            org.opencontainers.image.title=ZEUS Terminal
+            org.opencontainers.image.description=Self-hosted, all-in-one options trading terminal · 本地部署的全方位期权交易终端
+            org.opencontainers.image.licenses=PolyForm-Noncommercial-1.0.0
+            org.opencontainers.image.url=https://jackson-cmd.github.io/zeus-options-terminal/
+            org.opencontainers.image.documentation=https://github.com/jackson-cmd/zeus-options-terminal/blob/main/docs/USER_GUIDE.md#17-run-with-docker
+          annotations: |
+            org.opencontainers.image.title=ZEUS Terminal
+            org.opencontainers.image.description=Self-hosted, all-in-one options trading terminal · 本地部署的全方位期权交易终端
+            org.opencontainers.image.licenses=PolyForm-Noncommercial-1.0.0
+
+      - name: Log in to ghcr.io
+        if: steps.v.outputs.push == 'true'
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build amd64 + arm64${{ steps.v.outputs.push == 'true' && ' and push' || '' }}
+        id: build
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: ${{ steps.v.outputs.push == 'true' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          annotations: ${{ steps.meta.outputs.annotations }}
+          provenance: false     # signed below with GitHub's attestation instead (no unknown/unknown entries)
+          cache-from: type=gha
+
+      - name: Sign the build provenance
+        if: steps.v.outputs.push == 'true'
+        uses: actions/attest@v4
+        with:
+          subject-name: ${{ env.IMAGE }}
+          subject-digest: ${{ steps.build.outputs.digest }}
+          create-storage-record: false
+
+      - name: Summary
+        if: steps.v.outputs.push == 'true'
+        env:
+          TAGS: ${{ steps.meta.outputs.tags }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          {
+            echo "### Pushed"
+            echo
+            echo '```'
+            echo "$TAGS"
+            echo '```'
+            echo
+            echo "Digest \`$DIGEST\`. Run it: \`docker run -d --name zeus -p 127.0.0.1:8765:8765 -v zeus-data:/data $IMAGE:${{ steps.v.outputs.version }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"

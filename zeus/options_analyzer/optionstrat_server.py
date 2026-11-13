@@ -19284,6 +19284,9 @@ if __name__ == "__main__":
     _host = str(os.environ.get("HOST") or _hc.get("host") or "127.0.0.1")
     print(f"ZEUS Terminal · 宙斯期权终端  →  http://{'localhost' if _host in ('127.0.0.1', '0.0.0.0') else _host}:{_port}")
     print(f"Settings / 设置  →  http://localhost:{_port}/settings   (config: {_hc.config_path()})")
+    if _hc.in_container():
+        print("Docker: open the port you published with -p (-p 127.0.0.1:8765:8765 → http://localhost:8765) · "
+              "在 Docker 里：打开启动时用 -p 发布的端口")
     # reload=False in production: this runs under launchd with a persistent
     # DXLink WebSocket + ~10 background asyncio tasks and no shutdown handler,
     # so uvicorn's hot-reload (watch files → kill/respawn worker) can leave a
