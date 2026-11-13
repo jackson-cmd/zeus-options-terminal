@@ -1,0 +1,25 @@
+# ZEUS Terminal
+
+> ZEUS Terminal (宙斯期权终端) is a self-hosted options trading terminal that runs on your own computer, in English and Chinese. It shows live positions and Greeks, P/L and risk (stress test, VaR / CVaR, beta-weighted Greeks), exit discipline, paper trading with option and stock legs, a four-source news desk, a stock picker, earnings and SEC filings, and a trade journal. It connects to tastytrade, Alpaca or Public, or reads a CSV of your trades, and fills in quotes from free sources (Cboe and Yahoo, about 15 minutes delayed). It only reads from brokers and never places an order. Free for noncommercial use (PolyForm Noncommercial 1.0.0); nothing in it is investment advice.
+
+- Install: `pipx install zeus-options-terminal`, then run `zeus` (Python 3.10+). Or clone the repository and run `./start.sh` (Windows: `start.bat`), or run the image: `docker run -d --name zeus -p 127.0.0.1:8765:8765 -v zeus-data:/data ghcr.io/jackson-cmd/zeus-options-terminal`. The page opens at http://localhost:8765.
+- MCP server: while ZEUS runs, AI agents (Claude Code, Claude Desktop, Codex, Gemini CLI or your own) connect to `http://127.0.0.1:8765/mcp` over streamable HTTP and get 18 tools: positions with exact max profit and loss, breakevens, Greeks and exit advice, what-if pricing of any strategy, the four-gate pre-trade checkup, liquidity, news, events, sector rotation and the trade journal. It is read-only unless you let agents paper trade, answers only programs on the same computer, and never touches a real order. Clients that can only launch a command use the stdio bridge in `zeus/zeus_mcp_stdio.py`.
+
+## Website
+
+- [ZEUS Terminal](https://jackson-cmd.github.io/zeus-options-terminal/): what it does, screenshots and answers to common questions
+- [宙斯期权终端](https://jackson-cmd.github.io/zeus-options-terminal/zh/): the same page in Chinese
+
+## Documentation
+
+- [README](https://github.com/jackson-cmd/zeus-options-terminal#readme): quick start, screenshots, brokers, AI agents (MCP), FAQ
+- [User manual](https://github.com/jackson-cmd/zeus-options-terminal/blob/main/docs/USER_GUIDE.md): every page and setting, Docker, pipx, connecting AI agents
+- [All features](https://github.com/jackson-cmd/zeus-options-terminal/blob/main/docs/FEATURES.md): the complete feature checklist
+- [Changelog](https://github.com/jackson-cmd/zeus-options-terminal/blob/main/CHANGELOG.md)
+
+## Optional
+
+- [README in Chinese](https://github.com/jackson-cmd/zeus-options-terminal/blob/main/README_zh.md)
+- [User manual in Chinese](https://github.com/jackson-cmd/zeus-options-terminal/blob/main/docs/USER_GUIDE_zh.md)
+- [PyPI package](https://pypi.org/project/zeus-options-terminal/)
+- [Docker image](https://github.com/jackson-cmd/zeus-options-terminal/pkgs/container/zeus-options-terminal)
