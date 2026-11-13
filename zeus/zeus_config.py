@@ -604,20 +604,25 @@ def _drop_old_links(base: Path) -> None:
     if REPO_ROOT.name != "zeus":
         return
     top = REPO_ROOT.parent
-    try:
-        base_real = base.resolve()
-    except OSError:
-        return
+
+    def real(path) -> str:
+        # Windows reports link targets as \\?\C:\…; realpath + normcase make both sides comparable
+        p = os.path.realpath(str(path))
+        if p.startswith("\\\\?\\"):
+            p = p[4:]
+        return os.path.normcase(p).rstrip("\\/")
+
+    root = real(base)
     for rel in RUNTIME_DIRS:
         old = top / rel
         try:
             if not old.is_symlink():
                 continue
-            target = Path(os.readlink(old))
-            if not target.is_absolute():
-                target = (old.parent / target)
-            target = target.resolve()
-            if target == base_real or base_real in target.parents:
-                old.unlink()
+            target = real(old)                  # where the link points (it need not exist)
+            if target == root or target.startswith(root + os.sep):
+                try:
+                    old.unlink()
+                except OSError:
+                    os.rmdir(old)               # Windows removes a link to a folder with rmdir
         except OSError:
             continue
