@@ -2,7 +2,8 @@ name: Website
 
 # The project page at https://jackson-cmd.github.io/zeus-options-terminal/ (site/), with the
 # screenshots copied in from docs/screenshots and the share cards from docs/assets at build
-# time, so each picture is stored only once.
+# time, so each picture is stored only once. site/llms.txt is the plain-text map that AI search
+# tools read. After each deploy, the sitemap's pages go to IndexNow (Bing and others).
 on:
   push:
     branches: [main]
@@ -37,3 +38,21 @@ jobs:
           path: site
       - id: deployment
         uses: actions/deploy-pages@v5
+      - name: Tell Bing and the other IndexNow search engines which pages changed
+        # IndexNow needs no account: the engines check that the key file site/<key>.txt is on the
+        # site (the key is public by design). Best effort, so a refused ping never fails the deploy.
+        continue-on-error: true
+        env:
+          INDEXNOW_KEY: 0798c5080ad3272dc37d3c67d2de5d7d
+          SITE_URL: https://jackson-cmd.github.io/zeus-options-terminal/
+        run: |
+          python3 - <<'PY'
+          import json, os, re, urllib.request
+          site, key = os.environ["SITE_URL"], os.environ["INDEXNOW_KEY"]
+          urls = re.findall(r"<loc>([^<]+)</loc>", open("site/sitemap.xml", encoding="utf-8").read())
+          body = {"host": site.split("/")[2], "key": key, "keyLocation": f"{site}{key}.txt", "urlList": urls}
+          request = urllib.request.Request("https://api.indexnow.org/indexnow", data=json.dumps(body).encode(),
+                                           headers={"Content-Type": "application/json; charset=utf-8"})
+          with urllib.request.urlopen(request, timeout=30) as response:
+              print(f"IndexNow answered {response.status} for {len(urls)} pages")
+          PY

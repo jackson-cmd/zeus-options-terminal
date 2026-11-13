@@ -98,3 +98,22 @@ def test_google_search_console_file_stays():
     """Google re-checks this file; removing it drops the site's verified ownership in Search Console."""
     f = SITE / "google3ed451f05041f5f9.html"
     assert f.read_text(encoding="utf-8").strip() == "google-site-verification: google3ed451f05041f5f9.html"
+
+
+def test_llms_txt_lists_every_page_and_existing_docs():
+    """site/llms.txt is the plain-text map that AI search tools read: every page in the sitemap is in
+    it, every file it links on GitHub exists, and its docker run stays on this computer."""
+    text = (SITE / "llms.txt").read_text(encoding="utf-8")
+    assert text.startswith("# ZEUS Terminal\n\n> ")
+    pages = re.findall(r"<loc>([^<]+)</loc>", (SITE / "sitemap.xml").read_text(encoding="utf-8"))
+    assert pages and all(f"]({u})" in text for u in pages)
+    for name in re.findall(r"blob/main/([^)#\s]+)", text):
+        assert (ROOT / name).is_file(), f"llms.txt links to a missing file: {name}"
+    assert all("-p 127.0.0.1:" in line for line in text.splitlines() if "docker run" in line)
+
+
+def test_indexnow_key_file_matches_the_workflow():
+    wf = (ROOT / ".github" / "workflows" / "pages.yml").read_text(encoding="utf-8")
+    key = re.search(r"INDEXNOW_KEY: ([0-9a-f]{32})", wf)[1]
+    assert (SITE / f"{key}.txt").read_bytes() == key.encode()          # the key itself, no newline
+    assert f"SITE_URL: {BASE}" in wf and "continue-on-error: true" in wf
