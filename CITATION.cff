@@ -1,9 +1,11 @@
 # GitHub shows "Cite this repository" from this file, and Zenodo archives each GitHub release with
-# a DOI using the same details.
+# a DOI using the same details. doi is the concept DOI: it stands for every version and resolves
+# to the newest one.
 cff-version: 1.2.0
 message: "If you use ZEUS Terminal in your work, please cite it as below."
 type: software
 title: "ZEUS Terminal: the self-hosted options trading terminal"
+doi: 10.5281/zenodo.24205410
 abstract: >-
   ZEUS Terminal (宙斯期权终端) is a self-hosted options trading terminal that runs on your own
   computer: live positions and Greeks, P/L and risk, paper trading with option and stock legs, a

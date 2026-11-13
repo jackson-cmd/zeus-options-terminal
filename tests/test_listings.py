@@ -1,6 +1,7 @@
 """Files that directories read from the top of the repository: glama.json lets Glama's MCP
 directory confirm the maintainer, and CITATION.cff gives GitHub's "Cite this repository" and
-Zenodo's archive of each release their details, naming the project rather than a person.
+Zenodo's archive of each release their details, naming the project rather than a person; its doi
+is the concept DOI that the DOI badge in both READMEs links to.
 (server.json, for the MCP Registry, is in tests/test_mcp_registry.py.)"""
 import json
 import re
@@ -24,3 +25,10 @@ def test_citation_names_the_project_not_a_person():
     license_ = re.search(r'^license = "([^"]+)"', (ROOT / "pyproject.toml").read_text(encoding="utf-8"), re.M).group(1)
     assert f"license: {license_}" in text
     assert 'repository-code: "https://github.com/jackson-cmd/zeus-options-terminal"' in text
+
+
+def test_readme_doi_badges_link_the_citation_doi():
+    doi = re.search(r"^doi: (10\.5281/zenodo\.\d+)$", (ROOT / "CITATION.cff").read_text(encoding="utf-8"), re.M)[1]
+    badge = f"[![DOI](https://zenodo.org/badge/DOI/{doi}.svg)](https://doi.org/{doi})"
+    for name in ("README.md", "README_zh.md"):
+        assert badge in (ROOT / name).read_text(encoding="utf-8"), name
