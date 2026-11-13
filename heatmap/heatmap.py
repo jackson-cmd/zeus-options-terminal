@@ -5711,8 +5711,15 @@ HEATMAP_JS = r"""
   function _hmLocalDay() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
   function _hmSeenToday() { try { return localStorage.getItem('hmSeenDate') === _hmLocalDay(); } catch (e) { return false; } }
   function _hmMarkSeenToday() { try { localStorage.setItem('hmSeenDate', _hmLocalDay()); } catch (e) {} }
+  // A first visit, or the welcome card still waiting on the Positions tab: don't pull a new user away
+  // to the movers news before they have seen how to start.
+  function _hmWelcomeShowing() { return !!document.getElementById('zsManualHint'); }
   function _hmMaybeDailyCatchup() {
     try {
+      let first = false;
+      try { first = localStorage.getItem('hmSeenDate') === null; } catch (e) {}
+      if (first) { _hmMarkSeenToday(); return; }
+      if (_hmWelcomeShowing()) return;
       const now = new Date(), wd = now.getDay();
       if (wd < 1 || wd > 5) return;          // 仅工作日(周末没盘可看)
       if (now.getHours() < 9) return;         // 本地 9点(开盘)后才弹
@@ -5725,7 +5732,7 @@ HEATMAP_JS = r"""
   async function _hmPopupPoll() {
     try {
       const r = await (await fetch('/api/heatmap/popup_state')).json();
-      if (r && r.due && r.id && !_hmPopupAlreadyShown(r.id)) {
+      if (r && r.due && r.id && !_hmPopupAlreadyShown(r.id) && !_hmWelcomeShowing()) {
         _hmMarkPopupShown(r.id);
         if ((r.kind || 'movernews') === 'movernews') window.hmOpenMoverNews(r.slot);
         else window.hmOpenCompactPopup(r.slot);

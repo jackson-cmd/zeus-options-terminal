@@ -166,3 +166,17 @@ def test_privacy_check_allows_handle_only_in_github_urls(tmp_path, monkeypatch):
     (tmp_path / "bad.md").write_text("written by octo-cat")
     problems = pc.check([("100644", "ok.md"), ("100644", "bad.md")], staged=False)
     assert problems == ["bad.md: contains your global git name"]
+
+
+def test_every_runtime_dir_is_ignored_and_covers_the_finviz_store():
+    """Everything the terminal writes while running goes to ~/.zeus-terminal/runtime through these links;
+    a folder written inside the code (like the Finviz 'why is it moving' store once was) could be pushed."""
+    from pathlib import Path
+    import zeus_config as zc
+    root = Path(zc.__file__).resolve().parent
+    ignored = {ln.strip() for ln in (root / ".gitignore").read_text(encoding="utf-8").splitlines()}
+    for rel in zc.RUNTIME_DIRS:
+        assert rel in ignored, rel
+    from benzinga_mcp import finviz_ai_store
+    store = finviz_ai_store.FINVIZ_AI_DIR
+    assert str(store.relative_to(root)).replace("\\", "/") in zc.RUNTIME_DIRS

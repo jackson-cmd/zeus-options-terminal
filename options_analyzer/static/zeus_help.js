@@ -37,6 +37,7 @@
 
   // ================================================================== groups
   G('top', 'bar', '顶栏（每个页面都有）', 'Top bar (on every page)');
+  G('positions', 'start', '开局', 'Getting started');
   G('positions', 'acct', '账户概览', 'Account');
   G('positions', 'exit', '出场状态', 'Exit status');
   G('positions', 'tools', '工具栏', 'Toolbar');
@@ -81,8 +82,8 @@
     ['界面语言', '中文、双语、English 三种界面语言，随时切换。双语保留中文，在按钮和表头旁边加上英文。', '', '只改界面上的字，新闻保持原文。English 界面下，Digest 里的「EN + 中文」按钮能在每条英文标题下面显示中文翻译。'],
     ['Interface language', 'Chinese, bilingual or English, switch any time. Bilingual keeps the Chinese labels and adds English beside the buttons and column headers.', '', 'Only the interface changes; news keeps its own language. In English, the “EN + 中文” button in the Digest shows a Chinese translation under each headline.']);
   E('top', 'bar', 'top.gear', '#zsGearBtn',
-    ['⚙ 设置', '所有设置都在这里：tastytrade 账号、AI 提供方、新闻源、手动上传交易、AI 智能体（MCP）。只存在这台电脑上。', '', '鼠标停在 ⚙ 上能看到现在的模式：● tastytrade 实时，或 ◐ 手动上传和已导入的交易笔数。'],
-    ['⚙ Settings', 'Every setting lives here: the tastytrade account, the AI provider, news sources, manual trade uploads and AI agents (MCP). They are stored only on this computer.', '', 'Hover ⚙ to see the current mode: ● tastytrade live, or ◐ manual upload with the number of trades imported.']);
+    ['⚙ 设置', '所有设置都在这里：券商（tastytrade、Alpaca、Public 或手动上传）、行情来源、AI 提供方、新闻源、AI 智能体（MCP）。只存在这台电脑上。', '', '鼠标停在 ⚙ 上能看到持仓和行情从哪来：● tastytrade 实时、● Alpaca 模拟盘或实盘、● Public，或 ◐ 手动上传和已导入的交易笔数。'],
+    ['⚙ Settings', 'Every setting lives here: the broker (tastytrade, Alpaca, Public or manual uploads), where quotes come from, the AI provider, news sources and AI agents (MCP). They are stored only on this computer.', '', 'Hover ⚙ to see where positions and quotes come from: ● tastytrade live, ● Alpaca paper or live, ● Public, or ◐ manual upload with the number of trades imported.']);
   E('top', 'bar', 'top.ai', '#aiPauseBtn',
     ['AI 暂停', '暂停或恢复定时跑的 AI 任务（每天的 AI 选股、新闻叙事等）。', '', '想省 AI 额度时暂停，再点一次恢复。'],
     ['AI pause', 'Pauses or resumes the scheduled AI jobs (the daily AI picks, the news narratives and so on).', '', 'Pause it to save AI credits; click again to resume.']);
@@ -97,6 +98,18 @@
     ['👁 Privacy mode', 'Blurs the dollar amounts on the page.', '', 'Turn it on before recording, taking screenshots or sharing your screen.']);
 
   // ================================================================== positions
+  E('positions', 'start', 'pos.start', '#zsManualHint',
+    ['开局三选一', '还没有任何持仓时，持仓页最上面会出现这张卡片：先看示例组合、连接券商，或上传自己的成交。', '',
+      '想先看看 ZEUS 能做什么，就载入示例组合；有 tastytrade、Alpaca 或 Public 账户就连券商（只读，不下单）；用别的券商就导出成交 CSV 上传。有了持仓，这张卡片自己消失。'],
+    ['Three ways to start', 'With no positions yet, this card sits at the top of the Positions page: try the sample portfolio, connect a broker, or upload your own fills.', '',
+      'To see what ZEUS does first, load the sample portfolio; with a tastytrade, Alpaca or Public account, connect it (read-only, no orders); with any other broker, upload a CSV export of your fills. The card disappears once you have positions.']);
+  E('positions', 'start', 'pos.sample', '#zsSampleBar',
+    ['示例组合', '6 个示例持仓（AAPL 股票、SPY 牛市看跌价差、NVDA 牛市看涨价差、QQQ 铁鹰、MSFT 看涨、TSLA 卖出看跌）和 1 笔已平仓的 AMD 交易。交易是编的，行权价、到期日和价格取自载入那一刻的真实期权报价。',
+      '开仓价按当时的报价上下挪一点，所以有的赚、有的亏；起始资金设为 $50,000（只在你没设过的时候）。',
+      '「清除示例」只删示例交易，你自己录入的交易不受影响；「换成我自己的」打开券商设置。'],
+    ['Sample portfolio', 'Six sample positions (AAPL shares, a SPY bull put spread, an NVDA bull call spread, a QQQ iron condor, an MSFT call, a TSLA short put) and one closed AMD trade. The trades are made up; strikes, expirations and prices come from real option quotes at the moment you load it.',
+      'Entry prices are set a little above or below those quotes, so some positions are up and some are down; the starting cash is set to $50,000 (only if you had not set one).',
+      'Remove the sample deletes only the sample trades, never your own; Use my own opens the broker settings.']);
   E('positions', 'acct', 'pos.tickers', '#dashSummary .dash-stat|Tickers',
     ['Tickers 标的数', '持仓里有多少个不同的标的。同一只股票上的几个价差只算一个。', '数持仓里不同的正股代码。到 15 个就变黄，加 ⚠。', '标的太多，盯不过来，风险也难管。变黄时考虑收缩。'],
     ['Tickers', 'How many different underlyings you hold. Several spreads on one stock count once.', 'Counts the distinct underlying symbols. It turns yellow with ⚠ at 15.', 'Too many names are hard to watch and to manage. When it turns yellow, consider trimming.'], true);

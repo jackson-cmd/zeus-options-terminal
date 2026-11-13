@@ -15,6 +15,7 @@ barchart/snapshots
 benzinga_digest/digests
 benzinga_digest/ai_summary
 benzinga_digest/pivot_summary
+benzinga_digest/finviz_ai
 trading_assistant/data
 trading_assistant/reports
 winrate_scanner/data

@@ -13,7 +13,8 @@ Any module can do:
 
     import zeus_config as hc
     hc.get("finviz_elite_token")
-    hc.has_tastytrade()
+    hc.account_source()     # 'tastytrade' | 'alpaca' | 'public' | 'manual'
+    hc.market_source()      # 'tastytrade' | 'alpaca' | 'public' | 'free'
 """
 from __future__ import annotations
 
@@ -26,7 +27,7 @@ from typing import Any
 
 APP_NAME = "ZEUS Terminal"
 APP_NAME_ZH = "宙斯期权终端"
-APP_VERSION = "0.4.2"
+APP_VERSION = "0.5.0"
 APP_TAGLINE = "Self-hosted, all-in-one options trading terminal"
 APP_TAGLINE_ZH = "本地部署的全方位期权交易终端"
 REPO_ROOT = Path(__file__).resolve().parent
@@ -68,6 +69,19 @@ SCHEMA: dict[str, tuple] = {
                               "on / off. Take-profit, missing GTC, risk radar, S/R alerts.",
                               "on / off。止盈、未挂 GTC、风险雷达、支撑阻力告警。"),
     # ---- broker ----
+    "account_source": ("auto", False, "broker", "Positions come from", "持仓来源",
+                       "auto = the first broker filled in below (tastytrade, then Alpaca, then Public), otherwise your "
+                       "uploaded trades. Or pick one: tastytrade / alpaca / public / manual.",
+                       "auto = 按 tastytrade、Alpaca、Public 的顺序用第一个填好的券商，都没填就用你上传的交易。"
+                       "也可以直接指定：tastytrade / alpaca / public / manual。"),
+    "market_data": ("auto", False, "broker", "Quotes come from", "行情来源",
+                    "auto = your broker's own data (tastytrade, Alpaca or Public), otherwise free. free = Cboe options "
+                    "(about 15 min delayed, with Greeks) + Yahoo stocks, no account needed. alpaca / public = that API; "
+                    "anything it lacks, such as the SPX and VIX index levels, still comes from the free sources. "
+                    "With tastytrade as the broker, quotes always stream from tastytrade.",
+                    "auto = 用券商自己的行情（tastytrade、Alpaca 或 Public），没有就用免费的。free = Cboe 期权（约延迟 "
+                    "15 分钟，带希腊值）+ Yahoo 股票，不用开户。alpaca / public = 用该券商的接口；它没有的数据（比如 SPX、"
+                    "VIX 指数点位）照样走免费源。券商选 tastytrade 时，行情一律走 tastytrade 实时推送。"),
     "tt_client_id": ("", True, "broker", "tastytrade OAuth client ID", "tastytrade OAuth Client ID",
                      "my.tastytrade.com → Manage → API Access → OAuth Applications.",
                      "my.tastytrade.com → Manage → API Access → OAuth Applications。"),
@@ -79,6 +93,33 @@ SCHEMA: dict[str, tuple] = {
                          "OAuth 应用 → Manage → Create Grant（勾选全部 scope）。"),
     "tt_account_number": ("", True, "broker", "tastytrade account number (optional)", "tastytrade 账户号（可选）",
                           "Only needed if you hold several accounts.", "有多个账户时才需要填。"),
+    "alpaca_key_id": ("", True, "broker", "Alpaca API key ID", "Alpaca API Key ID",
+                      "alpaca.markets → sign up (free) → Paper Trading → API Keys → Generate. Paper keys start with PK, "
+                      "live keys with AK.",
+                      "alpaca.markets 免费注册 → Paper Trading → API Keys → Generate。模拟盘的 key 以 PK 开头，实盘以 AK 开头。"),
+    "alpaca_secret_key": ("", True, "broker", "Alpaca secret key", "Alpaca Secret Key",
+                          "Shown once, next to the key ID.", "和 Key ID 一起生成，只显示一次。"),
+    "alpaca_paper": ("on", False, "broker", "Alpaca paper account", "Alpaca 模拟盘",
+                     "on = your paper account (paper-api.alpaca.markets); off = your live account.",
+                     "on = 模拟盘账户（paper-api.alpaca.markets）；off = 实盘账户。"),
+    "alpaca_stock_feed": ("iex", False, "broker", "Alpaca stock feed", "Alpaca 股票行情",
+                          "iex = free, real time, prices from the IEX exchange only; delayed_sip = free, every exchange, "
+                          "15 min delayed; sip = every exchange in real time (Alpaca's paid data plan).",
+                          "iex = 免费、实时，只含 IEX 交易所的成交；delayed_sip = 免费、全市场、延迟 15 分钟；"
+                          "sip = 全市场实时（Alpaca 付费行情）。"),
+    "alpaca_options_feed": ("indicative", False, "broker", "Alpaca options feed", "Alpaca 期权行情",
+                            "indicative = free: quotes are Alpaca's indicative prices, trades 15 min delayed, Greeks "
+                            "and IV included; opra = the real-time exchange feed (Alpaca's paid data plan).",
+                            "indicative = 免费：报价是 Alpaca 的参考价，成交延迟 15 分钟，带希腊值和 IV；"
+                            "opra = 交易所实时（Alpaca 付费行情）。"),
+    "public_secret_key": ("", True, "broker", "Public API secret key", "Public API Secret Key",
+                          "public.com → Account → Settings → API → Generate secret key. Public has live accounts only "
+                          "(no paper trading); ZEUS only reads, it never places orders.",
+                          "public.com → 账户 → Settings → API → 生成 secret key。Public 只有实盘（没有模拟盘）；"
+                          "ZEUS 只读取，从不下单。"),
+    "public_account_id": ("", True, "broker", "Public account ID (optional)", "Public 账户 ID（可选）",
+                          "Only needed if you hold several Public accounts; empty = your brokerage account.",
+                          "有多个 Public 账户时才需要填；留空 = 你的证券账户。"),
     "manual_starting_cash": ("0", False, "broker", "Manual mode: starting cash", "手动模式：初始现金",
                              "Cash before your first uploaded trade. Drives NLV and position sizing.",
                              "第一笔上传交易之前的现金，用来算净值和仓位占比。"),
@@ -169,7 +210,7 @@ SCHEMA: dict[str, tuple] = {
 }
 
 GROUPS = [
-    ("broker", "Broker & trades", "券商与交易"),
+    ("broker", "Broker & data", "券商与行情"),
     ("news", "News sources", "新闻源"),
     ("ai", "AI", "AI"),
     ("agents", "AI agents (MCP)", "AI 智能体（MCP）"),
@@ -267,9 +308,51 @@ def has_tastytrade() -> bool:
     return bool(get("tt_client_secret") and get("tt_refresh_token"))
 
 
+def has_alpaca() -> bool:
+    return bool(get("alpaca_key_id") and get("alpaca_secret_key"))
+
+
+def has_public() -> bool:
+    return bool(get("public_secret_key"))
+
+
+BROKERS = ("tastytrade", "alpaca", "public")
+
+
+def _has(src: str) -> bool:
+    return {"tastytrade": has_tastytrade, "alpaca": has_alpaca, "public": has_public}.get(src, lambda: False)()
+
+
+def account_source() -> str:
+    """Where positions, balances and fills come from: 'tastytrade', 'alpaca', 'public' or 'manual'.
+    A broker that was picked but has no keys yet falls back to 'manual' (status() says so)."""
+    want = str(get("account_source") or "auto").strip().lower()
+    if want == "manual":
+        return "manual"
+    if want in BROKERS:
+        return want if _has(want) else "manual"
+    return next((b for b in BROKERS if _has(b)), "manual")
+
+
+def market_source() -> str:
+    """Where quotes, option chains and Greeks come from: 'tastytrade', 'alpaca', 'public' or 'free'.
+    With tastytrade as the broker everything streams from tastytrade."""
+    acct = account_source()
+    if acct == "tastytrade":
+        return "tastytrade"
+    want = str(get("market_data") or "auto").strip().lower()
+    if want == "free":
+        return "free"
+    if want in ("alpaca", "public"):
+        return want if _has(want) else "free"
+    if acct in ("alpaca", "public"):
+        return acct
+    return next((b for b in ("alpaca", "public") if _has(b)), "free")
+
+
 def broker_mode() -> str:
-    """'tastytrade' when OAuth credentials exist, otherwise 'manual'."""
-    return "tastytrade" if has_tastytrade() else "manual"
+    """Kept for older callers: the account source ('tastytrade', 'alpaca', 'public' or 'manual')."""
+    return account_source()
 
 
 def has_benzinga() -> bool:
@@ -309,8 +392,16 @@ def status() -> dict:
         ai = zeus_ai.describe()
     except Exception as e:  # pragma: no cover
         ai = {"provider": "off", "error": str(e)}
+    want = str(get("account_source") or "auto").strip().lower()
+    want_md = str(get("market_data") or "auto").strip().lower()
     return {
         "broker_mode": broker_mode(),
+        "market_source": market_source(),
+        "brokers": {"tastytrade": has_tastytrade(), "alpaca": has_alpaca(), "public": has_public()},
+        "alpaca_paper": get_bool("alpaca_paper"),
+        # a broker was picked but its keys are missing, so ZEUS fell back
+        "broker_fallback": want if (want in BROKERS and not _has(want)) else "",
+        "market_fallback": want_md if (want_md in ("alpaca", "public") and not _has(want_md)) else "",
         "benzinga": has_benzinga(),
         "benzinga_apikey": has_benzinga_apikey(),
         "finviz_elite": bool(get("finviz_elite_token")),
@@ -458,6 +549,7 @@ RUNTIME_DIRS = (
     "data", "options_analyzer/data", "trade_journal/data", "pre_trade_checkup/data", "stock_picker/data",
     "eod_crawler/data_eod", "eod_crawler/logs", "barchart/downloads", "barchart/snapshots",
     "benzinga_digest/digests", "benzinga_digest/ai_summary", "benzinga_digest/pivot_summary",
+    "benzinga_digest/finviz_ai",
     "trading_assistant/data", "trading_assistant/reports", "winrate_scanner/data",
 )
 

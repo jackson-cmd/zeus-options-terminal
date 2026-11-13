@@ -6,7 +6,11 @@
 
 *驾驭希腊值。· Rule the Greeks.*
 
-**实时持仓与希腊值 · 盈亏与风险 · 出场纪律 · 期权和股票都能下的模拟盘 · 四路新闻台（Benzinga · Finviz · 华尔街日报 · MarketWatch）· 选股 · 财报与 SEC 文件 · 不说假话的交易日记 —— 接 tastytrade API 或者一份 CSV 就能用，完全跑在你自己的电脑上，界面支持 中文 / 双语 / English。**
+**实时持仓与希腊值 · 盈亏与风险 · 出场纪律 · 期权和股票都能下的模拟盘 · 四路新闻台（Benzinga · Finviz · 华尔街日报 · MarketWatch）· 选股 · 财报与 SEC 文件 · 不说假话的交易日记 —— 接 tastytrade、Alpaca、Public，或者任何券商导出的一份 CSV 就能用，完全跑在你自己的电脑上，界面支持 中文 / 双语 / English。**
+
+**做期权要开十个网页才看得全的东西，一个终端全搞定。**
+
+<sub>如果你在找：本地部署的美股期权交易终端、带实时希腊值的期权盈亏计算器、tastytrade / Alpaca / Public 持仓管理、期权交易日记、期权价差和股票的模拟盘、带支撑阻力的美股选股器、中英双语美股新闻 —— 都在这一个应用里。</sub>
 
 [English → README.md](README.md) · [新功能](#-新功能) · [全部功能](docs/FEATURES_zh.md) · [使用手册](docs/USER_GUIDE_zh.md) · [快速开始](#-快速开始) · [参与贡献](#-参与贡献) · [许可证](#-许可证禁止商业使用)
 
@@ -18,17 +22,19 @@
 
 ## 目录
 
-- [🆕 新功能](#-新功能) · [写在前面](#写在前面) · [两种玩法](#两种玩法)
+- [🆕 新功能](#-新功能) · [写在前面](#写在前面) · [四种接入方式](#四种接入方式)
 - [🗺️ 功能全景](#️-功能全景)：[持仓](#️-持仓--指挥中心) · [纪律引擎](#-纪律引擎--真正帮你省钱的部分) · [选股](#-选股--找下一笔) · [模拟盘](#-模拟盘--先用假钱练手) · [市场判断](#-市场判断--大局观不带情绪) · [Digest](#-digest--四路新闻两种语言) · [事件](#-事件) · [交易日记](#-交易日记--照妖镜) · [三种界面语言](#-三种界面语言中文--双语--english) · [自带 AI](#-自带-ai) · [接入智能体（MCP）](#-接入你自己的-ai-智能体mcp)
 - [📸 截图一览](#-截图一览) · [🚀 快速开始](#-快速开始) · [🔑 每一项设置能解锁什么](#-每一项设置能解锁什么) · [📄 手动交易：CSV 格式](#-手动交易csv-格式)
 - [🔒 隐私与安全](#-隐私与安全) · [🏗️ 架构](#️-架构) · [❓ 常见问题](#-常见问题) · [🤝 参与贡献](#-参与贡献) · [📜 许可证](#-许可证禁止商业使用)
 
 ## 🆕 新功能
 
-<sub>最新版本 **0.4.2**（2026-11-12）。完整的更新历史见[更新记录](CHANGELOG_zh.md)。</sub>
+<sub>最新版本 **0.5.0**（2026-11-12）。完整的更新历史见[更新记录](CHANGELOG_zh.md)。</sub>
 
-| | 0.4.x、0.3.x 和 0.2.x 新加入 |
+| | 0.5.0、0.4.x、0.3.x 和 0.2.x 新加入 |
 |---|---|
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🔌 Alpaca 和 Public**：连上 Alpaca（免费，自带模拟盘）或 Public 账户，就有实时持仓、成交、在途订单和带希腊值的报价。持仓和行情分开选，也可以照样上传自己的交易、行情改用 Alpaca。ZEUS 只读，从不下单。[连接券商 →](docs/USER_GUIDE_zh.md#22-连接券商) |
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🧪 示例组合**：新装好以后点一下，就载入 6 个持仓和 1 笔已平仓交易，价格取自当天的真实期权报价，什么都不连也能把每个页面试一遍。一键清除。[怎么开始 →](docs/USER_GUIDE_zh.md#21-先选持仓从哪来) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **❓ 每个页面都有说明**：表头、分数、卡片旁边的小 ? 用大白话讲清这一项是什么、怎么算、怎么用；顶栏的 ? 列出这个页面上的每个按钮和数字。[怎么用 →](docs/USER_GUIDE_zh.md#31-每个页面的说明) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🔌 接入你自己的 AI 智能体（MCP）**：Claude Code、Claude Desktop、通过 Codex 用的 GPT、Gemini CLI 或你自己写的智能体，都能读你的持仓、跑开单前体检、给价差估价、读新闻和交易日记；你允许的话还能下模拟单。ZEUS 本身就是一个本地 MCP 服务器，不需要 API key。[连接智能体 →](docs/USER_GUIDE_zh.md#18-ai-智能体mcp) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🟩 热力图**：选股页的热力图回来了，和 K 线墙一键切换。[怎么用 →](docs/USER_GUIDE_zh.md#69-热力图) |
@@ -66,18 +72,20 @@ ZEUS Terminal（宙斯期权终端）是我给自己做的网站。前前后后�
 
 ---
 
-## 两种玩法
+## 四种接入方式
 
-| | **tastytrade API** —— *推荐，最顺滑* | **免费模式** —— *不需要券商账户* |
-|---|---|---|
-| 持仓 | 从你的账户实时拉取 | 上传 CSV 或手动录入（**股票和期权都支持**） |
-| 报价 | DXLink 实时推送，亚秒级 | 期权用 Cboe 延迟行情（免费，约延迟 15 分钟；收盘后仍保留收盘买卖价、隐波和希腊值），股票用 Yahoo Finance，Yahoo 限流时自动改用 Finviz |
-| 成交、到期、行权 | 自动入账 | 按你的成交 FIFO 回放；过期期权按内在价值自动结算 |
-| 交易日记 | 每小时自动同步 | 上传后立刻重算 |
-| 购买力、在途订单、漏挂止盈单提醒 | ✅ | — |
-| 其他所有功能（选股、Digest、事件、日记分析、AI……） | ✅ | ✅ |
+| | **tastytrade API** —— *最顺滑* | **Alpaca** —— *免费，自带模拟盘* | **Public** | **免费模式** —— *不需要券商账户* |
+|---|---|---|---|---|
+| 持仓 | 从你的账户实时拉取 | 从你的模拟盘或实盘实时拉取 | 从你的账户实时拉取 | 上传 CSV 或手动录入（**股票和期权都支持**） |
+| 报价 | DXLink 实时推送，亚秒级 | 免费行情：股票 IEX 实时；期权用 Alpaca 参考价，带希腊值和隐波 | 实时报价、期权链和希腊值 | 期权用 Cboe 延迟行情（免费，约延迟 15 分钟；收盘后仍保留收盘买卖价、隐波和希腊值），股票用 Yahoo Finance，Yahoo 限流时自动改用 Finviz |
+| 成交、到期、行权 | 自动入账 | 读你的成交记录 | 读你的历史记录 | 按你的成交 FIFO 回放；过期期权按内在价值自动结算 |
+| 交易日记 | 每小时自动同步 | 每小时按成交重算 | 每小时按历史记录重算 | 上传后立刻重算 |
+| 购买力、在途订单、漏挂止盈单提醒 | ✅ | ✅ | ✅ | — |
+| 其他所有功能（选股、Digest、事件、日记分析、AI……） | ✅ | ✅ | ✅ | ✅ |
 
-> 有 tastytrade 账户就连上它。整个终端就是围绕这条数据流设计的：盈亏随每一笔成交跳动，成交真实，什么都不用维护。免费模式是为了让任何券商的用户都能用上它。
+> 有 tastytrade 账户就连上它。整个终端就是围绕这条数据流设计的：盈亏随每一笔成交跳动，成交真实，什么都不用维护。Alpaca 是免费拿到实时账户数据的办法，还自带模拟盘；Public 的用户可以直接连 Public。ZEUS 对它们只读，从不下单。免费模式是为了让任何券商的用户都能用上它。持仓和行情在设置里分开选：比如照样上传自己的交易，行情改用 Alpaca。
+
+> **只想先看看？** 在空的持仓页点 **载入示例组合**：6 个持仓加 1 笔已平仓交易，价格取自那一刻的真实期权报价，每个页面立刻有内容。看完一键清除。
 
 **Benzinga 也是可选的。** 有 Benzinga Pro 登录，就有 Benzinga 实时新闻、盘前点评、市场事件和实时信号。没有的话，Digest 自动跑在**免费双语新闻源：Finviz + 华尔街日报 + MarketWatch** 上。
 
@@ -197,7 +205,7 @@ cd zeus-options-terminal
 
 第一次运行会自动建虚拟环境、装好依赖（需要 Python 3.10+）。然后打开 **<http://localhost:8765>**，点右上角 **⚙ 设置**：
 
-1. **券商与交易** —— 粘贴 tastytrade OAuth 的 *client secret* 和 *refresh token*，**或者**上传你的交易 CSV。
+1. **券商与行情** —— 粘贴 tastytrade OAuth 的 *client secret* 和 *refresh token*，**或者** Alpaca 的 key ID 和 secret，**或者** Public 的 secret key，**或者**上传你的交易 CSV。每一种都有 **测试连接** 按钮。还没准备好？在持仓页点 **载入示例组合**，先四处看看。
 2. **新闻源** —— 粘贴 Benzinga Pro 的 cookie（可选）、Finviz Elite token（可选）。
 3. **AI** —— 选一个提供方（可选）。
 
@@ -206,6 +214,9 @@ cd zeus-options-terminal
 ### tastytrade 凭证在哪拿
 my.tastytrade.com → **Manage → API Access → OAuth Applications** → 新建一个应用（记下 *client secret*）→ **Manage → Create Grant**（勾选全部 scope）→ 复制 *refresh token*。两样粘进设置页，点 **测试连接**。
 
+### Alpaca 和 Public 的 key 在哪拿
+**Alpaca**：在 alpaca.markets 免费注册 → 进入 **Paper Trading** 模拟盘 → **API Keys → Generate** → 复制 key ID（PK 开头）和 secret。接实盘就在实盘账户里生成（AK 开头），并把 *Alpaca 模拟盘* 改成 *off*。**Public**：public.com → **Account → Settings → API** → 生成 secret key。分步说明见[使用手册](docs/USER_GUIDE_zh.md#22-连接券商)。
+
 ---
 
 ## 🔑 每一项设置能解锁什么
@@ -213,6 +224,9 @@ my.tastytrade.com → **Manage → API Access → OAuth Applications** → 新�
 | 设置 | 解锁 | 是否免费 |
 |---|---|---|
 | tastytrade OAuth（client secret + refresh token） | 实时持仓、实时报价推送、自动交易日记、购买力、在途订单 | 有 tastytrade 账户即免费 |
+| Alpaca key ID + secret | 模拟盘或实盘的实时持仓、成交、在途订单；免费的 IEX 股票价格和带希腊值的期权参考价 | ✅ 账户和行情都免费 |
+| Public secret key | 实时持仓、历史记录、在途订单、实时报价、期权链和希腊值 | 有 Public 账户即免费 |
+| 持仓来源 / 行情来源 | 账户和行情分开选；券商没有的数据走免费源 | ✅ |
 | 手动交易（CSV / 表单） | 不连任何券商也有持仓、盈亏、日记和分析 | ✅ |
 | Benzinga Pro cookie | Benzinga 实时 Digest、盘前、市场事件、历史 | 需要 Benzinga Pro 订阅 |
 | Benzinga data API key | 实时信号流、扫描器 | 来自你的 Benzinga Pro 会话 |
@@ -265,6 +279,7 @@ date,symbol,asset,side,effect,qty,price,fees,option_type,strike,expiration,multi
    ▼
 FastAPI 服务 ── options_analyzer/optionstrat_server.py
    ├─ 券商 ......... tastytrade REST + DXLink 推送      │  local_broker.py（手动模式，Cboe + Yahoo）
+   │                                                   │  zeus_brokers.py（Alpaca · Public，只读）
    ├─ 新闻 ......... Benzinga（cookie / WS）            │  zeus_news.py（Finviz · WSJ · MarketWatch）
    ├─ 选股 ......... heatmap/ · ta_screener/ · ai_picks/ · stock_selector/ · barchart/
    ├─ 市场判断 ..... market_brief/ · narratives/
@@ -282,11 +297,13 @@ FastAPI 服务 ── options_analyzer/optionstrat_server.py
 
 ## ❓ 常见问题
 
-**一定要 tastytrade 吗？** 不用。免费模式通过 CSV 支持任何券商的股票和期权。tastytrade 只是最顺。
+**一定要 tastytrade 吗？** 不用。Alpaca（免费，自带模拟盘）和 Public 也能直接连，免费模式通过 CSV 支持任何券商的股票和期权。tastytrade 只是最顺。
+
+**什么账户都没有，能先试试吗？** 能：在持仓页点 **载入示例组合**。选股、Digest、事件和 TA 扫描本来就用免费数据。
 
 **一定要 Benzinga 吗？** 不用。Digest 免费跑在 Finviz + 华尔街日报 + MarketWatch 上。
 
-**它会帮我下单吗？** 不会真的下单。🧪 模拟盘只记模拟交易，用来练手；真正的交易在你自己的券商里做。
+**它会帮我下单吗？** 不会真的下单。它对 tastytrade、Alpaca 和 Public 都只读。🧪 模拟盘只记模拟交易，用来练手；真正的交易在你自己的券商里做。
 
 **Windows / Linux 能用吗？** 核心功能都能用。桌面通知只支持 macOS，Linux 上可以改用邮件提醒。
 

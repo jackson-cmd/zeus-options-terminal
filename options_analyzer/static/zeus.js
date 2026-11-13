@@ -249,7 +249,7 @@
   }
 
   // ------------------------------------------------------------------ settings overlay
-  function openSettings(tab) {
+  function openSettings(tab, anchor) {
     var ov = document.getElementById('zsSettingsOverlay');
     if (!ov) {
       ov = document.createElement('div');
@@ -258,7 +258,8 @@
       ov.addEventListener('click', function (e) { if (e.target === ov) closeSettings(); });
       document.body.appendChild(ov);
     }
-    document.getElementById('zsSettingsFrame').src = '/settings' + (tab ? ('?tab=' + encodeURIComponent(tab)) : '');
+    document.getElementById('zsSettingsFrame').src = '/settings' + (tab ? ('?tab=' + encodeURIComponent(tab)) : '') +
+      (anchor ? '#' + encodeURIComponent(anchor) : '');
     ov.style.display = 'flex';
   }
   function closeSettings() {
@@ -301,38 +302,97 @@
   function renderMode() {
     var g = document.getElementById('zsGearBtn');
     if (!g || !STATUS) return;
-    var mode;
-    if (STATUS.broker_mode === 'tastytrade') {
+    var mode, bm = STATUS.broker_mode, ms = STATUS.market_source;
+    var quotes = {
+      tastytrade: L('DXLink 实时推送', 'DXLink streaming'),
+      alpaca: L('Alpaca（股票 IEX 实时，期权参考价）', 'Alpaca (IEX stocks live, indicative options)'),
+      public: L('Public 实时', 'Public real time'),
+      free: L('Cboe 期权 + Yahoo 股票，约延迟 15 分钟', 'Cboe options + Yahoo stocks, ~15 min delayed')
+    }[ms] || '';
+    if (bm === 'tastytrade') {
       mode = L('● tastytrade 实时:实时持仓与 DXLink 报价推送', '● tastytrade live: live positions and DXLink streaming');
+    } else if (bm === 'alpaca' || bm === 'public') {
+      var name = bm === 'alpaca' ? ('Alpaca ' + (STATUS.alpaca_paper ? L('模拟盘', 'paper') : L('实盘', 'live'))) : 'Public';
+      mode = '● ' + name + L(' 持仓 · 行情:', ' positions · quotes: ') + quotes;
     } else {
       var n = (STATUS.manual && STATUS.manual.trades) || 0;
-      mode = L('◐ 手动上传模式' + (n ? ',' + n + ' 笔交易' : '') + ':期权报价来自 Cboe、股票来自 Yahoo Finance(约延迟 15 分钟)',
-        '◐ Manual upload mode' + (n ? ', ' + n + ' trades' : '') + ': option quotes from Cboe, stocks from Yahoo Finance (~15 min delayed)');
+      mode = '◐ ' + L('手动上传模式' + (n ? ',' + n + ' 笔交易' : ''), 'Manual upload mode' + (n ? ', ' + n + ' trades' : '')) +
+        L(' · 行情:', ' · quotes: ') + quotes;
     }
-    g.title = L('设置:账号、AI、新闻源、手动交易', 'Settings: accounts, AI, news sources, manual trades') + '\n' + mode;
+    g.title = L('设置:券商、行情、AI、新闻源、手动交易', 'Settings: broker, quotes, AI, news sources, manual trades') + '\n' + mode;
   }
+  // First visit with nothing to show: three ways in, the quickest first (a sample portfolio priced from
+  // today's quotes). With sample trades loaded, a slim bar says so and removes them in one click.
   function manualHint() {
     var old = document.getElementById('zsManualHint');
-    if (!STATUS || STATUS.broker_mode !== 'manual') { if (old) old.remove(); return; }
-    var n = (STATUS.manual && STATUS.manual.trades) || 0;
+    var bar = document.getElementById('zsSampleBar');
     var panel = document.getElementById('tab-positions');
-    if (!panel) return;
-    if (n > 0) { if (old) old.remove(); return; }
-    if (old) return;
+    var manual = STATUS && STATUS.broker_mode === 'manual';
+    var n = manual ? ((STATUS.manual && STATUS.manual.trades) || 0) : -1;
+    var ns = manual ? ((STATUS.manual && STATUS.manual.sample) || 0) : 0;
+    if (!panel || !STATUS) return;
     var B = function (zh, en) { return LANG === 'en' ? en : (LANG === 'bi' ? zh + '<br><span class="zs-sub-en">' + en + '</span>' : zh); };
+    // sample bar
+    if (ns > 0) {
+      if (!bar) {
+        bar = document.createElement('div');
+        bar.id = 'zsSampleBar'; bar.setAttribute('data-no-i18n', '');
+        bar.innerHTML = '<span>' + B('🧪 正在看示例组合：持仓是编的，报价是今天的真实行情。', '🧪 This is the sample portfolio: made-up trades, priced with today\'s real quotes.') + '</span>' +
+          '<span class="zs-hint-actions"><button class="zs-btn" id="zsSampleOff">' + L('清除示例', 'Remove the sample') + '</button>' +
+          '<button class="zs-btn zs-primary" id="zsSampleBroker">' + L('换成我自己的', 'Use my own') + '</button></span>';
+        panel.insertBefore(bar, panel.firstChild);
+        document.getElementById('zsSampleOff').onclick = function () { sampleCall('DELETE', this); };
+        document.getElementById('zsSampleBroker').onclick = function () { openSettings('broker'); };
+      }
+    } else if (bar) bar.remove();
+    if (n !== 0) { if (old) old.remove(); return; }
+    if (old) return;
     var hint = document.createElement('div');
     hint.id = 'zsManualHint'; hint.setAttribute('data-no-i18n', '');
+    var card = function (icon, title, body, buttons) {
+      return '<div class="zs-start-card"><div class="zs-start-h">' + icon + ' ' + title + '</div><div class="zs-start-b">' + body +
+        '</div><div class="zs-hint-actions">' + buttons + '</div></div>';
+    };
     hint.innerHTML =
       '<div class="zs-hint-title">' + L('欢迎来到 ZEUS Terminal · 宙斯期权终端', 'Welcome to ZEUS Terminal') + '</div>' +
-      '<div class="zs-hint-body">' + B(
-        '还没有任何持仓。两种开局方式:<br><b>① 连接 tastytrade API</b>(推荐,实时持仓 + 实时报价推送 + 交易日记自动同步);<br><b>② 免费模式</b>:上传你自己的股票 / 期权成交 CSV,或者手动录入一笔。',
-        'No positions yet. Two ways to start:<br><b>① Connect the tastytrade API</b> (recommended: live positions, streaming quotes, automatic journal);<br><b>② Free mode</b>: upload a CSV of your own stock and option fills, or type one in.') + '</div>' +
-      '<div class="zs-hint-actions"><button class="zs-btn zs-primary" id="zsHintTT">' + L('连接 tastytrade', 'Connect tastytrade') + '</button>' +
-      '<button class="zs-btn" id="zsHintCSV">' + L('上传 / 录入交易', 'Upload / add trades') + '</button>' +
-      '<a class="zs-btn" href="/api/trades/template.csv">' + L('下载 CSV 模板', 'CSV template') + '</a></div>';
+      '<div class="zs-hint-body">' + B('还没有任何持仓。选一种开局方式，随时可以换：', 'No positions yet. Pick a way in; you can switch any time:') + '</div>' +
+      '<div class="zs-start-grid">' +
+      card('🧪', L('先看示例组合', 'Try the sample portfolio'),
+        B('一键载入 6 个示例持仓和 1 笔已平仓交易，行权价和价格取自今天的真实期权报价。每个页面立刻有内容，看完一键清除。',
+          'Six sample positions and one closed trade, with strikes and prices taken from today\'s real option quotes. Every page fills up at once; remove it in one click.'),
+        '<button class="zs-btn zs-primary" id="zsHintSample">' + L('载入示例组合', 'Load the sample') + '</button>') +
+      card('🔌', L('连接券商', 'Connect a broker'),
+        B('tastytrade（实时推送）、Alpaca（免费注册，自带模拟盘）或 Public。ZEUS 只读取持仓和行情，从不下单。',
+          'tastytrade (streaming), Alpaca (free sign-up, paper account included) or Public. ZEUS only reads positions and quotes; it never places an order.'),
+        '<button class="zs-btn" id="zsHintTT">' + L('连接券商', 'Connect a broker') + '</button>') +
+      card('📄', L('上传我的成交', 'Upload my trades'),
+        B('任何券商导出的 CSV（股票和期权都行），或手动录入一笔。行情走免费源，不用开户。',
+          'A CSV export from any broker (stocks and options), or type one in. Quotes come from the free sources, no account needed.'),
+        '<button class="zs-btn" id="zsHintCSV">' + L('上传 / 录入交易', 'Upload / add trades') + '</button>' +
+        '<a class="zs-btn" href="/api/trades/template.csv">' + L('下载 CSV 模板', 'CSV template') + '</a>') +
+      '</div>' +
+      '<div class="zs-hint-foot">' + B('不连账户也能直接用：🎯 选股、📋 Digest、📅 Events 和 TA 扫描都用免费数据。每页右上角的 ? 讲解每个按钮和数字是什么、怎么算、怎么用。',
+        'Without any account you can still use 🎯 Picker, 📋 Digest, 📅 Events and the TA scanner on free data. The ? at the top right of every page explains each button and number: what it is, how it is worked out, how to use it.') + '</div>';
     panel.insertBefore(hint, panel.firstChild);
+    document.getElementById('zsHintSample').onclick = function () { sampleCall('POST', this); };
     document.getElementById('zsHintTT').onclick = function () { openSettings('broker'); };
-    document.getElementById('zsHintCSV').onclick = function () { openSettings('broker'); };
+    document.getElementById('zsHintCSV').onclick = function () { openSettings('broker', 'tradesSec'); };
+  }
+  function sampleCall(method, btn) {
+    var old = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = method === 'POST' ? L('正在按今天的报价生成…', 'Pricing it with today\'s quotes…') : L('清除中…', 'Removing…');
+    fetch('/api/trades/sample', { method: method, headers: { 'X-Zeus-Client': '1' } })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (j && j.ok === false) throw new Error(j.error || 'failed');
+        var h = document.getElementById('zsManualHint'); if (h) h.remove();
+        var b = document.getElementById('zsSampleBar'); if (b) b.remove();
+        return refreshStatus(false).then(function () {
+          if (typeof softRefresh === 'function') softRefresh(); else location.reload();
+        });
+      })
+      .catch(function (e) { btn.disabled = false; btn.textContent = old; alert(L('没成功：', 'That did not work: ') + (e && e.message || e)); });
   }
   function refreshStatus(reloadData) {
     return fetch('/api/zeus/status').then(function (r) { return r.json(); }).then(function (s) {
@@ -392,23 +452,57 @@
   // top tab closes the pop-ups too, so one opened on a page does not stay over the next page.
   var OVERLAYS = { liquidityOverlay: 'closeLiquidity', checkupOverlay: 'closeCheckup', riskRadarOverlay: 'closeRiskRadar',
     alertOverlay: 'closeAlertPanel', tvOverlay: 'closeTvChart' };
+  // Pop-ups the page's appBack() does not know about. Esc closes the topmost one; switching tabs closes
+  // them all; the small drop-down panels (PANELS: panel → the button that opens it) also close on a
+  // click anywhere outside them.
+  var POPUPS = { posAiOverlay: '', hmAiModal: 'hmAiCloseReport', dgAiOverlay: '_dgAiClose',
+    earningsModal: 'closeEarningsModal', trStatusPanel: '' };
+  var PANELS = { trStatusPanel: 'trStatusBtn' };
+  function shown(el) {
+    return !!el && el.style.display !== 'none' && getComputedStyle(el).display !== 'none';
+  }
+  function closeOne(id, fnName) {
+    var el = document.getElementById(id), fn = fnName && window[fnName];
+    try { if (typeof fn === 'function') fn(); else el.style.display = 'none'; } catch (e) { el.style.display = 'none'; }
+  }
   function closeOverlays() {
     Object.keys(OVERLAYS).forEach(function (id) {
       var el = document.getElementById(id);
       if (!el || !el.style.display || el.style.display === 'none') return;
-      var fn = window[OVERLAYS[id]];
-      try { if (typeof fn === 'function') fn(); else el.style.display = 'none'; } catch (e) { el.style.display = 'none'; }
+      closeOne(id, OVERLAYS[id]);
     });
+    Object.keys(POPUPS).forEach(function (id) { if (shown(document.getElementById(id))) closeOne(id, POPUPS[id]); });
   }
+  function closeTopPopup() {     // → true when a pop-up was closed
+    var open = Object.keys(POPUPS).filter(function (id) { return shown(document.getElementById(id)); });
+    if (!open.length) return false;
+    var z = function (id) { return parseInt(getComputedStyle(document.getElementById(id)).zIndex, 10) || 0; };
+    open.sort(function (a, b) { return z(b) - z(a); });
+    closeOne(open[0], POPUPS[open[0]]);
+    return true;
+  }
+  var POPUP_SEL = '#' + Object.keys(OVERLAYS).concat(Object.keys(POPUPS)).join(', #');
   function initPopups() {
     document.addEventListener('keydown', function (e) {
       if (e.key !== 'Escape' || e.defaultPrevented) return;
       var t = e.target;
-      if (t && (/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.isContentEditable)) return;
+      // Esc in a text box on the page is left alone; in a pop-up (the checkup puts the cursor in its
+      // ticker box when it opens) it still closes the pop-up
+      var inPopup = t && t.closest && t.closest(POPUP_SEL);
+      if (t && (/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.isContentEditable) && !inPopup) return;
       var ov = document.getElementById('zsSettingsOverlay');
       if (ov && ov.style.display === 'flex') return;   // the settings overlay closes itself
+      if (inPopup && t.blur) t.blur();
+      if (closeTopPopup()) return;
       if (typeof window.appBack === 'function') window.appBack();
     }, true);   // capture: runs before the settings overlay's own Escape handler closes it
+    document.addEventListener('click', function (e) {
+      Object.keys(PANELS).forEach(function (id) {
+        var p = document.getElementById(id), b = document.getElementById(PANELS[id]);
+        if (!shown(p) || p.contains(e.target) || (b && b.contains(e.target))) return;
+        p.style.display = 'none';
+      });
+    }, true);
     var orig = window.switchTopTab;
     if (typeof orig === 'function' && !orig.__zs) {
       var wrapped = function () { closeOverlays(); return orig.apply(this, arguments); };

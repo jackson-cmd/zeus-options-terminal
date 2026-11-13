@@ -14,6 +14,18 @@
 .zs-btn { display: inline-block; padding: 6px 14px; border-radius: 6px; border: 1px solid #30363d; background: #21262d; color: #e6edf3;
   font-size: 12px; font-weight: 600; cursor: pointer; text-decoration: none; }
 .zs-btn.zs-primary { background: #1f6feb; border-color: #1f6feb; color: #fff; }
+.zs-btn:disabled { opacity: 0.6; cursor: progress; }
+#zsManualHint .zs-start-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-top: 12px; }
+#zsManualHint .zs-start-card { border: 1px solid #30363d; border-radius: 8px; padding: 12px 14px; background: #0d1117;
+  display: flex; flex-direction: column; }
+#zsManualHint .zs-start-h { font-weight: 700; color: #e6edf3; margin-bottom: 4px; }
+#zsManualHint .zs-start-b { flex: 1; color: #8b949e; font-size: 12.5px; }
+#zsManualHint .zs-start-card .zs-hint-actions { margin-top: 10px; }
+#zsManualHint .zs-hint-foot { margin-top: 12px; color: #8b949e; font-size: 12px; }
+#zsSampleBar { margin: 10px 16px 0; padding: 8px 12px; border: 1px solid #30363d; border-left: 3px solid #a371f7; border-radius: 8px;
+  background: #161b22; color: #c9d1d9; font-size: 12.5px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  justify-content: space-between; }
+#zsSampleBar .zs-hint-actions { margin-top: 0; display: flex; gap: 8px; }
 @media (max-width: 700px) { #zsSettingsOverlay { padding: 0; } #zsSettingsOverlay .zs-ov-box { border-radius: 0; } }
 html.zs-hide-cn .ttl-cn, html.zs-hide-cn .dg-zh { display: none !important; }
 /* language selector + bilingual labels (双语 mode keeps Chinese and adds English beside it) */

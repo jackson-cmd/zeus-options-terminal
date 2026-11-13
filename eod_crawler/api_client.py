@@ -14,9 +14,20 @@ import local_broker as _lb
 
 class TastyClient:
     def __init__(self) -> None:
-        self.local = not _hc.has_tastytrade()
-        self.auth = None if self.local else TastyAuth()
+        self._auth = None
         self.session = requests.Session()
+
+    @property
+    def local(self) -> bool:
+        """Anything but tastytrade (Alpaca, Public, uploaded trades) is answered by local_broker in
+        tastytrade's shapes. Read on every call, so switching brokers in Settings needs no restart."""
+        return _hc.account_source() != "tastytrade"
+
+    @property
+    def auth(self):
+        if self._auth is None and not self.local:
+            self._auth = TastyAuth()
+        return self._auth
 
     def get(self, path: str, params: dict | None = None) -> dict:
         """GET with one retry on 429 (rate limit) using exponential backoff."""

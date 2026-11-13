@@ -2,9 +2,10 @@
 
   /settings                   bilingual settings page (credentials, AI, news, trades)
   /api/settings               read (public view) / write settings
-  /api/trades*                manual mode: add, import CSV, list, delete, export
+  /api/trades*                manual mode: add, import CSV, list, delete, export, sample portfolio
   /api/zeus/status         mode + capabilities for the UI (gear tooltip, settings cards)
-  /api/zeus/test/*         connection tests (tastytrade, AI, news, Benzinga, e-mail, MCP)
+  /api/zeus/test/*         connection tests (tastytrade, Alpaca, Public, free quotes, AI, news,
+                              Benzinga, e-mail, MCP)
   /api/freenews/*             Finviz / WSJ / MarketWatch wire status and refresh
 
 Security: the server listens on 127.0.0.1 by default. Write endpoints require
@@ -59,11 +60,13 @@ async def zeus_status():
     st = hc.status()
     st.update(app=hc.APP_NAME, app_zh=hc.APP_NAME_ZH, tagline=hc.APP_TAGLINE, tagline_zh=hc.APP_TAGLINE_ZH,
               language=hc.get("language"), news=zeus_news.status())
-    if st["broker_mode"] == "manual":
+    if st["broker_mode"] != "tastytrade":
         try:
-            st["manual"] = await asyncio.get_event_loop().run_in_executor(None, lb.summary)
+            summ = await asyncio.get_event_loop().run_in_executor(None, lb.summary)
         except Exception as e:
-            st["manual"] = {"error": str(e)}
+            summ = {"error": str(e)}
+        st["manual" if st["broker_mode"] == "manual" else "broker"] = summ
+    st["broker_errors"] = lb.broker_errors()
     return st
 
 
@@ -76,13 +79,18 @@ async def settings_get():
 @router.post("/api/settings")
 async def settings_post(request: Request, payload: dict = Body(...)):
     _guard(request)
-    before_mode = hc.broker_mode()
+    before_mode = (hc.account_source(), hc.market_source())
     view = hc.update(payload.get("values") or {})
+    try:
+        import zeus_brokers
+        zeus_brokers.reset()
+    except Exception:
+        pass
     hc.benzinga_cookies_path()  # materialise pasted Benzinga cookies for the Benzinga clients
     hc.barchart_credentials_file()
     hc.apply_notification_shims()
     lb._invalidate()
-    after_mode = hc.broker_mode()
+    after_mode = (hc.account_source(), hc.market_source())
     restart = any(k in (payload.get("values") or {}) for k in ("host", "port"))
     if before_mode != after_mode or "manual_starting_cash" in (payload.get("values") or {}):
         asyncio.create_task(_run_hook("refresh_positions"))
@@ -105,6 +113,11 @@ async def test_connection(what: str, request: Request):
     loop = asyncio.get_event_loop()
 
     def run():
+        if what in ("alpaca", "public"):
+            import zeus_brokers
+            return zeus_brokers.test(what)
+        if what == "free":
+            return lb.free_test()
         if what == "tastytrade":
             if not hc.has_tastytrade():
                 return {"ok": False, "error": "fill in client secret + refresh token first"}
@@ -203,6 +216,36 @@ async def trades_clear(request: Request):
     asyncio.create_task(_run_hook("refresh_positions"))
     asyncio.create_task(_run_hook("refresh_journal"))
     return {"ok": True}
+
+
+@router.post("/api/trades/sample")
+async def trades_sample_load(request: Request):
+    """Load the sample portfolio (priced from today's free quotes)."""
+    _guard(request)
+    try:
+        res = await asyncio.get_event_loop().run_in_executor(None, lb.load_sample)
+    except Exception as e:
+        return JSONResponse({"ok": False, "error": str(e)}, status_code=502)
+    await _refresh_now()
+    return res
+
+
+@router.delete("/api/trades/sample")
+async def trades_sample_remove(request: Request):
+    """Remove the sample trades only; your own trades stay."""
+    _guard(request)
+    res = lb.remove_sample()
+    await _refresh_now()
+    return res
+
+
+async def _refresh_now():
+    """Recompute positions before answering, so the page shows the change as soon as it reloads."""
+    try:
+        await asyncio.wait_for(_run_hook("refresh_positions"), timeout=45)
+    except Exception:
+        pass
+    asyncio.create_task(_run_hook("refresh_journal"))
 
 
 @router.get("/api/trades/template.csv")

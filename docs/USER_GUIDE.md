@@ -11,7 +11,7 @@ This manual explains every page, button and setting of ZEUS Terminal: what it do
 1. [Install and start](#1-install-and-start)
    - [1.1 Requirements](#11-requirements) · [1.2 First start](#12-first-start) · [1.3 Stop, restart, change the port](#13-stop-restart-change-the-port) · [1.4 Install as an app](#14-install-as-an-app) · [1.5 Update](#15-update) · [1.6 Uninstall](#16-uninstall)
 2. [First-time setup](#2-first-time-setup)
-   - [2.1 Choose how your positions get in](#21-choose-how-your-positions-get-in) · [2.2 Connect tastytrade](#22-connect-tastytrade) · [2.3 Free mode: your trades from a CSV](#23-free-mode-your-trades-from-a-csv) · [2.4 News sources](#24-news-sources) · [2.5 AI](#25-ai) · [2.6 Notifications and e-mail](#26-notifications-and-e-mail) · [2.7 Every setting](#27-every-setting)
+   - [2.1 Choose how your positions get in](#21-choose-how-your-positions-get-in) · [2.2 Connect a broker](#22-connect-a-broker) · [2.3 Free mode: your trades from a CSV](#23-free-mode-your-trades-from-a-csv) · [2.4 News sources](#24-news-sources) · [2.5 AI](#25-ai) · [2.6 Notifications and e-mail](#26-notifications-and-e-mail) · [2.7 Every setting](#27-every-setting)
 3. [The top bar](#3-the-top-bar)
    - [3.1 Help on every page](#31-help-on-every-page)
 4. [Positions](#4-positions)
@@ -64,7 +64,7 @@ cd zeus-options-terminal
 
 - **macOS:** you can also double-click `start.command`. **Windows:** double-click `start.bat`.
 - The first run creates a virtual environment in `.venv` and installs the requirements. This takes a minute or two; later starts take seconds.
-- After about four seconds the browser opens **http://localhost:8765**. On the very first start the terminal shows a short onboarding hint for free mode.
+- After about four seconds the browser opens **http://localhost:8765**. On the very first start the Positions page offers three ways in: load the **sample portfolio** to look around, connect a broker, or upload your trades ([2.1](#21-choose-how-your-positions-get-in)).
 - On first start ZEUS also seeds the default ticker lists into `data/`: the heatmap universe, the industry groups, the ETF list and the watchlists. Your own edits to those files are never overwritten.
 
 ### 1.3 Stop, restart, change the port
@@ -94,30 +94,50 @@ Delete the code folder. Delete `~/.zeus-terminal/` too if you also want to remov
 
 ## 2. First-time setup
 
-Open **⚙** in the top bar. Everything is configured in the browser; you never edit a file by hand. Saved secrets are write-only: the page shows *set* or *not set* and never sends a secret back. The four cards at the top show the broker mode, Benzinga, AI and the free news sources at a glance.
+Open **⚙** in the top bar. Everything is configured in the browser; you never edit a file by hand. Saved secrets are write-only: the page shows *set* or *not set* and never sends a secret back. The cards at the top show at a glance where positions and quotes come from, Benzinga, AI, the free news sources and the AI agents.
 
 ### 2.1 Choose how your positions get in
 
-| | tastytrade (recommended) | Free mode |
-|---|---|---|
-| Positions | Pulled live from your account | From a CSV you upload, or trades you type in |
-| Quotes | Real-time DXLink streaming | Options from Cboe's delayed feed (about 15 minutes late), stocks from Yahoo Finance with Finviz as a fallback |
-| Fills, expirations, assignments | Booked by the broker | Replayed from your fills; expired options settle at intrinsic value |
-| Trade journal | Synced every hour | Rebuilt as soon as you upload |
-| Buying power, working orders, missing take-profit alarm | Yes | No |
+| | tastytrade | Alpaca | Public | Free mode |
+|---|---|---|---|---|
+| What you need | A tastytrade account | A free Alpaca account; the paper account needs no deposit | A Public brokerage account (Public has no paper trading) | Nothing |
+| Positions | Live from your account | Live from your paper or live account | Live from your account | From a CSV you upload, or trades you type in |
+| Quotes | Real-time DXLink streaming | Free: stocks from IEX in real time, options at Alpaca's indicative prices with Greeks and IV | Real-time quotes, option chains and Greeks | Options from Cboe's delayed feed (about 15 minutes late), stocks from Yahoo Finance with Finviz as a fallback |
+| Fills, expirations, assignments | Booked by the broker | Read from your Alpaca fills | Read from your Public history | Replayed from your fills; expired options settle at intrinsic value |
+| Trade journal | Synced every hour | Rebuilt from your fills every hour | Rebuilt from your history every hour | Rebuilt as soon as you upload |
+| Buying power, working orders, missing take-profit alarm | Yes | Yes | Yes | Buying power from your starting cash; no working orders |
 
-You can switch at any time: filling in the tastytrade credentials turns live mode on; clearing them goes back to free mode.
+ZEUS only reads from Alpaca and Public. It never places, changes or cancels an order there, and nothing you do in 🧪 Paper Trade is sent to them.
 
-### 2.2 Connect tastytrade
+**Positions come from** (Settings → Broker & data) picks the source: *auto* uses the first broker whose keys are filled in (tastytrade, then Alpaca, then Public), otherwise your uploaded trades; or choose *tastytrade*, *alpaca*, *public* or *manual*. **Quotes come from** is a separate choice: *auto* uses your broker's own data and the free sources otherwise; *free*, *alpaca* or *public* pick one. Anything a broker does not carry, such as the SPX and VIX index levels, still comes from the free sources, and so does everything when the broker does not answer (rate limit, expired key). The cards at the top of Settings show the source in use, and say so when a broker was picked but its keys are missing.
+
+**Just looking?** Press **Load the sample** on the empty Positions page. ZEUS builds six positions (AAPL shares, a SPY bull put spread, an NVDA bull call spread, a QQQ iron condor, an MSFT call, a TSLA short put) and one closed AMD trade, with strikes, expirations and prices taken from that moment's real option quotes, so every page has something to show. A bar at the top says it is the sample; **Remove the sample** deletes only those trades, never your own.
+
+### 2.2 Connect a broker
+
+#### tastytrade
 
 1. On my.tastytrade.com open **Manage → API Access → OAuth Applications** and create an application. Copy the *client ID* and the *client secret* (the secret is shown once).
 2. Open **Manage → Create Grant**, select all scopes, and copy the *refresh token*.
-3. In ⚙ Settings → **Broker & trades**, paste the client ID, client secret and refresh token. Add the account number only if you have more than one account.
-4. Press **Save**, then **Test connection**. A green ✓ shows how many accounts were found. Positions load within seconds.
+3. In ⚙ Settings → **Broker & data**, paste the client ID, client secret and refresh token into the tastytrade block. Add the account number only if you have more than one account.
+4. Press **Save**, then **Test connection** in that block. A green ✓ shows how many accounts were found. Positions load within seconds.
+
+#### Alpaca
+
+1. Sign up at alpaca.markets (free). Open your **Paper Trading** account, then **API Keys → Generate**. Copy the *key ID* (paper keys start with PK) and the *secret key* (shown once). For your live account generate the keys there instead; live keys start with AK.
+2. In ⚙ Settings → **Broker & data**, paste both into the Alpaca block. Leave **Alpaca paper account** on for paper keys; set it to *off* for live keys.
+3. **Alpaca stock feed**: *iex* (free, real time, prices from the IEX exchange only), *delayed_sip* (free, every exchange, 15 minutes late) or *sip* (every exchange in real time, Alpaca's paid data plan). **Alpaca options feed**: *indicative* (free; quotes are Alpaca's indicative prices, trades are 15 minutes late, Greeks and IV included) or *opra* (the real-time exchange feed, paid).
+4. Press **Save**, then **Test connection**. The ✓ line shows the account, paper or live, the options level, how many positions it holds, a live AAPL price and how many SPY option quotes came back with Greeks.
+
+#### Public
+
+1. On public.com open **Account → Settings → API** and generate a *secret key*. Public has live accounts only.
+2. In ⚙ Settings → **Broker & data**, paste it into the Public block. Fill in the account ID only if you hold several Public accounts; empty picks your brokerage account.
+3. Press **Save**, then **Test connection**. ZEUS exchanges the secret for a short-lived token by itself; the secret never leaves this computer except to Public.
 
 ### 2.3 Free mode: your trades from a CSV
 
-1. In ⚙ Settings → **Broker & trades**, scroll to the trades section.
+1. In ⚙ Settings → **Broker & data**, scroll to the trades section. If positions come from a broker, set **Positions come from** to *manual* to use your uploads.
 2. Drop a CSV on the upload area, or click it to pick a file. Tick *replace* to replace everything instead of adding.
 3. Or add one trade with the form below it: date, symbol, stock or option, buy or sell, open or close, quantity, price, fees, and for options the type, strike and expiration.
 4. Set **Manual mode: starting cash** to your real cash before the first trade; it drives net liquidating value and position sizing.
@@ -162,13 +182,23 @@ Without AI, ZEUS works fully; AI buttons say that AI is not configured.
 | Port | Where the terminal listens; restart to apply | 8765 |
 | Desktop notifications (macOS) | Take-profit, missing GTC, risk radar and support/resistance alerts on the desktop | on |
 
-**Broker & trades**
+**Broker & data**
 
-| Setting | What it does |
-|---|---|
-| tastytrade OAuth client ID / client secret / refresh token | The live connection (see [2.2](#22-connect-tastytrade)) |
-| tastytrade account number (optional) | Only if you hold several accounts |
-| Manual mode: starting cash | Cash before your first uploaded trade |
+| Setting | What it does | Default |
+|---|---|---|
+| Positions come from | *auto*, *tastytrade*, *alpaca*, *public* or *manual* (see [2.1](#21-choose-how-your-positions-get-in)) | auto |
+| Quotes come from | *auto*, *free*, *alpaca* or *public*; with tastytrade as the broker, quotes always stream from tastytrade | auto |
+| tastytrade OAuth client ID / client secret / refresh token | The tastytrade connection (see [2.2](#22-connect-a-broker)) | |
+| tastytrade account number (optional) | Only if you hold several accounts | |
+| Alpaca API key ID / secret key | The Alpaca connection | |
+| Alpaca paper account | *on* = paper account, *off* = live account | on |
+| Alpaca stock feed | *iex*, *delayed_sip* or *sip* | iex |
+| Alpaca options feed | *indicative* or *opra* | indicative |
+| Public API secret key | The Public connection | |
+| Public account ID (optional) | Only if you hold several Public accounts | |
+| Manual mode: starting cash | Cash before your first uploaded trade | 0 |
+
+Each broker block has its own **Test connection** button, and the manual block has **Test free quotes**, which fetches an AAPL price and the AAPL and SPX option chains from the free sources.
 
 **News sources**
 
@@ -758,7 +788,7 @@ The code folder never holds your data, so `git pull` and `git push` cannot touch
 
 ### 15.2 Environment variables
 
-- Any setting can come from the environment as `ZEUS_<KEY>`, for example `ZEUS_TT_REFRESH_TOKEN` or `ZEUS_PORT`.
+- Any setting can come from the environment as `ZEUS_<KEY>`, for example `ZEUS_TT_REFRESH_TOKEN`, `ZEUS_ALPACA_KEY_ID`, `ZEUS_PUBLIC_SECRET_KEY` or `ZEUS_PORT`.
 - `ZEUS_HOME=/path` moves the settings folder.
 - `PORT=8790` overrides the port for one start.
 
@@ -770,7 +800,7 @@ The code folder never holds your data, so `git pull` and `git push` cannot touch
 
 ### 15.4 What goes over the network
 
-ZEUS has no telemetry. It talks only to the services you connect (tastytrade, Benzinga, your AI provider, your SMTP server, Barchart) and to public market data: Cboe delayed quotes, Yahoo Finance, Finviz, SEC EDGAR, Dow Jones RSS (WSJ, MarketWatch) and the translation engines. The server listens on 127.0.0.1 only, refuses foreign Host headers, and every write needs a header that other websites cannot send.
+ZEUS has no telemetry. It talks only to the services you connect (tastytrade, Alpaca, Public, Benzinga, your AI provider, your SMTP server, Barchart) and to public market data: Cboe delayed quotes, Yahoo Finance, Finviz, SEC EDGAR, Dow Jones RSS (WSJ, MarketWatch) and the translation engines. The server listens on 127.0.0.1 only, refuses foreign Host headers, and every write needs a header that other websites cannot send.
 
 ---
 
@@ -781,7 +811,7 @@ ZEUS has no telemetry. It talks only to the services you connect (tastytrade, Be
 | Enter | Any ticker or search box | Load or search |
 | B | TA single-ticker page | Open the main recommended spread in Paper Trade |
 | ? | Anywhere outside a text box | Open the guide to the page you are on ([3.1](#31-help-on-every-page)) |
-| Esc | Anywhere | Close the open pop-up (checkup, risk radar, alerts, liquidity, chart, a help card or the guide) or leave a detail view |
+| Esc | Anywhere | Close the open pop-up (checkup, risk radar, alerts, liquidity, chart, AI review, AI picks, the 🌐 translation panel, a help card or the guide), even with the cursor in its text box, or leave a detail view |
 | Cmd+Shift+R / Ctrl+Shift+R | Anywhere | Reload without the cache (after an update) |
 
 ---
@@ -793,7 +823,11 @@ ZEUS has no telemetry. It talks only to the services you connect (tastytrade, Be
 | The page does not open | Look at the window where the terminal runs. Is another program on 8765? Start with `PORT=8790 ./start.sh`. |
 | The picker shows 0 quotes after the close | Press **Refresh** in the picker; the last session's closing prices fill in within seconds. |
 | Quotes stop updating in free mode | Yahoo Finance is throttling; ZEUS switches stock quotes to Finviz by itself. Wait a minute and refresh. |
-| Positions are empty in free mode | Upload your trades in Settings → Broker & trades, and check that the CSV columns match [section 14](#14-manual-trades-the-csv-format). |
+| Positions are empty in free mode | Upload your trades in Settings → Broker & data, and check that the CSV columns match [section 14](#14-manual-trades-the-csv-format). To look around first, press **Load the sample** on the Positions page. |
+| The Alpaca test fails with 401 or 403 | The key and secret don't match, or paper keys meet *Alpaca paper account: off* (or live keys meet *on*). Paper keys start with PK, live keys with AK. |
+| Alpaca stock prices look stale for a small stock | The free *iex* feed only has trades from the IEX exchange. Switch **Alpaca stock feed** to *delayed_sip* (every exchange, 15 minutes late). |
+| The Public test fails | Generate a new secret key on public.com and paste it again; with several accounts, fill in the account ID. |
+| A broker is picked but positions are empty | Its keys are missing, so ZEUS fell back to manual mode; the Broker card in Settings says so. Fill in the keys and press Test connection. |
 | The tastytrade test fails | Create a new grant (all scopes) and paste the new refresh token; check the client secret. |
 | No AI buttons, or "AI not configured" | Set a provider in Settings → AI, press Test connection, then reload. |
 | Benzinga news stopped | The cookies expired; paste fresh cookies in Settings → News sources. |

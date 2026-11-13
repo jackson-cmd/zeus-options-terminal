@@ -33,19 +33,21 @@ ZEUS does far more than the screenshots in the README show. There are 7 pages in
 | ✅ | Page tabs | Positions · 🎯 Picker · 📋 Digest · 📅 Events · Trade Journal · 🧪 Paper Trade; in a narrow window they scroll sideways instead of wrapping | Free |
 | ✅ | Language menu | 中文 · 双语 (bilingual) · English, switch any time | Free |
 | ✅ | ? Guide <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | Lists every button and number on the page you are on, with search and “show me”; small ? icons beside columns, scores and cards open a card: what it is, how it is calculated, how to use it. The risk view, the liquidity scan and the risk radar explain their numbers too. Chinese, bilingual or English | Free |
-| ✅ | ⚙ Settings | Opens the settings page; everything is configured in the browser. Hover ⚙ to see the mode (tastytrade, or ◐ manual with the number of manual trades); the first card in Settings shows it too | Free |
+| ✅ | ⚙ Settings | Opens the settings page; everything is configured in the browser. Hover ⚙ to see where positions and quotes come from (tastytrade, Alpaca, Public, or ◐ manual with the number of manual trades); the first two cards in Settings show it too | Free |
 | ✅ | AI pause | Pauses the scheduled AI jobs (picks, brief, summaries) with one click | AI |
 | ✅ | 🔔 Mute | Silences every notification: take-profit, movers, risk, AI position review | Free |
 | ✅ | 🌐 Translation status | Which translation engine is working now, why the others fail, and a manual test | Free |
 | ✅ | 👁 Privacy blur | Blurs dollar amounts for screen sharing and recording | Free |
 | ✅ | LIVE indicator | Shows whether the live data connection is up | Free |
 | ✅ | Install as an app | The terminal is a PWA: install it from the browser and it opens in its own window | Free |
-| ✅ | Esc | Closes the open pop-up or leaves a detail view, like Back; switching tabs closes pop-ups too | Free |
+| ✅ | Esc | Closes the topmost pop-up (also the AI review, AI picks, news AI summary, earnings and 🌐 pop-ups, and with the cursor in a pop-up's text box) or leaves a detail view, like Back; switching tabs closes pop-ups too, and a click outside closes the 🌐 panel | Free |
 
 ## ⚔️ Positions
 
 | ✓ | Feature | What it does | Needs |
 |---|---|---|---|
+| ✅ | Three ways to start <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | With no positions yet: load the sample portfolio, connect a broker, or upload your trades, from one card at the top | Free |
+| ✅ | Sample portfolio <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | Six positions and one closed trade, strikes and prices taken from that moment's real option quotes; a bar marks it, one click removes only the sample trades | Free |
 | ✅ | Automatic strategy grouping | Verticals, calendars, diagonals, iron condors, butterflies, naked and covered legs and stock, grouped by the order that opened them, so rolls and legging-in stay together | Free |
 | ✅ | Live P/L | Every leg marked to market; today's P/L from the official previous close; total return in $ and % | Free (live streaming with tastytrade) |
 | ✅ | Sortable board | Name, underlying, total return, today's return, distance to breakeven, max profit, max loss (∞ when unlimited), chance of profit, DTE, progress to max profit | Free |
@@ -206,7 +208,7 @@ ZEUS does far more than the screenshots in the README show. There are 7 pages in
 
 | ✓ | Group | What you can set |
 |---|---|---|
-| ✅ | Broker & trades | tastytrade client ID, client secret, refresh token, account number; or manual trades (CSV upload or form) and starting cash; connection test |
+| ✅ | Broker & data <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | Where positions come from (auto, tastytrade, Alpaca, Public, manual) and where quotes come from (auto, free, Alpaca, Public); tastytrade client ID, client secret, refresh token, account number; Alpaca key ID, secret, paper or live, stock and options feeds; Public secret key and account ID; manual trades (CSV upload or form) and starting cash; a comparison table, a connection test per broker and a test of the free quotes |
 | ✅ | News sources | Benzinga cookies, Benzinga data API key, Benzinga login, Finviz Elite token, which free sources to use, headline translation (Google / Bing / AI / off), Google translate key |
 | ✅ | AI | Provider, Claude CLI path, Anthropic or OpenAI-compatible key and URL, fast and smart models, answer language, scheduled AI jobs on / off |
 | ✅ | AI agents (MCP) | MCP server on / off, whether agents may place paper trades, the address and setup for each agent, a test button |
@@ -228,7 +230,7 @@ Saved secrets are write-only: the page shows *set* or *not set* and never sends 
 | ✅ | TA scan | Four times a trading day: 09:40, 10:30, 12:00 and 15:00 New York time |
 | ✅ | Unusual options activity archive | Every 15 minutes in market hours (Benzinga) |
 | ✅ | Earnings and macro calendar | Daily |
-| ✅ | Journal sync | Hourly (tastytrade) |
+| ✅ | Journal sync | Hourly (tastytrade, Alpaca, Public; uploaded trades right away) |
 | ✅ | Alerts: take-profit, missing GTC, credit-spread mistakes, support / resistance, risk radar, decision-log reminders, weekly review (also by e-mail when set up) | Continuously |
 | ✅ | Bilingual news notification | Daily |
 
@@ -237,7 +239,9 @@ Saved secrets are write-only: the page shows *set* or *not set* and never sends 
 | Source | Used for | Cost |
 |---|---|---|
 | tastytrade REST + DXLink | Positions, fills, balances, orders, real-time quotes and Greeks | Free with an account |
-| Cboe delayed quotes | Option chains, bid/ask, IV and Greeks in manual mode (about 15 minutes delayed) | Free |
+| Alpaca <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | Positions, fills, balances, working orders; stocks from IEX in real time (or every exchange 15 minutes late), options at indicative prices with Greeks and IV | Free account and data (real-time SIP and OPRA are paid) |
+| Public <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | Positions, history, balances, working orders, real-time quotes, option chains and Greeks | Free with a Public account |
+| Cboe delayed quotes | Option chains, bid/ask, IV and Greeks without a broker feed (about 15 minutes delayed); also fills in what a broker leaves out | Free |
 | Yahoo Finance | Stock quotes and daily candles | Free |
 | Finviz | Quotes when Yahoo throttles, company data in batches, news, "why is it moving" | Free (Elite token optional) |
 | WSJ and MarketWatch RSS | News | Free |

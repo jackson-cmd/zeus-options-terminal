@@ -4,6 +4,25 @@
 
 What changed in each version of ZEUS Terminal. New features carry the <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> badge. Numbers in parentheses are the pull requests.
 
+## 0.5.0 — 2026-11-12
+
+### New features
+
+| | Feature | Read more |
+|---|---|---|
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🔌 Alpaca and Public**: connect an Alpaca account (free, paper trading included; keys starting PK are paper, AK live) or a Public account. Positions, balances, fills (for the journal) and working orders (for the missing take-profit alarm) are read from it; ZEUS never places, changes or cancels an order there. Alpaca's free data gives IEX stock prices in real time and options at indicative prices with Greeks and IV; Public gives its customers real-time quotes, chains and Greeks. (#39) | [Manual §2.2](docs/USER_GUIDE.md#22-connect-a-broker) |
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **Positions and quotes are separate choices**: *Positions come from* (auto, tastytrade, alpaca, public, manual) and *Quotes come from* (auto, free, alpaca, public). Index levels such as SPX and VIX, anything a broker leaves out (prior close, IV, Greeks) and everything during a broker error (rate limit, expired key) come from the free sources. Settings shows a card for each source and says so when a broker was picked but its keys are missing. Switching needs no restart. (#39) | [Manual §2.1](docs/USER_GUIDE.md#21-choose-how-your-positions-get-in) |
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **Settings → Broker & data**: a comparison table, then one block per broker with what it gives, a link to get keys and its own **Test connection** (the account, paper or live, the options level, positions, a live AAPL price, SPY option quotes with Greeks); the manual block has **Test free quotes**. (#39) | [Manual §2.7](docs/USER_GUIDE.md#27-every-setting) |
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🧪 Sample portfolio and a welcome card**: with no positions, the Positions page offers three ways in: load the sample, connect a broker, upload your trades. The sample is six positions (AAPL shares, SPY bull put spread, NVDA bull call spread, QQQ iron condor, MSFT call, TSLA short put) and one closed AMD trade, with strikes, expirations and prices from that moment's real option quotes. A bar marks it; **Remove the sample** deletes only those trades. (#39) | [Manual §2.1](docs/USER_GUIDE.md#21-choose-how-your-positions-get-in) |
+
+### Fixed
+
+- Esc now closes the topmost pop-up everywhere. The checkup ignored it because the cursor sits in its ticker box. The AI position review, AI picks, news AI summary and earnings pop-ups were not on Esc's list. (#39)
+- The 🌐 translation panel stayed open over every page until clicked again, covering the Positions toolbar and column headers. It now closes on Esc, a click outside it and a tab switch, and its notes wrap inside the panel. (#39)
+- A first visit opened the daily movers pop-up about 2 s in and switched to the Picker, so a new user never saw how to start. It no longer pops on a first visit or while the welcome card is waiting. (#39)
+- The Trade Journal without data showed the stand-alone tool's instructions (trades_raw.json, `python -m http.server`). It now explains how the journal fills up and checks again every 10 s. (#39)
+- Uploaded trades' times were converted to UTC as EDT all year, an hour off in winter; they now use New York time. (#39)
+
 ## 0.4.2 — 2026-11-12
 
 ### Fixed
