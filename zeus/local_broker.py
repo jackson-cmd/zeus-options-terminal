@@ -817,7 +817,47 @@ def _cboe_book(und: str) -> dict | None:
             return None
         return {"spot": g(data, "current_price") or g(data, "close"), "iv30": g(data, "iv30") / 100.0,
                 "rows": rows}
-    return _cached(("cboe", u), 120, fetch)
+    book = _cached(("cboe", u), 120, fetch)
+    if book is None:                      # Cboe busy (429) or down: try again in 15 s, not 2 min
+        with _lock:
+            hit = _cache.get(("cboe", u))
+            if hit and hit[1] is None:
+                _cache[("cboe", u)] = (time.time() - 105, None)
+    return book
+
+
+def _yahoo_book(und: str) -> dict | None:
+    """The shape of _cboe_book from Yahoo Finance option chains: one expiration near each of 25, 40,
+    55, 75 and 95 days out. Used for the sample portfolio when Cboe is busy."""
+    u = und.upper().lstrip("$^")
+    spot = _free_equity_quote(u).get("last") or 0
+    if not spot:
+        return None
+    today = date.today()
+    rows = {}
+    window = [e for e in expirations(u) if 15 <= (date.fromisoformat(e) - today).days <= 110]
+    picks = []
+    for target in (25, 40, 55, 75, 95):    # one chain near each horizon the sample uses
+        if window:
+            e = min(window, key=lambda x: abs((date.fromisoformat(x) - today).days - target))
+            if e not in picks:
+                picks.append(e)
+    for e in picks:
+        calls, puts = _chain(u, e)
+        ymd = date.fromisoformat(e).strftime("%y%m%d")
+        for cp, df in (("C", calls), ("P", puts)):
+            if df is None or getattr(df, "empty", True):
+                continue
+            for _, r in df.iterrows():
+                try:
+                    k = int(round(float(r["strike"]) * 1000))
+                    bid, ask, last = (float(r.get(c) or 0) for c in ("bid", "ask", "lastPrice"))
+                    iv = float(r.get("impliedVolatility") or 0)
+                except (TypeError, ValueError):
+                    continue
+                vals = [x if x == x else 0.0 for x in (bid, ask, last, iv)]   # NaN → 0
+                rows[(u, ymd, cp, k)] = (vals[0], vals[1], vals[2], vals[2], vals[3], 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+    return {"spot": spot, "iv30": 0.0, "rows": rows} if rows else None
 
 
 def _cboe_row(p: dict):
@@ -1289,13 +1329,17 @@ def _sample_contract(book: dict, und: str, cp: str, target: float, dte_lo: int, 
         dte = (date.fromisoformat(e) - today).days
         if not dte_lo <= dte <= dte_hi:
             continue
-        bid, ask = row[0], row[1]
-        if bid <= 0 or ask <= 0:
+        bid, ask, last = row[0], row[1], row[2]
+        if bid > 0 and ask > 0:
+            mid = (bid + ask) / 2
+        elif last > 0:                    # Yahoo blanks bid/ask at night and on weekends
+            mid = last
+        else:
             continue
         monthly = date.fromisoformat(e).weekday() == 4 and 15 <= date.fromisoformat(e).day <= 21
         score = (abs(k / 1000.0 - target) / max(target, 1e-9), 0 if monthly else 1, dte)
         if best is None or score < best[0]:
-            best = (score, e, k / 1000.0, round((bid + ask) / 2, 2))
+            best = (score, e, k / 1000.0, round(mid, 2))
     return best[1:] if best else None
 
 
@@ -1321,10 +1365,15 @@ def sample_trades() -> list[dict]:
     books = {}
     for und in ("SPY", "QQQ", "AAPL", "NVDA", "MSFT", "TSLA"):
         b = _cboe_book(und)
+        if not (b and b.get("spot")):
+            try:
+                b = _yahoo_book(und)          # Cboe busy: Yahoo's chains will do
+            except Exception:
+                b = None
         if b and b.get("spot"):
             books[und] = b
     if len(books) < 3:
-        raise LocalModeError("could not reach the free option quotes (Cboe) to price the sample portfolio")
+        raise LocalModeError("could not reach the free option quotes (Cboe or Yahoo) to price the sample portfolio")
 
     # 1. stock: AAPL shares bought three weeks ago, a little below today's price
     if "AAPL" in books:

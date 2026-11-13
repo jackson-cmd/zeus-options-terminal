@@ -173,10 +173,45 @@ def test_every_runtime_dir_is_ignored_and_covers_the_finviz_store():
     a folder written inside the code (like the Finviz 'why is it moving' store once was) could be pushed."""
     from pathlib import Path
     import zeus_config as zc
-    root = Path(zc.__file__).resolve().parent
-    ignored = {ln.strip() for ln in (root / ".gitignore").read_text(encoding="utf-8").splitlines()}
+    code = Path(zc.__file__).resolve().parent          # zeus/
+    top = code.parent                                  # the repository
+    ignored = {ln.strip() for ln in (top / ".gitignore").read_text(encoding="utf-8").splitlines()}
     for rel in zc.RUNTIME_DIRS:
-        assert rel in ignored, rel
+        assert ("zeus/" + rel if "/" in rel else rel) in ignored, rel
+        if "/" in rel:
+            assert rel in ignored, rel                 # the old place too, for links older versions left there
     from benzinga_mcp import finviz_ai_store
     store = finviz_ai_store.FINVIZ_AI_DIR
-    assert str(store.relative_to(root)).replace("\\", "/") in zc.RUNTIME_DIRS
+    assert str(store.relative_to(code)).replace("\\", "/") in zc.RUNTIME_DIRS
+
+
+def test_links_left_at_the_old_place_are_removed(tmp_path, monkeypatch):
+    """After the move into zeus/, a pulled install still has the old runtime links at the top. Starting removes
+    them, but only links that point into the runtime folder: a real folder or a link elsewhere stays."""
+    import os
+    import zeus_config as zc
+    top = tmp_path / "repo"
+    code = top / "zeus"
+    code.mkdir(parents=True)
+    home = tmp_path / "home"
+    monkeypatch.setattr(zc, "REPO_ROOT", code)
+    monkeypatch.setenv("ZEUS_HOME", str(home))
+    runtime = zc.runtime_root()
+    (runtime / "data").mkdir(parents=True)
+    (runtime / "data" / "keep.txt").write_text("my data", encoding="utf-8")
+    try:
+        os.symlink(runtime / "data", top / "data", target_is_directory=True)
+    except OSError:
+        pytest.skip("this system does not allow symlinks")
+    (top / "trade_journal").mkdir()
+    os.symlink(runtime / "trade_journal__data", top / "trade_journal" / "data", target_is_directory=True)
+    (top / "options_analyzer").mkdir()
+    (top / "options_analyzer" / "data").mkdir()                     # a real folder: never touched
+    elsewhere = tmp_path / "elsewhere"
+    elsewhere.mkdir()
+    (top / "stock_picker").mkdir()
+    os.symlink(elsewhere, top / "stock_picker" / "data", target_is_directory=True)   # not ours: stays
+    zc.relocate_runtime_dirs()
+    assert not os.path.lexists(top / "data") and not os.path.lexists(top / "trade_journal" / "data")
+    assert (top / "options_analyzer" / "data").is_dir() and (top / "stock_picker" / "data").is_symlink()
+    assert (code / "data").is_symlink() and (code / "data" / "keep.txt").read_text(encoding="utf-8") == "my data"

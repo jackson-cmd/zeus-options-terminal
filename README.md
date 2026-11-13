@@ -29,7 +29,7 @@
 
 ## 🆕 What's new
 
-<sub>Latest release **0.5.0** (2026-11-12). The full history is in the [changelog](CHANGELOG.md).</sub>
+<sub>Latest release **0.5.1** (2026-11-12). The full history is in the [changelog](CHANGELOG.md).</sub>
 
 | | New in 0.5.0, 0.4.x, 0.3.x and 0.2.x |
 |---|---|
@@ -277,7 +277,7 @@ date,symbol,asset,side,effect,qty,price,fees,option_type,strike,expiration,multi
 browser (PWA, 中文 / 双语 / English)
    │  WebSocket + REST
    ▼
-FastAPI server  ── options_analyzer/optionstrat_server.py
+FastAPI server  ── zeus/options_analyzer/optionstrat_server.py   (all code lives in zeus/)
    ├─ broker ........ tastytrade REST + DXLink stream   │  local_broker.py (manual mode, Cboe + Yahoo)
    │                                                   │  zeus_brokers.py (Alpaca · Public, read-only)
    ├─ news .......... Benzinga (cookies / WS)           │  zeus_news.py (Finviz · WSJ · MarketWatch)
@@ -291,7 +291,7 @@ FastAPI server  ── options_analyzer/optionstrat_server.py
    └─ settings ...... zeus_config.py → ~/.zeus-terminal/config.json
 ```
 
-Runtime data (candles, caches, digests) lives in `~/.zeus-terminal/runtime/`; folders such as `data/` inside the code are only links to it. Configuration can also come from environment variables (`ZEUS_<KEY>`, e.g. `ZEUS_TT_REFRESH_TOKEN`) and the settings folder can be moved with `ZEUS_HOME`.
+Runtime data (candles, caches, digests) lives in `~/.zeus-terminal/runtime/`; folders such as `zeus/data/` inside the code are only links to it. Configuration can also come from environment variables (`ZEUS_<KEY>`, e.g. `ZEUS_TT_REFRESH_TOKEN`) and the settings folder can be moved with `ZEUS_HOME`.
 
 ---
 
@@ -328,4 +328,4 @@ ZEUS Terminal is released under the **[PolyForm Noncommercial License 1.0.0](LIC
 
 **Rights holders:** if you believe anything in this repository infringes your rights (trademarks, data, terms of service or anything else), **open an issue** and the material will be removed promptly.
 
-**Disclaimer.** This is a personal tool shared as is, without any warranty. It is **not investment advice**. Options involve substantial risk of loss. You are responsible for your own trades and for complying with the terms of every data provider and broker you connect. ZEUS Terminal is not affiliated with or endorsed by tastytrade, Benzinga, Cboe, Finviz, Dow Jones / The Wall Street Journal / MarketWatch, Barchart, Yahoo or Anthropic; all names belong to their owners.
+**Disclaimer.** This is a personal tool shared as is, without any warranty. It is **not investment advice**. Options involve substantial risk of loss. You are responsible for your own trades and for complying with the terms of every data provider and broker you connect. ZEUS Terminal is not affiliated with or endorsed by tastytrade, Alpaca, Public, Benzinga, Cboe, Finviz, Dow Jones / The Wall Street Journal / MarketWatch, Barchart, Yahoo or Anthropic; all names belong to their owners.

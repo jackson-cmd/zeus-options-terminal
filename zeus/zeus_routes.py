@@ -199,25 +199,8 @@ async def trades_import(request: Request, payload: dict = Body(...)):
     return {"ok": bool(trades), **res, "parsed": len(trades), "errors": errors[:50], "error_count": len(errors)}
 
 
-@router.delete("/api/trades/{trade_id}")
-async def trades_delete(trade_id: str, request: Request):
-    _guard(request)
-    ok = lb.delete_trade(trade_id)
-    if ok:
-        asyncio.create_task(_run_hook("refresh_positions"))
-        asyncio.create_task(_run_hook("refresh_journal"))
-    return {"ok": ok}
-
-
-@router.post("/api/trades/clear")
-async def trades_clear(request: Request):
-    _guard(request)
-    lb.save_trades([])
-    asyncio.create_task(_run_hook("refresh_positions"))
-    asyncio.create_task(_run_hook("refresh_journal"))
-    return {"ok": True}
-
-
+# The sample routes come before /api/trades/{trade_id}: FastAPI matches in order, and that route
+# would otherwise take DELETE /api/trades/sample as "delete the trade whose id is sample".
 @router.post("/api/trades/sample")
 async def trades_sample_load(request: Request):
     """Load the sample portfolio (priced from today's free quotes)."""
@@ -246,6 +229,25 @@ async def _refresh_now():
     except Exception:
         pass
     asyncio.create_task(_run_hook("refresh_journal"))
+
+
+@router.delete("/api/trades/{trade_id}")
+async def trades_delete(trade_id: str, request: Request):
+    _guard(request)
+    ok = lb.delete_trade(trade_id)
+    if ok:
+        asyncio.create_task(_run_hook("refresh_positions"))
+        asyncio.create_task(_run_hook("refresh_journal"))
+    return {"ok": ok}
+
+
+@router.post("/api/trades/clear")
+async def trades_clear(request: Request):
+    _guard(request)
+    lb.save_trades([])
+    asyncio.create_task(_run_hook("refresh_positions"))
+    asyncio.create_task(_run_hook("refresh_journal"))
+    return {"ok": True}
 
 
 @router.get("/api/trades/template.csv")

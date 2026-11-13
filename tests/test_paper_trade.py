@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "options_analyzer"))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "zeus" / "options_analyzer"))
 
 import paper_trade_api as pta  # noqa: E402
 import paper_trade_routes as ptr  # noqa: E402

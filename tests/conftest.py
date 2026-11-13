@@ -7,6 +7,7 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT))
-sys.path.insert(0, str(ROOT / "benzinga_digest" / "src"))
+CODE = ROOT / "zeus"                      # all the code lives here
+sys.path.insert(0, str(CODE))
+sys.path.insert(0, str(CODE / "benzinga_digest" / "src"))
 os.environ["ZEUS_HOME"] = tempfile.mkdtemp(prefix="zeus-test-")

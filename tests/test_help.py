@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parent.parent / "zeus"   # the code
 HELP = ROOT / "options_analyzer" / "static" / "zeus_help.js"
 ZEUS_JS = (ROOT / "options_analyzer" / "static" / "zeus.js").read_text(encoding="utf-8")
 ZEUS_CSS = (ROOT / "options_analyzer" / "static" / "zeus.css").read_text(encoding="utf-8")

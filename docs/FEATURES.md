@@ -200,7 +200,7 @@ ZEUS does far more than the screenshots in the README show. There are 7 pages in
 | ✅ | 18 tools | Status; positions with ZEUS's own P/L, max profit and loss, breakevens, chance of profit, Greeks, stress and exit advice; what-if analysis of any strategy; pre-trade checkup; spread suggestions; liquidity; quotes and option chains; market overview; events; news; sector rotation; trade ideas; ticker report; trade journal; paper trades | Free (each tool's data as usual) |
 | ✅ | 4 prompts | Portfolio review, pre-trade check, morning brief, journal coach: slash commands in Claude Code and Gemini CLI | Free |
 | ✅ | Paper trading by agents | Agents open and close simulated trades, only after you allow it in Settings | Free |
-| ✅ | stdio bridge | `zeus_mcp_stdio.py` for clients that launch a command (Claude Desktop); standard library only; `--check` tests the connection | Free |
+| ✅ | stdio bridge | `zeus/zeus_mcp_stdio.py` for clients that launch a command (Claude Desktop); standard library only; `--check` tests the connection | Free |
 | ✅ | Old and new clients | The current stateless protocol (2026-07-28) and the handshake-based revisions (2025-11-25 and earlier) | Free |
 | ✅ | Local only | Answers only programs on this computer; no tool can place a real order or read a saved key | Free |
 
@@ -255,7 +255,7 @@ Saved secrets are write-only: the page shows *set* or *not set* and never sends 
 | ✓ | Feature | Notes |
 |---|---|---|
 | ✅ | REST API | More than 200 endpoints under `/api/...`, for example `/api/paper-trade`, `/api/digest`, `/api/checkup`, `/api/sec` |
-| ✅ | MCP server | `zeus_mcp.py` (add a tool with the `@tool` decorator); the option math agents read is in `zeus_payoff.py` and is tested against the page's own JavaScript |
+| ✅ | MCP server | `zeus/zeus_mcp.py` (add a tool with the `@tool` decorator); the option math agents read is in `zeus/zeus_payoff.py` and is tested against the page's own JavaScript |
 | ✅ | Configuration by environment | Any setting as `ZEUS_<KEY>`; move the settings folder with `ZEUS_HOME` |
 | ✅ | Tests | `python -m pytest` (offline; quotes are faked) |
 | ✅ | CI | Every pull request runs the tests on Linux, macOS and Windows (7 jobs); `main` only accepts green pull requests |

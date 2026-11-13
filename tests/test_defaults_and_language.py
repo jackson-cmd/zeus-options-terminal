@@ -8,7 +8,7 @@ import pytest
 
 import zeus_config as zc
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parent.parent / "zeus"   # the code
 sys.path.insert(0, str(ROOT / "market_brief"))
 
 import groups  # noqa: E402

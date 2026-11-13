@@ -13,7 +13,7 @@ import local_broker as lb
 import zeus_brokers as zb
 import zeus_config as hc
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parent.parent / "zeus"   # the code
 KEYS = ("account_source", "market_data", "alpaca_key_id", "alpaca_secret_key", "alpaca_paper", "alpaca_stock_feed",
         "alpaca_options_feed", "public_secret_key", "public_account_id", "tt_client_secret", "tt_refresh_token",
         "manual_starting_cash")
@@ -413,8 +413,40 @@ def test_sample_portfolio_load_and_remove(monkeypatch):
 
 def test_sample_needs_quotes(monkeypatch):
     monkeypatch.setattr(lb, "_cboe_book", lambda und: None)
+    monkeypatch.setattr(lb, "_yahoo_book", lambda und: None)
     with pytest.raises(lb.LocalModeError):
         lb.sample_trades()
+
+
+def test_sample_uses_yahoo_when_cboe_is_busy(monkeypatch):
+    """Cboe answers 429 under load; the sample then prices from Yahoo's chains, whose bid/ask may be
+    blank at night (the last price is used then)."""
+    spots = {"SPY": 700.0, "QQQ": 600.0, "AAPL": 350.0, "NVDA": 170.0, "MSFT": 520.0, "TSLA": 400.0}
+
+    def night_book(und):
+        b = fake_book(und, spots[und])
+        b["rows"] = {k: (0.0, 0.0, v[2]) + v[3:] for k, v in b["rows"].items()}     # no bid/ask, last only
+        return b
+    monkeypatch.setattr(lb, "_cboe_book", lambda und: None)
+    monkeypatch.setattr(lb, "_yahoo_book", night_book)
+    monkeypatch.setattr(lb, "_free_equity_quote", lambda s: {"last": 200.0, "prev_close": 199.0})
+    trades = lb.sample_trades()
+    assert len(trades) == 13 and all(t["price"] > 0 for t in trades)
+
+
+def test_a_cboe_failure_is_retried_soon(monkeypatch):
+    calls = []
+
+    def down(sym):
+        calls.append(sym)
+        raise OSError("429")
+    monkeypatch.setattr(lb, "_cboe_json", down)
+    lb._cache.pop(("cboe", "ZZZ"), None)
+    assert lb._cboe_book("ZZZ") is None and lb._cboe_book("ZZZ") is None
+    assert len(calls) == 1                                  # not hammered right away …
+    lb._cache[("cboe", "ZZZ")] = (lb._cache[("cboe", "ZZZ")][0] - 16, None)
+    lb._cboe_book("ZZZ")
+    assert len(calls) == 2                                  # … but asked again after 15 s, not 2 min
 
 
 # --------------------------------------------------------------------------- pages
@@ -479,3 +511,23 @@ def test_status_reports_the_broker_summary():
     assert 'st["broker_errors"] = lb.broker_errors()' in src
     js = json.dumps(hc.status())
     assert '"market_source"' in js and '"brokers"' in js
+
+
+def test_sample_routes_reach_the_sample_not_a_trade_id(monkeypatch):
+    """DELETE /api/trades/sample once fell through to DELETE /api/trades/{trade_id} (id "sample"), so the
+    Remove the sample button said it failed. Both sample routes are checked through the real router."""
+    from fastapi import FastAPI
+    from fastapi.testclient import TestClient
+    import zeus_routes
+    app = FastAPI()
+    app.include_router(zeus_routes.router)
+    c = TestClient(app)
+    calls = []
+    monkeypatch.setattr(lb, "load_sample", lambda: calls.append("load") or {"ok": True, "added": 13})
+    monkeypatch.setattr(lb, "remove_sample", lambda: calls.append("remove") or {"ok": True, "removed": 13})
+    monkeypatch.setattr(lb, "delete_trade", lambda tid: calls.append(("delete", tid)) or False)
+    h = {"X-Zeus-Client": "1"}
+    assert c.post("/api/trades/sample", headers=h).json()["ok"] is True
+    r = c.delete("/api/trades/sample", headers=h).json()
+    assert r == {"ok": True, "removed": 13} and calls == ["load", "remove"]
+    assert c.delete("/api/trades/sample").status_code == 403          # write routes still need the header

@@ -12,7 +12,7 @@ if [ ! -d .venv ]; then
 fi
 export ZEUS_PYTHON="$(pwd)/.venv/bin/python"
 if [ -z "${PORT:-}" ]; then   # the port set in ⚙ Settings, else 8765
-  PORT="$(.venv/bin/python -c 'import zeus_config as c; print(c.get("port") or 8765)' 2>/dev/null || echo 8765)"
+  PORT="$(.venv/bin/python -c 'import sys; sys.path.insert(0, "zeus"); import zeus_config as c; print(c.get("port") or 8765)' 2>/dev/null || echo 8765)"
 fi
 ( sleep 4; (command -v open >/dev/null && open "http://localhost:${PORT}/") || (command -v xdg-open >/dev/null && xdg-open "http://localhost:${PORT}/") || true ) &
-exec .venv/bin/python options_analyzer/optionstrat_server.py
+exec .venv/bin/python zeus/options_analyzer/optionstrat_server.py

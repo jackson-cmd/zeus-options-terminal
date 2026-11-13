@@ -3,7 +3,25 @@
 # and all runtime data lives in ~/.zeus-terminal/runtime/ — both outside this folder.
 # The runtime directories below are links to that place (or plain folders where links
 # are not allowed). Patterns have NO trailing slash so links are ignored too.
+# all code lives in zeus/, so its runtime links do too:
 data
+zeus/options_analyzer/data
+zeus/trade_journal/data
+zeus/pre_trade_checkup/data
+zeus/stock_picker/data
+zeus/eod_crawler/data_eod
+zeus/eod_crawler/logs
+zeus/barchart/downloads
+zeus/barchart/snapshots
+zeus/benzinga_digest/digests
+zeus/benzinga_digest/ai_summary
+zeus/benzinga_digest/pivot_summary
+zeus/benzinga_digest/finviz_ai
+zeus/trading_assistant/data
+zeus/trading_assistant/reports
+zeus/winrate_scanner/data
+zeus/benzinga/data
+# the same links at the old place, left behind by versions before 0.5.1 (removed at start):
 options_analyzer/data
 trade_journal/data
 pre_trade_checkup/data

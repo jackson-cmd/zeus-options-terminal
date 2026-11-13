@@ -1,7 +1,7 @@
 """Background jobs the server starts."""
 from pathlib import Path
 
-SERVER = Path(__file__).resolve().parent.parent / "options_analyzer" / "optionstrat_server.py"
+SERVER = Path(__file__).resolve().parent.parent / "zeus" / "options_analyzer" / "optionstrat_server.py"
 
 
 def test_signal_backtest_job_is_not_started():
