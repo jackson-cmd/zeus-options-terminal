@@ -4,6 +4,32 @@
 
 What changed in each version of ZEUS Terminal. New features carry the <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> badge. Numbers in parentheses are the pull requests.
 
+## 0.8.0 — 2026-11-24
+
+### New features
+
+| | Feature | Read more |
+|---|---|---|
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **📱 Use it on your phone**: ZEUS keeps running on your computer, and your phone opens it at home or away on mobile data, installed on the home screen like an app. The free Tailscale connects the two over HTTPS without opening anything to the internet. ⚙ Settings → Phone access turns on the address with one button and shows a QR code that opens ZEUS on the phone and logs it in. Each phone logs in once with an access code, Settings open only on the computer, a switch keeps the computer awake, and when it cannot be reached the app says why. Off until you turn it on; the same Wi-Fi works without Tailscale too. (#78) | [Set it up →](docs/USER_GUIDE.md#19-use-it-on-your-phone) |
+
+### Fixed
+
+- Ctrl+C stops the server within a few seconds, even while long background jobs run. Before, it could take minutes (one stop took 109 s), and an open heatmap or digest page held it up as well. (#75)
+- On pandas 3, which every fresh install on Python 3.11 or later gets, positions the broker gives no IV for get the Yahoo Finance estimate again, and the correlation of SPY alone is no longer empty. (#74)
+- Installs bring yfinance up to 1.8.0. On the 0.2 series Yahoo news failed and earnings dates stopped at April 2025. (#73)
+- Downloads from Yahoo Finance no longer mix up tickers when they overlap: on yfinance before 1.4 they take turns, and on 1.4 and later, which keeps each download apart, they run side by side. (#69, #72)
+- Gainers / Losers, ETF trends and the risk stats keep their last good data when a download fails, instead of an empty table for up to a week. (#68)
+- On a fresh install the TA screener scans the default tickers instead of stopping with FileNotFoundError. (#71)
+
+### Security
+
+- The live quote stream (a WebSocket) now refuses pages of other websites, including sandboxed frames that send `Origin: null`. Browsers apply no cross-origin rules to WebSockets, so before, a page you visited could open the stream of the ZEUS running on your computer. (#78)
+
+### Project
+
+- `segno`, a pure-Python package with no dependencies of its own, draws the phone access QR code and is now installed with ZEUS. (#78)
+- The READMEs carry the Zenodo DOI badge and `CITATION.cff` the concept DOI; the website has a Bing Webmaster Tools verification tag. (#67, #70)
+
 ## 0.7.1 — 2026-11-13
 
 ### New features

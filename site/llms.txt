@@ -4,6 +4,7 @@
 
 - Install: `pipx install zeus-options-terminal`, then run `zeus` (Python 3.10+). Or clone the repository and run `./start.sh` (Windows: `start.bat`), or run the image: `docker run -d --name zeus -p 127.0.0.1:8765:8765 -v zeus-data:/data ghcr.io/jackson-cmd/zeus-options-terminal`. The page opens at http://localhost:8765.
 - MCP server: while ZEUS runs, AI agents (Claude Code, Claude Desktop, Codex, Gemini CLI or your own) connect to `http://127.0.0.1:8765/mcp` over streamable HTTP and get 18 tools: positions with exact max profit and loss, breakevens, Greeks and exit advice, what-if pricing of any strategy, the four-gate pre-trade checkup, liquidity, news, events, sector rotation and the trade journal. It is read-only unless you let agents paper trade, answers only programs on the same computer, and never touches a real order. Clients that can only launch a command use the stdio bridge in `zeus/zeus_mcp_stdio.py`.
+- Phone access: while ZEUS runs on your computer, your phone opens it at home or away through Tailscale (an HTTPS address inside your own tailnet, nothing opened to the internet) and installs it on the home screen. It is off until you turn it on in Settings → Phone access; each phone logs in once with an access code, and Settings stay on the computer.
 - MCP Registry: listed as `io.github.jackson-cmd/zeus-options-terminal`; clients that install servers from the official registry start ZEUS with `uvx zeus-options-terminal --no-browser --port 8765` and connect to `http://localhost:8765/mcp`.
 
 ## Website
