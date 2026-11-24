@@ -3,8 +3,8 @@
 #   docker run -d --name zeus -p 127.0.0.1:8765:8765 -v zeus-data:/data \
 #     ghcr.io/jackson-cmd/zeus-options-terminal
 #
-# then open http://localhost:8765. Keep "127.0.0.1:" in -p: ZEUS has no login, so anyone who
-# can reach the port can read your positions. Settings, trades and caches live in the /data
+# then open http://localhost:8765. Keep "127.0.0.1:" in -p: ZEUS asks this computer for no login,
+# so anyone who can reach the port can read your positions (phones log in: manual §1.9). Settings, trades and caches live in the /data
 # volume; the code in /app is read-only for the app's user. Manual: docs/USER_GUIDE.md §1.7.
 #
 # Build it yourself from the top of the repository (the build context), with BuildKit, which

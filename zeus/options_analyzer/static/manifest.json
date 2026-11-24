@@ -1,8 +1,10 @@
 {
+  "id": "/",
   "name": "ZEUS Terminal · 宙斯期权终端",
   "short_name": "ZEUS",
   "description": "Self-hosted, all-in-one options trading terminal: live positions & Greeks, risk, bilingual news, stock picker, earnings & SEC, trade journal. 本地部署的全方位期权交易终端。",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#0d1117",
   "theme_color": "#0d1117",

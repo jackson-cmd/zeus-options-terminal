@@ -6,6 +6,20 @@
   if (window.__zeusLoaded) return;
   window.__zeusLoaded = true;
 
+  // ------------------------------------------------------------------ phone access
+  // On a phone whose login has run out, API calls answer 401 with X-Zeus-Login: open the login page.
+  if (window.fetch) {
+    var _fetch = window.fetch.bind(window);
+    window.fetch = function () {
+      return _fetch.apply(null, arguments).then(function (r) {
+        if (r.status === 401 && r.headers.get('X-Zeus-Login')) {
+          location.href = '/login?next=' + encodeURIComponent(location.pathname + location.search);
+        }
+        return r;
+      });
+    };
+  }
+
   // ------------------------------------------------------------------ language: zh | bi | en
   var LANGS = ['zh', 'bi', 'en'];
   function pickLang(serverPref) {

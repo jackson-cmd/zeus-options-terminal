@@ -22,7 +22,7 @@ ZEUS does far more than the screenshots in the README show. There are 7 pages in
 - [Top bar](#top-bar-on-every-page) · [⚔️ Positions](#️-positions) · [🔍 Strategy detail](#-strategy-detail-click-any-position) · [⚠ Risk view](#-risk-view)
 - [🩺 Discipline and alerts](#-discipline-and-alerts) · [🩺 Pre-trade checkup and liquidity](#-pre-trade-checkup-and-liquidity)
 - [🎯 Picker](#-picker) · [🔎 TA screener](#-ta-screener-ta) · [🧪 Paper Trade](#-paper-trade-)
-- [📋 Digest](#-digest) · [📅 Events](#-events) · [📓 Trade journal](#-trade-journal) · [🔌 AI agents (MCP)](#-ai-agents-mcp-)
+- [📋 Digest](#-digest) · [📅 Events](#-events) · [📓 Trade journal](#-trade-journal) · [🔌 AI agents (MCP)](#-ai-agents-mcp-) · [📱 Phone access](#-phone-access-)
 - [⚙ Settings](#-settings) · [🔁 What runs by itself](#-what-runs-by-itself) · [🌍 Data sources](#-data-sources) · [🛠 For developers](#-for-developers)
 - [Not wired up yet: ideas for pull requests](#not-wired-up-yet--ideas-for-pull-requests)
 
@@ -204,6 +204,19 @@ ZEUS does far more than the screenshots in the README show. There are 7 pages in
 | ✅ | Old and new clients | The current stateless protocol (2026-07-28) and the handshake-based revisions (2025-11-25 and earlier) | Free |
 | ✅ | Local only | Answers only programs on this computer; no tool can place a real order or read a saved key. In Docker, HTTP from this computer only with `-e ZEUS_MCP_FROM_HOST=1` | Free |
 
+## 📱 Phone access <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!">
+
+| ✓ | Feature | What it does | Needs |
+|---|---|---|---|
+| ✅ | ZEUS on your phone | Open the terminal on your phone at home or away on mobile data, while it runs on your computer; through Tailscale over HTTPS, with nothing opened to the internet | Free (Tailscale's personal plan) |
+| ✅ | Guided setup | Settings → Phone access shows whether Tailscale runs, turns on its https address with one button (`tailscale serve`), and a QR code that opens ZEUS and logs the phone in | Free |
+| ✅ | Install as an app | Add to Home Screen (iPhone) or Install app (Android): full screen, with its own icon | Free |
+| ✅ | Access code | 8 characters, once per device; the login lasts 180 days and renews while used; wrong codes are rate-limited; a new code or *Sign out every phone* ends every login | Free |
+| ✅ | Settings stay on the computer | Settings, the phone controls, connection tests and MCP never open on a phone | Free |
+| ✅ | Can't-reach page | When the computer sleeps or ZEUS is stopped, the app says why and offers *Try again* instead of a browser error | Free |
+| ✅ | Keep awake | While phone access is on, the computer does not sleep when idle (macOS, Linux) | Free |
+| ✅ | Same Wi-Fi | Without Tailscale: listen on 0.0.0.0; plain http, still behind the access code | Free |
+
 ## ⚙ Settings
 
 | ✓ | Group | What you can set |
@@ -214,6 +227,7 @@ ZEUS does far more than the screenshots in the README show. There are 7 pages in
 | ✅ | AI agents (MCP) | MCP server on / off, whether agents may place paper trades, the address and setup for each agent, a test button |
 | ✅ | Other data | Barchart login, Finviz "why is it moving" crawl on / off, SEC EDGAR User-Agent |
 | ✅ | E-mail alerts | From, to, app password, SMTP server and port; a button sends a test e-mail |
+| ✅ | Phone access | Phone access on / off, keep the computer awake, the Tailscale https address, a QR code, the access code, sign out every phone |
 | ✅ | General | Language, listen address, port, desktop notifications |
 
 Saved secrets are write-only: the page shows *set* or *not set* and never sends a secret back.

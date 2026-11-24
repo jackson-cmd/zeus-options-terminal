@@ -71,6 +71,10 @@ code{font:12px ui-monospace,Menlo,monospace;background:var(--bg3);border-radius:
 .pill.cur{color:#fff;background:var(--accent);border-color:var(--accent)}
 table.cmp{font-size:12px;margin:4px 0 12px}
 table.cmp th,table.cmp td{white-space:normal;vertical-align:top}
+.qr{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.qr svg{flex-shrink:0;border-radius:6px}
+.qr p{margin:6px 0 0}
+.code{font:700 26px/1.3 ui-monospace,Menlo,monospace;letter-spacing:4px;color:var(--gold);margin:2px 0 4px}
 @media (max-width:720px){.row{grid-template-columns:1fr}header .tag{display:none}}
 </style>
 </head>
@@ -149,6 +153,40 @@ const T = {
   c_stdio: ['启动命令（stdio）', 'Command (stdio)'],
   c_gemini_json: ['Gemini CLI：把这段并进 ~/.gemini/settings.json', 'Gemini CLI: merge this into ~/.gemini/settings.json'],
   c_check: ['检查连接：在终端里运行，会列出全部工具', 'Check the connection: run this in a terminal, it lists the tools'],
+  phone_card: ['手机访问', 'Phone access'], on: ['开启', 'on'],
+  phone_intro: ['ZEUS 照常在这台电脑上运行，手机通过 Tailscale 连回来：在家、在外用流量都行。地址只有你自己的设备能打开，走 HTTPS 加密。手机上用访问码登录一次，再添加到主屏幕，用起来就像一个 App。',
+                'ZEUS keeps running on this computer and your phone connects back through Tailscale, at home or away on mobile data. Only your own devices can open the address, and the connection is HTTPS. Log in once on the phone with the access code, add it to the home screen, and it works like an app.'],
+  ph_connect: ['连接你的手机', 'Connect your phone'],
+  ph_s1: ['这台电脑上的 Tailscale', 'Tailscale on this computer'],
+  ph_ts_install: ['安装 Tailscale（个人使用免费）并登录。', 'Install Tailscale (free for personal use) and sign in.'],
+  ph_ts_stopped: ['Tailscale 已安装但没连上：打开 Tailscale 并登录，然后刷新本页。', 'Tailscale is installed but not connected: open it, sign in, then reload this page.'],
+  ph_ts_ok: ['已连接，这台电脑在你的 tailnet 里叫', 'Connected; in your tailnet this computer is'],
+  ph_box: ['ZEUS 在 Docker 容器里运行：在电脑本身（不是容器里）装好 Tailscale，再在电脑的终端里运行第 2 步的命令。', 'ZEUS runs in a Docker container: install Tailscale on the computer itself (not in the container) and run the command of step 2 in a terminal there.'],
+  ph_s2: ['给 ZEUS 一个 HTTPS 地址', 'Give ZEUS an HTTPS address'],
+  ph_s2_intro: ['Tailscale Serve 把 https://你的电脑.你的tailnet.ts.net 转到这台电脑上的 ZEUS，只在你的 tailnet 里可见。', 'Tailscale Serve forwards https://&lt;computer&gt;.&lt;tailnet&gt;.ts.net to ZEUS on this computer, visible only inside your tailnet.'],
+  ph_on: ['开启', 'Turn on'], ph_off: ['关闭这个地址', 'Turn this address off'], ph_working: ['处理中…', 'Working…'],
+  ph_or_cmd: ['或者在终端里运行', 'Or run this in a terminal'],
+  ph_enable: ['你的 tailnet 还没开 HTTPS：打开这个链接，点 Enable，再回来点「开启」。', 'Your tailnet does not have HTTPS switched on yet: open this link, press Enable, then press Turn on again.'],
+  ph_enable_link: ['在 Tailscale 里开启 HTTPS', 'Switch on HTTPS in Tailscale'],
+  ph_busy: ['Tailscale Serve 的 443 端口已经转发到 {x}。不想改动它的话，把命令里的 --https=443 换成 --https=8443。', 'Port 443 of Tailscale Serve already forwards to {x}. To keep it, run the command with --https=8443 instead of --https=443.'],
+  ph_funnel: ['Funnel 开着：这个地址在公网上也能打开。访问码仍然保护着 ZEUS，但不需要的话请关掉 Funnel。', 'Funnel is on: this address is open on the public internet. The access code still protects ZEUS, but turn Funnel off unless you need it.'],
+  ph_s3: ['在手机上', 'On your phone'],
+  ph_s3_app: ['在 App Store 或 Google Play 装 Tailscale，用同一个账号登录。', 'Install Tailscale from the App Store or Google Play and sign in with the same account.'],
+  ph_turn_on: ['先把上面的「手机访问」改成 on 并保存，二维码就会出现在这里。', 'Set Phone access above to on and save; the QR code then appears here.'],
+  ph_scan: ['用手机相机扫码：会打开 ZEUS 并自动登录。', 'Scan it with the phone\'s camera: it opens ZEUS and logs in.'],
+  ph_home: ['添加到主屏幕。iPhone：Safari → 分享 → 添加到主屏幕；Android：Chrome → ⋮ → 安装应用。如果打开后又要访问码，再输一次就好（iPhone 的主屏幕 App 和 Safari 分开记登录）。',
+            'Add it to the home screen. iPhone: Safari → Share → Add to Home Screen; Android: Chrome → ⋮ → Install app. If the app asks for the code again, type it once more (on iPhone the home-screen app keeps its own sign-in, apart from Safari).'],
+  ph_code: ['访问码', 'Access code'],
+  ph_newcode: ['换一个访问码', 'New code'], ph_signout: ['让所有手机退出登录', 'Sign out every phone'],
+  ph_confirm_new: ['换访问码后，所有已登录的手机都要用新访问码重新登录。继续？', 'With a new code, every phone that is logged in has to log in again with it. Continue?'],
+  ph_signed_out: ['已退出：每台手机下次打开都要重新输访问码。', 'Done: every phone has to enter the code again next time.'],
+  ph_wifi: ['只在同一个 Wi-Fi 里用（不装 Tailscale）', 'Same Wi-Fi only (no Tailscale)'],
+  ph_wifi_how: ['在「通用」里把监听地址改成 0.0.0.0，重启 ZEUS，手机连同一个 Wi-Fi 打开这台电脑的地址。走的是 http：同一 Wi-Fi 里的人能看到流量，Android 也不会把它装成完整的 App。在外面用请走 Tailscale。',
+                'Set Listen address to 0.0.0.0 under General, restart ZEUS, and open this computer\'s address on a phone on the same Wi-Fi. It is plain http: others on that Wi-Fi can see the traffic, and Android will not install it as a full app. Away from home, use Tailscale.'],
+  ph_wifi_url: ['手机连同一个 Wi-Fi 时打开：', 'On a phone on the same Wi-Fi, open:'],
+  ph_awake_on: ['这台电脑现在不会因闲置而睡眠（合上笔记本盖子仍会睡眠）。', 'This computer stays awake while idle (closing a laptop\'s lid still puts it to sleep).'],
+  ph_awake_off: ['电脑睡眠后手机就连不上了：打开上面的「电脑不睡眠」，或在系统设置里让它接电源时不睡眠。', 'Once the computer sleeps the phone cannot reach it: turn on "Keep this computer awake" above, or stop it sleeping on power in the system settings.'],
+  ph_safe: ['设置、这一页的开关和 AI 智能体（MCP）只能在这台电脑上打开，手机上打不开。ZEUS 只读你的券商账户，从不下单。', 'Settings, the controls on this page and AI agents (MCP) open only on this computer, never on a phone. ZEUS only reads from your broker and never places an order.'],
   privacy: ['隐私:所有 token、密码、交易都只保存在本机 ~/.zeus-terminal/(权限 600),不在代码仓库里,也不会上传到任何地方;浏览器端读不回已保存的密钥。',
             'Privacy: every token, password and trade is stored only on this computer in ~/.zeus-terminal/ (mode 600), never inside the code repository, never uploaded anywhere; saved secrets cannot be read back by the browser.'],
 };
@@ -211,6 +249,7 @@ function renderCards() {
   h += card(t('ai'), ai.provider && ai.provider !== 'off' ? '● ' + esc(ai.provider) + ' · ' + esc(ai.fast || '') : '○ ' + t('off'), ai.provider && ai.provider !== 'off' ? 'ok' : '');
   h += card(t('news'), 'Finviz' + (s.finviz_elite ? ' Elite' : '') + ' · WSJ · MarketWatch', 'ok');
   h += card(t('agents_card'), s.mcp ? '● MCP /mcp' + (s.mcp_paper_trades ? ' · ' + t('paper_on') : '') : '○ ' + t('off'), s.mcp ? 'ok' : '');
+  h += card(t('phone_card'), s.phone_access ? '● ' + t('on') : '○ ' + t('off'), s.phone_access ? 'ok' : '');
   $('#cards').innerHTML = h;
   // the number of manual trades (shown here since the top bar no longer carries a mode badge)
   if (s.broker_mode === 'manual') api('/api/zeus/status').then(st => {
@@ -239,7 +278,8 @@ function field(key, s) {
       ai_language: ['auto', 'zh', 'en'], news_translate: ['google', 'bing', 'ai', 'off'], desktop_notifications: ['on', 'off'],
       ai_schedules: ['on', 'off'], finviz_ai_crawl: ['on', 'off'], mcp_server: ['on', 'off'], mcp_paper_trades: ['off', 'on'],
       account_source: ['auto', 'tastytrade', 'alpaca', 'public', 'manual'], market_data: ['auto', 'free', 'alpaca', 'public'],
-      alpaca_paper: ['on', 'off'], alpaca_stock_feed: ['iex', 'delayed_sip', 'sip'], alpaca_options_feed: ['indicative', 'opra'] };
+      alpaca_paper: ['on', 'off'], alpaca_stock_feed: ['iex', 'delayed_sip', 'sip'], alpaca_options_feed: ['indicative', 'opra'],
+      phone_access: ['off', 'on'], keep_awake: ['on', 'off'] };
     if (enums[key]) {
       input = '<select data-k="' + key + '">' + enums[key].map(o => '<option' + (String(s.value) === o ? ' selected' : '') + '>' + o + '</option>').join('') + '</select>';
     } else {
@@ -300,6 +340,7 @@ function renderSection() {
   if (g[0] === 'broker') h += '<p class="intro">' + pickBlock('持仓从哪来、行情从哪来，可以分开选。什么都不填也能用：上传你的成交，行情走免费源。',
     'Where positions come from and where quotes come from are two separate choices. With nothing filled in ZEUS still works: upload your fills and quotes come from the free sources.') + '</p>' + cmpTable();
   if (g[0] === 'agents') h += '<p class="intro">' + tb('agents_intro') + '</p>';
+  if (g[0] === 'phone') h += '<p class="intro">' + tb('phone_intro') + '</p>';
   if (g[0] === 'email') h += '<p class="intro">' + pickBlock('填好并保存后，每个桌面提醒（止盈、漏挂 GTC、风险雷达、支撑阻力、AI 选股……）都会同时发一封邮件。同一条提醒 30 分钟内只发一次，每小时最多 20 封。Linux 没有桌面通知，也能靠邮件收到提醒；Windows 暂不支持。', 'Once this is filled in and saved, every desktop alert (take-profit, missing GTC, risk radar, support / resistance, AI picks…) is also sent by e-mail. The same alert goes out at most once per 30 minutes, and at most 20 alerts per hour. On Linux, which has no desktop notifications here, this is how alerts reach you; not available on Windows yet.') + '</p>';
   h += keys.map(k => (g[0] === 'broker' && SUBS[k] ? subHead(SUBS[k]) : '') + field(k, VIEW.settings[k])).join('');
   h += '<div class="actions"><button class="primary" id="saveBtn">' + t('save') + '</button>';
@@ -312,6 +353,7 @@ function renderSection() {
   h += '<div class="note">' + ((VIEW.status || {}).container ? tb('privacy').split('~/.zeus-terminal/').join('/data/') : tb('privacy')) + '</div></section>';
   if (g[0] === 'broker') h += tradesHtml();
   if (g[0] === 'agents') h += '<section class="on" id="agentsSec"><h2>' + t('connect') + '</h2><div id="agentsBody"><span class="msg">…</span></div></section>';
+  if (g[0] === 'phone') h += '<section class="on" id="phoneSec"><h2>' + t('ph_connect') + '</h2><div id="phoneBody"><span class="msg">…</span></div></section>';
   $('#sections').innerHTML = h;
   $('#saveBtn').onclick = save;
   document.querySelectorAll('[data-clear]').forEach(b => b.onclick = () => saveValues({ [b.dataset.clear]: '' }));
@@ -320,6 +362,7 @@ function renderSection() {
   if ($('#testBz')) $('#testBz').onclick = () => runTest('benzinga', $('#testBz'));
   if (g[0] === 'broker') bindTrades();
   if (g[0] === 'agents') loadAgents();
+  if (g[0] === 'phone') loadPhone();
 }
 // ---------------------------------------------------------------- AI agents (MCP)
 function snip(label, code, id) {
@@ -359,14 +402,69 @@ function loadAgents() {
     h += '<p class="intro">' + m.tools.length + ' ' + t('tools_n') + ': '
       + m.tools.map(x => '<code>' + esc(x.name) + (x.write ? ' ✎' : '') + '</code>').join(' ') + '</p>';
     $('#agentsBody').innerHTML = h;
-    document.querySelectorAll('[data-copy]').forEach(b => b.onclick = () => {
-      const el = $('#' + b.dataset.copy);
-      const done = () => { b.textContent = t('copied'); setTimeout(() => { b.textContent = t('copy'); }, 1500); };
-      const select = () => { const r = document.createRange(); r.selectNodeContents(el); const s = getSelection(); s.removeAllRanges(); s.addRange(r); };
-      if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(el.textContent).then(done, select);
-      else select();
-    });
+    bindCopy();
   }).catch(e => { $('#agentsBody').innerHTML = '<span class="bad">✗ ' + esc(e) + '</span>'; });
+}
+function bindCopy() {
+  document.querySelectorAll('[data-copy]').forEach(b => b.onclick = () => {
+    const el = $('#' + b.dataset.copy);
+    const done = () => { b.textContent = t('copied'); setTimeout(() => { b.textContent = t('copy'); }, 1500); };
+    const select = () => { const r = document.createRange(); r.selectNodeContents(el); const s = getSelection(); s.removeAllRanges(); s.addRange(r); };
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(el.textContent).then(done, select);
+    else select();
+  });
+}
+// ---------------------------------------------------------------- phone access
+function step(n, title, body) { return '<div class="sub"><h3>' + n + '. ' + esc(title) + '</h3>' + body + '</div>'; }
+function loadPhone() {
+  api('/api/remote/status').then(st => {
+    const ts = st.tailscale || {}, ka = st.keep_awake || {};
+    let s1;
+    if (st.container) s1 = '<p>' + tb('ph_box') + '</p>';
+    else if (!ts.installed) s1 = '<p>' + tb('ph_ts_install') + ' <a href="' + esc(ts.download) + '" target="_blank" rel="noopener">tailscale.com/download ↗</a></p>';
+    else if (!ts.running) s1 = '<p class="warn">' + tb('ph_ts_stopped') + '</p>';
+    else s1 = '<p><span class="ok">✓</span> ' + esc(t('ph_ts_ok')) + ' <code>' + esc(ts.dns) + '</code></p>';
+    let s2;
+    if (ts.serve) {
+      s2 = '<p><span class="ok">✓</span> <code>' + esc(ts.url) + '</code> → ZEUS</p>'
+        + (ts.funnel ? '<p class="warn">' + tb('ph_funnel') + '</p>' : '')
+        + '<div class="actions"><button class="ghost" id="tsOff">' + t('ph_off') + '</button><span class="msg" id="tsMsg"></span></div>';
+    } else {
+      s2 = '<p>' + tb('ph_s2_intro') + '</p>'
+        + (ts.running ? '<div class="actions"><button class="primary" id="tsOn">' + t('ph_on') + '</button><span class="msg" id="tsMsg"></span></div>' : '')
+        + (ts.busy ? '<p class="warn">' + esc(t('ph_busy').replace('{x}', ts.busy)) + '</p>' : '')
+        + snip(t('ph_or_cmd'), st.serve_cmd, 'snServe');
+    }
+    let s3 = '<p>' + tb('ph_s3_app') + '</p>';
+    if (!st.enabled) s3 += '<div class="note"><span class="warn">' + tb('ph_turn_on') + '</span></div>';
+    else if (st.url) s3 += '<div class="qr">' + st.qr + '<div><code>' + esc(st.url) + '</code><p>' + tb('ph_scan') + '</p></div></div>';
+    s3 += '<p>' + tb('ph_home') + '</p>';
+    let h = step(1, t('ph_s1'), s1) + step(2, t('ph_s2'), s2) + step(3, t('ph_s3'), s3);
+    h += '<div class="sub"><h3>' + t('ph_code') + '</h3><div class="code">' + esc(st.code) + '</div>'
+      + '<div class="actions"><button id="newCode">' + t('ph_newcode') + '</button><button class="ghost danger" id="signOut">' + t('ph_signout') + '</button><span class="msg" id="codeMsg"></span></div></div>';
+    h += '<div class="sub"><h3>' + t('ph_wifi') + '</h3><p>' + (st.lan ? tb('ph_wifi_url') + ' <code>' + esc(st.lan) + '</code>' : tb('ph_wifi_how')) + '</p></div>';
+    if (st.enabled) h += '<div class="note">' + (ka.active ? '<span class="ok">✓</span> ' + tb('ph_awake_on') : '<span class="warn">' + tb('ph_awake_off') + '</span>') + '</div>';
+    h += '<div class="note">' + tb('ph_safe') + '</div>';
+    $('#phoneBody').innerHTML = h;
+    bindCopy();
+    const serve = (on, btn) => {
+      btn.disabled = true; $('#tsMsg').textContent = t('ph_working');
+      api('/api/remote/tailscale', { method: 'POST', headers: H, body: JSON.stringify({ on: on }) }).then(r => {
+        if (r.ok) return loadPhone();
+        let m;
+        if (r.error === 'enable_https') m = tb('ph_enable') + ' <a href="' + esc(r.link) + '" target="_blank" rel="noopener">' + esc(t('ph_enable_link')) + ' ↗</a>';
+        else if (r.error === 'busy') m = esc(t('ph_busy').replace('{x}', r.busy));
+        else if (r.error === 'not_running' || r.error === 'not_installed') m = tb('ph_ts_stopped');
+        else m = '✗ ' + esc(r.output || r.error || '');
+        $('#tsMsg').innerHTML = '<span class="warn">' + m + '</span>'; btn.disabled = false;
+      }).catch(e => { $('#tsMsg').innerHTML = '<span class="bad">✗ ' + esc(e) + '</span>'; btn.disabled = false; });
+    };
+    if ($('#tsOn')) $('#tsOn').onclick = () => serve(true, $('#tsOn'));
+    if ($('#tsOff')) $('#tsOff').onclick = () => serve(false, $('#tsOff'));
+    $('#newCode').onclick = () => { if (confirm(t('ph_confirm_new'))) api('/api/remote/code', { method: 'POST', headers: H }).then(() => loadPhone()); };
+    $('#signOut').onclick = () => api('/api/remote/signout', { method: 'POST', headers: H })
+      .then(() => { $('#codeMsg').innerHTML = '<span class="ok">✓</span> ' + esc(t('ph_signed_out')); });
+  }).catch(e => { $('#phoneBody').innerHTML = '<span class="bad">✗ ' + esc(e) + '</span>'; });
 }
 function render() { applyStatic(); renderCards(); renderTabs(); renderSection(); }
 function collect() {

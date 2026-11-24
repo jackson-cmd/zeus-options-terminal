@@ -67,7 +67,7 @@ def test_workflow_pushes_three_tags_after_the_check():
 
 
 def test_every_documented_docker_run_publishes_on_localhost_only():
-    """ZEUS has no login: a port published on all interfaces shows your positions to your network."""
+    """ZEUS asks this computer for no login: a port published on all interfaces shows your positions to your network."""
     runs = 0
     for name in DOCS:
         text = (ROOT / name).read_text(encoding="utf-8")

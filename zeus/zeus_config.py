@@ -214,6 +214,17 @@ SCHEMA: dict[str, tuple] = {
                          "on / off. Lets agents open and close trades in the Paper Trade tab. Simulated: nothing "
                          "is ever sent to a broker.",
                          "on / off。允许智能体在模拟盘里开仓、平仓。全是模拟，不会发给任何券商。"),
+    # ---- phone access ----
+    "phone_access": ("off", False, "phone", "Phone access", "手机访问",
+                     "on / off. Lets your phone open ZEUS, at home or away, after logging in once with the access "
+                     "code below. Off: only this computer can open ZEUS.",
+                     "on / off。打开后，手机在家或在外都能打开 ZEUS，第一次用下面的访问码登录一次。"
+                     "关闭时只有这台电脑能打开。"),
+    "keep_awake": ("on", False, "phone", "Keep this computer awake", "电脑不睡眠",
+                   "on / off. While phone access is on, the computer does not go to sleep when idle (macOS, Linux), "
+                   "so your phone can still reach it. Closing a laptop's lid still puts it to sleep.",
+                   "on / off。手机访问打开时，电脑闲置也不睡眠（macOS、Linux），手机才连得上。"
+                   "合上笔记本盖子仍然会睡眠。"),
     # ---- other data ----
     "barchart_username": ("", True, "data", "Barchart username (optional)", "Barchart 账号（可选）",
                           "Enables the Barchart screener / signal lists.", "开启 Barchart 筛选和信号榜单。"),
@@ -247,6 +258,7 @@ GROUPS = [
     ("agents", "AI agents (MCP)", "AI 智能体（MCP）"),
     ("data", "Other data", "其他数据"),
     ("email", "E-mail alerts", "邮件提醒"),
+    ("phone", "Phone access", "手机访问"),
     ("general", "General", "通用"),
 ]
 
@@ -440,6 +452,7 @@ def status() -> dict:
         "ai": ai,
         "mcp": get_bool("mcp_server"),
         "mcp_paper_trades": get_bool("mcp_paper_trades"),
+        "phone_access": get_bool("phone_access"),
         "config_file": str(config_path()),
         "container": in_container(),
     }

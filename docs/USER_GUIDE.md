@@ -9,7 +9,7 @@ This manual explains every page, button and setting of ZEUS Terminal: what it do
 ## Contents
 
 1. [Install and start](#1-install-and-start)
-   - [1.1 Requirements](#11-requirements) · [1.2 First start](#12-first-start) · [1.3 Stop, restart, change the port](#13-stop-restart-change-the-port) · [1.4 Install as an app](#14-install-as-an-app) · [1.5 Update](#15-update) · [1.6 Uninstall](#16-uninstall) · [1.7 Run with Docker](#17-run-with-docker) · [1.8 Install with pipx](#18-install-with-pipx)
+   - [1.1 Requirements](#11-requirements) · [1.2 First start](#12-first-start) · [1.3 Stop, restart, change the port](#13-stop-restart-change-the-port) · [1.4 Install as an app](#14-install-as-an-app) · [1.5 Update](#15-update) · [1.6 Uninstall](#16-uninstall) · [1.7 Run with Docker](#17-run-with-docker) · [1.8 Install with pipx](#18-install-with-pipx) · [1.9 Use it on your phone](#19-use-it-on-your-phone)
 2. [First-time setup](#2-first-time-setup)
    - [2.1 Choose how your positions get in](#21-choose-how-your-positions-get-in) · [2.2 Connect a broker](#22-connect-a-broker) · [2.3 Free mode: your trades from a CSV](#23-free-mode-your-trades-from-a-csv) · [2.4 News sources](#24-news-sources) · [2.5 AI](#25-ai) · [2.6 Notifications and e-mail](#26-notifications-and-e-mail) · [2.7 Every setting](#27-every-setting)
 3. [The top bar](#3-the-top-bar)
@@ -75,7 +75,7 @@ cd zeus-options-terminal
 
 ### 1.4 Install as an app
 
-ZEUS is a progressive web app. In Chrome or Edge, click "Install ZEUS Terminal" in the address bar; it then opens in its own window and can sit in the Dock or the taskbar. The app works as long as the terminal is running.
+ZEUS is a progressive web app. In Chrome or Edge, click "Install ZEUS Terminal" in the address bar; it then opens in its own window and can sit in the Dock or the taskbar. The app works as long as the terminal is running. On a phone, see [1.9](#19-use-it-on-your-phone).
 
 ### 1.5 Update
 
@@ -103,7 +103,7 @@ docker run -d --name zeus --restart unless-stopped \
 
 Open **http://localhost:8765**. The first start takes about half a minute; then the Positions page offers the sample, a broker or your trades ([2.1](#21-choose-how-your-positions-get-in)). The browser does not open by itself as it does with `./start.sh`, and installing ZEUS as an app ([1.4](#14-install-as-an-app)) works the same.
 
-- **Keep `127.0.0.1:` in `-p`.** ZEUS has no login: anyone who reaches the port sees your positions and can change your settings. With `127.0.0.1:` only programs on this computer reach it. For another port on your computer, change the first number, as in `-p 127.0.0.1:8790:8765`. Inside the container ZEUS always listens on 8765, so the port in ⚙ Settings has no effect there.
+- **Keep `127.0.0.1:` in `-p`.** ZEUS asks this computer for no login: anyone who reaches the port as this computer does sees your positions and can change your settings. Phones get in through Tailscale instead ([1.9](#19-use-it-on-your-phone)). With `127.0.0.1:` only programs on this computer reach it. For another port on your computer, change the first number, as in `-p 127.0.0.1:8790:8765`. Inside the container ZEUS always listens on 8765, so the port in ⚙ Settings has no effect there.
 - **On a server or a NAS**, keep `127.0.0.1:` as well and reach ZEUS through an SSH tunnel from your own computer: `ssh -L 8765:localhost:8765 you@server`, then open http://localhost:8765. Opened by an IP address or a host name, ZEUS answers `host not allowed`: that is its protection against DNS rebinding.
 - **Your data** lives in the `zeus-data` volume, which is `/data` in the container: `config.json` with your settings and keys, your uploaded trades, and everything under `runtime/`. It outlasts updates and `docker rm`. A new volume starts with empty settings. To keep the files in a folder instead, use `-v ~/zeus-data:/data`; on Linux, first make the folder writable for user 1000, the user ZEUS runs as (`sudo chown 1000 ~/zeus-data`).
 - **Your clock.** Jobs that run at a time of day (the 8:30 AI news summary, the 9:00 market brief, the AI position review) follow the container's clock. It is New York time; set `TZ` to your own zone, such as `America/Chicago` or `Asia/Shanghai`, to run them on your clock.
@@ -153,6 +153,40 @@ zeus
 - **Not included:** the Barchart lists and the Benzinga cookie export (they need Playwright and Chromium), offline headline translation, and the Benzinga auto re-login helper (Node.js). Run ZEUS from the code with `./start.sh` and `requirements-optional.txt` if you need them.
 
 ---
+
+### 1.9 Use it on your phone
+
+ZEUS keeps running on your computer, and your phone opens it, at home or away on mobile data. The phone reaches the computer through [Tailscale](https://tailscale.com/download), a free private network for your own devices: the address works only on devices signed in to your Tailscale account, and the connection is HTTPS. ZEUS itself keeps listening on 127.0.0.1, and nothing is opened to the internet.
+
+**Set it up once**
+
+1. Install Tailscale on the computer that runs ZEUS and sign in.
+2. Open **⚙ Settings → Phone access**, set **Phone access** to *on* and press **Save**.
+3. Under *Give ZEUS an HTTPS address*, press **Turn on**. It runs `tailscale serve --bg --yes --https=443 http://127.0.0.1:8765`, which forwards `https://<computer>.<tailnet>.ts.net` to ZEUS; you can also run that command in a terminal yourself. The first time, Tailscale may ask you to switch on HTTPS for your tailnet: ZEUS shows the link; open it, press Enable, then press **Turn on** again.
+4. On the phone, install Tailscale from the App Store or Google Play and sign in with the same account.
+5. Scan the QR code on the Settings page with the phone's camera. ZEUS opens and logs in.
+6. Add it to the home screen: on iPhone, Safari → Share → Add to Home Screen; on Android, Chrome → ⋮ → Install app. It then opens full screen, like an app. On iPhone the home-screen app keeps its own sign-in apart from Safari, so it may ask for the access code once more.
+
+**How it stays safe**
+
+- With Phone access off (the default), ZEUS answers only this computer, as before.
+- A phone logs in once with the 8-character access code shown in Settings and stays logged in for 180 days, renewed while you use it. Five wrong codes make that device wait 10 minutes; 20 wrong codes from anywhere pause every login for 15 minutes.
+- **New code** replaces the code and logs out every phone; **Sign out every phone** logs them out and keeps the code.
+- Settings, the Phone access controls, the connection tests and AI agents (MCP) open only on the computer, never on a phone. Everything else works on the phone, and ZEUS still never places a real order.
+- If Tailscale Funnel is on for that address, it is open on the public internet. The access code still protects ZEUS, and the Settings page warns you.
+
+**Keep the computer reachable**
+
+- The computer must be on, awake and running ZEUS. **Keep this computer awake** (on by default) stops it from sleeping when idle while Phone access is on, on macOS and Linux. Closing a laptop's lid still puts it to sleep, so leave the lid open or the laptop connected to a display.
+- When the computer cannot be reached, the phone shows *Can't reach ZEUS* with the likely causes and a **Try again** button, instead of a browser error.
+
+**Same Wi-Fi, without Tailscale**
+
+Set **Listen address** to `0.0.0.0` in ⚙ Settings → General and restart ZEUS; Settings → Phone access then shows this computer's address and a QR code for a phone on the same Wi-Fi. Phones still log in with the access code. It is plain http: others on that Wi-Fi can see the traffic, Android does not install it as a full app, and it does not work away from home.
+
+**In Docker**
+
+Keep `-p 127.0.0.1:8765:8765`, install Tailscale on the computer itself (not in the container) and run `tailscale serve --bg --https=443 http://127.0.0.1:8765` in a terminal there; then follow steps 4 to 6. The access code is on the Settings page you open on this computer.
 
 ## 2. First-time setup
 
@@ -302,6 +336,13 @@ Each broker block has its own **Test connection** button, and the manual block h
 | Alert e-mail: to | Where alerts go; several addresses separated by commas |
 | SMTP app password | Not your normal password; Gmail needs an app password |
 | SMTP server / SMTP port | smtp.gmail.com and 587 by default; 465 uses SSL |
+
+**Phone access**
+
+| Setting | What it does | Default |
+|---|---|---|
+| Phone access | Lets a phone open ZEUS after logging in once with the access code ([1.9](#19-use-it-on-your-phone)) | off |
+| Keep this computer awake | While Phone access is on, the computer does not sleep when idle (macOS, Linux) | on |
 
 ---
 
@@ -845,6 +886,7 @@ Fills are replayed in time order, first in, first out. Expired options settle at
 | `~/.zeus-terminal/config.json` | Every setting and secret (permission 600) |
 | `~/.zeus-terminal/runtime/` | Everything the terminal writes: position snapshots, the journal and its screenshots, paper trades, news archives, caches, downloads, logs |
 | `~/.zeus-terminal/mail_state.json` | Which alerts were mailed recently (for repeats and the hourly cap) |
+| `~/.zeus-terminal/remote.json` | The phone access code and the key that signs phone logins (permission 600) |
 | `zeus/data/` and the other runtime folders in the code | Links into `~/.zeus-terminal/runtime/`, ignored by git |
 | `/data` in Docker | The same files, in the container's `zeus-data` volume ([1.7](#17-run-with-docker)) |
 
@@ -866,7 +908,7 @@ The code folder never holds your data, so `git pull` and `git push` cannot touch
 
 ### 15.4 What goes over the network
 
-ZEUS has no telemetry. It talks only to the services you connect (tastytrade, Alpaca, Public, Benzinga, your AI provider, your SMTP server, Barchart) and to public market data: Cboe delayed quotes, Yahoo Finance, Finviz, SEC EDGAR, Dow Jones RSS (WSJ, MarketWatch) and the translation engines. The server listens on 127.0.0.1 only, refuses foreign Host headers, and every write needs a header that other websites cannot send.
+ZEUS has no telemetry. It talks only to the services you connect (tastytrade, Alpaca, Public, Benzinga, your AI provider, your SMTP server, Barchart) and to public market data: Cboe delayed quotes, Yahoo Finance, Finviz, SEC EDGAR, Dow Jones RSS (WSJ, MarketWatch) and the translation engines. The server listens on 127.0.0.1 only, refuses foreign Host headers, and every write needs a header that other websites cannot send. With Phone access on, a phone reaches it through Tailscale and only after logging in ([1.9](#19-use-it-on-your-phone)).
 
 ---
 
@@ -906,6 +948,10 @@ ZEUS has no telemetry. It talks only to the services you connect (tastytrade, Al
 | The page looks old after an update | Reload with Cmd+Shift+R (Ctrl+Shift+R). |
 | An AI agent cannot connect | ZEUS must be running, and Settings → AI agents (MCP) → MCP server must be on. Run `python3 zeus/zeus_mcp_stdio.py --check` in the ZEUS folder (in Docker: `docker exec -i zeus python /app/zeus/zeus_mcp_stdio.py --check`); use `127.0.0.1`, not `localhost`. |
 | An agent says it may not paper trade | Turn on Settings → AI agents (MCP) → Agents may place paper trades. |
+| The phone shows *Can't reach ZEUS* | The computer is asleep or off, ZEUS is not running, or Tailscale is off on the phone or the computer. Turn on **Keep this computer awake** in Settings → Phone access. |
+| The phone asks for the access code again | On iPhone the home-screen app signs in apart from Safari: type the code once more. After **New code** or **Sign out every phone**, every phone logs in again. |
+| **Turn on** says HTTPS is not switched on | Open the link it shows, enable HTTPS for your tailnet in Tailscale, then press **Turn on** again. |
+| The phone says *Too many tries* | Wait the minutes it shows, or press **New code** on the computer, which clears the count. |
 
 Still stuck? [Open an issue](https://github.com/jackson-cmd/zeus-options-terminal/issues) with what you did and what you saw (leave out tokens, cookies and account numbers).
 

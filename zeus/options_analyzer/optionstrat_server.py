@@ -130,15 +130,11 @@ app.add_middleware(
 )
 
 
-@app.middleware("http")
-async def _zeus_host_guard(request, call_next):
-    # DNS-rebinding guard: unless you deliberately listen on all interfaces,
-    # only answer requests addressed to localhost.
-    if str(_hc.get("host") or "127.0.0.1") in ("127.0.0.1", "localhost", "::1"):
-        h = (request.headers.get("host") or "").rsplit(":", 1)[0].strip("[]").lower()
-        if h and h not in ("localhost", "127.0.0.1", "::1", "testserver"):
-            return JSONResponse({"error": "host not allowed"}, status_code=403)
-    return await call_next(request)
+# Who may use ZEUS: this computer always; a phone only with Phone access on and after logging in
+# with the access code. With Phone access off it keeps the old DNS-rebinding guard (only requests
+# addressed to localhost, unless you listen on all interfaces). Also adds /login and /api/remote/*.
+import zeus_remote as _zremote  # noqa: E402
+_zremote.install(app)
 
 # --- 电源模式:每个 HTTP 请求戳一次 last_request_ts(lite 档 idle 自动关实时用) ---
 import power_mode as _power_mode  # noqa: E402
@@ -2382,7 +2378,9 @@ html, body { overscroll-behavior-x: none; }
     <link rel="manifest" href="/static/manifest.json">
     <meta name="theme-color" content="#0d1117">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="ZEUS">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <link rel="apple-touch-icon" href="/static/icon-192.png">
     <!-- Browser-tab favicon: inline SVG with money emoji so it renders sharp
          at any size, no extra request, and works without a static image. -->
@@ -2407,12 +2405,17 @@ html, body { overscroll-behavior-x: none; }
     # PWA: inject service worker registration + auto-update check before </body>
     sw_script = """
 <script>
-// Clear all old caches on every page load to prevent stale HTML
+// Clear old caches on every page load to prevent stale HTML (all but the "can't reach ZEUS" page)
 if ('caches' in window) {
-  caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+  caches.keys().then(keys => keys.forEach(k => { if (k.indexOf('zeus-offline') !== 0) caches.delete(k); }));
 }
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/static/sw.js').then(reg => {
+  // The worker used to cover /static/ only; it now covers every page, so it can show the
+  // "can't reach ZEUS" page when the computer is asleep or ZEUS is stopped.
+  navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => {
+    if (r.scope.endsWith('/static/')) r.unregister();
+  })).catch(() => {});
+  navigator.serviceWorker.register('/static/sw.js', {scope: '/'}).then(reg => {
     setInterval(() => reg.update(), 30000);
     reg.addEventListener('updatefound', () => {
       const nw = reg.installing;
@@ -19049,20 +19052,22 @@ async def get_version():
 async def serve_sw():
     from fastapi.responses import Response
     sw_content = f"""const V = '{_server_version}';
-self.addEventListener('install', () => self.skipWaiting());
+const OFFLINE = 'zeus-offline-v1';
+self.addEventListener('install', (e) => {{
+  self.skipWaiting();
+  e.waitUntil(caches.open(OFFLINE).then(c => c.add('/static/offline.html')).catch(() => {{}}));
+}});
 self.addEventListener('activate', (e) => {{
-  e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k=>k!=='trading-hub-v'+V).map(k => caches.delete(k)))));
+  e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== OFFLINE).map(k => caches.delete(k)))));
   self.clients.claim();
 }});
+// Pages always come from ZEUS, never from a cache. When the computer cannot be reached (asleep,
+// ZEUS stopped, Tailscale off), show a page that says so instead of the browser's error; behind
+// Tailscale Serve a stopped ZEUS answers 502. Everything else (API, streams) is left to the browser.
+const offline = (r) => caches.match('/static/offline.html').then(c => c || r || Response.error());
 self.addEventListener('fetch', (e) => {{
-  // Always go to network for HTML pages and API calls — never serve stale cache
-  const url = new URL(e.request.url);
-  if (e.request.mode === 'navigate' || url.pathname === '/' || url.pathname.startsWith('/api/')) {{
-    e.respondWith(fetch(e.request));
-    return;
-  }}
-  // Static assets: network first, cache fallback
-  e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+  if (e.request.mode !== 'navigate') return;
+  e.respondWith(fetch(e.request).then(r => (r.status >= 502 && r.status <= 504) ? offline(r) : r).catch(() => offline()));
 }});
 
 // When the user clicks a notification: focus an existing PWA window if one
@@ -19086,7 +19091,7 @@ self.addEventListener('notificationclick', (event) => {{
 }});
 """
     return Response(content=sw_content, media_type="application/javascript",
-                    headers={"Cache-Control": "no-cache, no-store"})
+                    headers={"Cache-Control": "no-cache, no-store", "Service-Worker-Allowed": "/"})
 
 
 # Mount static files for PWA assets (icons, manifest)

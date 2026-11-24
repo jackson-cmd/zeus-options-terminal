@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ZEUS · 连不上 Can't reach ZEUS</title>
+<meta name="theme-color" content="#0d1117">
+<style>
+:root{--bg:#0d1117;--bg2:#161b22;--border:#30363d;--text:#e6edf3;--text2:#8b949e;--accent:#1f6feb;--gold:#e3b341}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);color:var(--text);
+  font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+  padding:calc(24px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom))}
+main{width:100%;max-width:420px;background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:24px 22px}
+h1{font-size:18px;margin:0 0 4px}
+.en{color:var(--text2);font-size:13px}
+ul{padding-left:18px;margin:16px 0;color:var(--text2);font-size:13.5px}
+li{margin:8px 0}
+li b{color:var(--text);font-weight:600}
+button{width:100%;font:600 15px/1 inherit;font-family:inherit;padding:13px;border-radius:8px;border:1px solid var(--accent);
+  background:var(--accent);color:#fff;cursor:pointer}
+</style>
+</head>
+<body>
+<main>
+  <h1>⚡ 连不上电脑上的 ZEUS</h1>
+  <div class="en">Can't reach ZEUS on your computer</div>
+  <ul>
+    <li><b>电脑睡眠或关机了</b>：唤醒它，并在 ⚙ 设置 → 手机访问 里打开「电脑不睡眠」。<br>The computer is asleep or off: wake it, and turn on "Keep this computer awake" in ⚙ Settings → Phone access.</li>
+    <li><b>ZEUS 没在运行</b>：在电脑上重新启动 ZEUS。<br>ZEUS is not running: start it again on the computer.</li>
+    <li><b>手机或电脑上的 Tailscale 没连上</b>：打开 Tailscale App，确认已连接。<br>Tailscale is off on the phone or the computer: open the Tailscale app and connect.</li>
+  </ul>
+  <button onclick="location.reload()">重试 · Try again</button>
+</main>
+</body>
+</html>

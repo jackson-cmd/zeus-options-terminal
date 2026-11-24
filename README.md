@@ -54,7 +54,17 @@ docker run -d --name zeus --restart unless-stopped \
   ghcr.io/jackson-cmd/zeus-options-terminal:latest
 ```
 
-Then open **http://localhost:8765**. Your settings, trades and caches stay in the `zeus-data` volume. To update, run `docker pull ghcr.io/jackson-cmd/zeus-options-terminal:latest` and `docker rm -f zeus`, then the same `docker run`; nothing is lost. Keep `127.0.0.1:` in `-p`: ZEUS has no login, so its port must stay on your own computer. Your time zone, AI agents, a Compose file and what the image leaves out: [manual §1.7](docs/USER_GUIDE.md#17-run-with-docker).
+Then open **http://localhost:8765**. Your settings, trades and caches stay in the `zeus-data` volume. To update, run `docker pull ghcr.io/jackson-cmd/zeus-options-terminal:latest` and `docker rm -f zeus`, then the same `docker run`; nothing is lost. Keep `127.0.0.1:` in `-p` so that only your own computer reaches the port; your phone gets in [another way](#-use-it-on-your-phone). Your time zone, AI agents, a Compose file and what the image leaves out: [manual §1.7](docs/USER_GUIDE.md#17-run-with-docker).
+
+### 📱 Use it on your phone
+
+ZEUS keeps running on your computer, and your phone opens it from anywhere, at home or on mobile data, as an app on the home screen. The free [Tailscale](https://tailscale.com/download) connects the two privately over HTTPS, so nothing is opened to the internet:
+
+1. Install Tailscale on the computer and on the phone, and sign in with the same account on both.
+2. In ZEUS, open **⚙ Settings → Phone access**, set *Phone access* to **on**, save, and press **Turn on** to give ZEUS its https address.
+3. Scan the QR code shown there with the phone's camera: ZEUS opens and logs in. Then add it to the home screen (iPhone: Share → Add to Home Screen; Android: ⋮ → Install app).
+
+Each phone logs in once with an access code, Settings open only on the computer, and the computer has to stay on and awake (the same page has a switch that keeps it awake). The same-Wi-Fi way without Tailscale, Docker and how it stays safe: [manual §1.9](docs/USER_GUIDE.md#19-use-it-on-your-phone).
 
 ## Is it for you?
 
@@ -70,7 +80,7 @@ Then open **http://localhost:8765**. Your settings, trades and caches stay in th
 
 ## Contents
 
-- [🚀 Quick start](#-quick-start) · [🐳 Run with Docker](#-run-with-docker) · [Is it for you?](#is-it-for-you) · [🆕 What's new](#-whats-new) · [The story](#the-story) · [Four ways in](#four-ways-in)
+- [🚀 Quick start](#-quick-start) · [🐳 Run with Docker](#-run-with-docker) · [📱 On your phone](#-use-it-on-your-phone) · [Is it for you?](#is-it-for-you) · [🆕 What's new](#-whats-new) · [The story](#the-story) · [Four ways in](#four-ways-in)
 - [🗺️ Feature tour](#️-feature-tour): [Positions](#️-positions--the-command-center) · [Discipline engine](#-discipline-engine--the-part-that-saves-money) · [Picker](#-picker--find-the-next-trade) · [Paper trade](#-paper-trade--practice-before-real-money) · [Market brief](#-market-brief--the-big-picture-without-the-drama) · [Digest](#-digest--four-wires-two-languages) · [Events](#-events) · [Trade journal](#-trade-journal--the-honest-mirror) · [Three languages](#-three-interface-languages-中文--双语--english) · [Bring your own AI](#-bring-your-own-ai) · [Your agents (MCP)](#-plug-in-your-own-agents-mcp)
 - [📸 Screenshots](#-screenshots) · [🔌 Connect your broker](#-connect-your-broker) · [🔑 What each setting unlocks](#-what-each-setting-unlocks) · [📄 Manual trades: the CSV](#-manual-trades-the-csv)
 - [🔒 Privacy & security](#-privacy--security) · [🏗️ Under the hood](#️-under-the-hood) · [❓ FAQ](#-faq) · [🤝 Contributing](#-contributing) · [📜 License](#-license-non-commercial)
@@ -305,6 +315,7 @@ date,symbol,asset,side,effect,qty,price,fees,option_type,strike,expiration,multi
 - Saved secrets are **write-only** from the browser: the settings API reports *set / not set* and never sends a secret back.
 - The MCP endpoint for AI agents answers only programs on this computer (in Docker they come in through `docker exec`), and no MCP tool can place a real order or read a saved key. What an agent reads goes to that agent's model provider.
 - The server listens on **127.0.0.1** only by default, refuses foreign `Host` headers (DNS rebinding), only accepts cross-origin calls from localhost, and write endpoints need a header that other websites cannot send.
+- **Phone access** is off until you turn it on. Then a phone, through Tailscale or your Wi-Fi, logs in once with an access code and keeps a login signed on this computer; wrong codes are rate-limited. Settings, the phone controls and MCP never open on a phone, and **Sign out every phone** or a new code ends every phone's login.
 - **In Docker** the app runs as an ordinary user and cannot change its own code, your data stays in the `/data` volume, and the documented command publishes the port on 127.0.0.1 only. The localhost checks work exactly as they do without Docker.
 - No telemetry. The app only talks to the services you connect plus public market data (Cboe delayed quotes, Yahoo Finance, SEC EDGAR, Finviz, Dow Jones RSS).
 - Free market data is rate-limit aware: company data (sector, industry, market cap) comes from Finviz in batches of 20 tickers, stock quotes fall back to Finviz whenever Yahoo Finance throttles, and a whole option chain is one Cboe request instead of one Yahoo request per expiration.
@@ -373,6 +384,8 @@ Runtime data (candles, caches, digests) lives in `~/.zeus-terminal/runtime/`; fo
 **Does it work on Windows / Linux?** The core does. Desktop notifications are macOS only; on Linux, set up e-mail alerts instead.
 
 **Can I run it in Docker?** Yes: [Run with Docker](#-run-with-docker). The image runs on Intel, AMD and ARM. Desktop notifications are not in it; e-mail alerts are.
+
+**Can I use it on my phone?** Yes, at home or away, installed on the home screen: [Use it on your phone](#-use-it-on-your-phone). The computer that runs ZEUS has to stay on.
 
 **Where are my settings?** `~/.zeus-terminal/config.json` (in Docker, the `zeus-data` volume). Delete the folder to forget everything.
 

@@ -40,7 +40,9 @@ def _guard(request: Request) -> None:
     if origin:
         host = (urlparse(origin).hostname or "").lower()
         req_host = (request.url.hostname or "").lower()
-        if host not in _LOCAL_HOSTS and host != req_host:
+        # a phone behind Tailscale Serve or another proxy: the address it typed
+        fwd_host = (request.headers.get("x-forwarded-host") or "").split(",")[0].strip().rsplit(":", 1)[0].lower()
+        if host not in _LOCAL_HOSTS and host != req_host and host != fwd_host:
             raise HTTPException(403, "cross-origin request refused")
 
 
@@ -89,6 +91,11 @@ async def settings_post(request: Request, payload: dict = Body(...)):
     hc.benzinga_cookies_path()  # materialise pasted Benzinga cookies for the Benzinga clients
     hc.barchart_credentials_file()
     hc.apply_notification_shims()
+    try:
+        import zeus_remote
+        zeus_remote.sync_keep_awake()   # phone access / keep awake switched
+    except Exception:
+        pass
     lb._invalidate()
     after_mode = (hc.account_source(), hc.market_source())
     restart = any(k in (payload.get("values") or {}) for k in ("host", "port"))
