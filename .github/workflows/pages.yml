@@ -15,16 +15,15 @@ permissions:
   pages: write
   id-token: write
 
+# One deploy at a time; a newer push waits for the running deploy instead of cancelling it halfway.
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
       - name: Add the screenshots and the share cards
@@ -36,8 +35,34 @@ jobs:
       - uses: actions/upload-pages-artifact@v5
         with:
           path: site
+
+  # Deploying in a job of its own, as GitHub's own Pages workflow does. Right after an upload, the
+  # API that deploy-pages asks can still answer "Found 0 artifact(s)" (the 0.8.0 release hit this
+  # when both ran in one job); the hand-over between jobs gives it time, and one retry covers the
+  # rest. A failed deploy can then be re-run on its own ("Re-run failed jobs") with the artifact
+  # already uploaded, where re-running the whole run uploads a second one and deploy-pages refuses
+  # "multiple artifacts".
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url || steps.retry.outputs.page_url }}
+    steps:
       - id: deployment
+        continue-on-error: true
         uses: actions/deploy-pages@v5
+      - name: Wait before trying once more
+        if: steps.deployment.outcome == 'failure'
+        run: sleep 30
+      - id: retry
+        if: steps.deployment.outcome == 'failure'
+        uses: actions/deploy-pages@v5
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: site/sitemap.xml
+          sparse-checkout-cone-mode: false
       - name: Tell Bing and the other IndexNow search engines which pages changed
         # IndexNow needs no account: the engines check that the key file site/<key>.txt is on the
         # site (the key is public by design). Best effort, so a refused ping never fails the deploy.
