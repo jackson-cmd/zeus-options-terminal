@@ -14,11 +14,13 @@ from __future__ import annotations
 
 import datetime as _dt
 import json
+import os
 import re
 import threading
 import time
 from pathlib import Path
 from typing import Optional
+from urllib.parse import quote
 
 import zeus_config as hc
 
@@ -46,6 +48,36 @@ def _dir() -> Path:
 
 def _safe(ticker: str) -> str:
     return re.sub(r"[^A-Z0-9._-]", "", ticker.upper()) or "_"
+
+
+def _cache(name: str) -> Optional[Path]:
+    """A file in the cache folder, or None when `name` would lead out of it.
+
+    Names hold a ticker that came with a request and a period from the API's answer. _safe()
+    already strips path characters from both; this check holds even if that ever changes. On
+    Windows a `..` steps out of the folder even when the folder before it does not exist."""
+    root = os.path.normpath(str(_dir()))
+    full = os.path.normpath(os.path.join(root, name))
+    if not full.startswith(root + os.sep):
+        return None
+    return Path(full)
+
+
+def _period(call: dict) -> str:
+    """The call's place in a cache file name: 2026Q3, or the start of its id when the API gives
+    no fiscal year and quarter. Only numbers and cleaned characters reach the file name."""
+    try:
+        fy, fq = int(call.get("fiscalYear")), int(call.get("fiscalQuarter"))
+        if fy > 0 and fq > 0:
+            return f"{fy}Q{fq}"
+    except (TypeError, ValueError):
+        pass
+    return _safe(str(call.get("id") or ""))[:8]
+
+
+def _seg(value) -> str:
+    """One URL path segment: a ticker or an id can never add a segment or a query."""
+    return quote(str(value), safe="")
 
 
 # ─── pause after 401 / 403 / 429 ─────────────────────────────────────────────
@@ -112,13 +144,15 @@ def _call(endpoint: str, path: str, params: Optional[dict] = None):
 
 def _latest_call(ticker: str, refresh: bool = False) -> Optional[dict]:
     """The newest earnings call with a transcript: {id, title, callDate, fiscalYear, fiscalQuarter}."""
-    cache = _dir() / f"{_safe(ticker)}.latest.json"
+    cache = _cache(f"{_safe(ticker)}.latest.json")
+    if cache is None:
+        return None
     if cache.exists() and not refresh and time.time() - cache.stat().st_mtime < _LATEST_FRESH_SECS:
         try:
             return json.loads(cache.read_text("utf-8")) or None
         except Exception:
             pass
-    body = _call("transcripts", f"/stocks/{ticker}/investor-events",
+    body = _call("transcripts", f"/stocks/{_seg(ticker)}/investor-events",
                  {"eventType": "EarningsCall", "limit": 8})
     if body is None:
         return None
@@ -145,8 +179,9 @@ def latest_transcript(ticker: str, refresh: bool = False) -> Optional[dict]:
     if not call:
         return None
     fy, fq = call.get("fiscalYear"), call.get("fiscalQuarter")
-    period = f"{fy}Q{fq}" if fy and fq else str(call["id"])[:8]
-    cache = _dir() / f"{_safe(ticker)}_{period}.json"
+    cache = _cache(f"{_safe(ticker)}_{_period(call)}.json")
+    if cache is None:
+        return None
     if cache.exists():                      # a past call's transcript doesn't change
         try:
             return json.loads(cache.read_text("utf-8"))
@@ -154,7 +189,7 @@ def latest_transcript(ticker: str, refresh: bool = False) -> Optional[dict]:
             pass
     turns, first, offset = [], None, 0
     for _ in range(_MAX_PAGES):
-        page = _call("transcripts", f"/investor-events/{call['id']}/speakers",
+        page = _call("transcripts", f"/investor-events/{_seg(call['id'])}/speakers",
                      {"limit": _PAGE, "offset": offset})
         if page is None:
             return None
@@ -195,7 +230,7 @@ def iv_rank(ticker: str) -> Optional[dict]:
     hit = cache.get(ticker)
     if isinstance(hit, dict) and hit.get("day") == _utc_today():
         return hit.get("value")
-    body = _call("iv_rank", f"/stocks/{ticker}/options/volatility", {"limit": 1})
+    body = _call("iv_rank", f"/stocks/{_seg(ticker)}/options/volatility", {"limit": 1})
     if body is None:
         return None
     s = (body.get("sessions") or [None])[0] or {}
@@ -221,7 +256,7 @@ def self_test(ticker: str = "AAPL") -> dict:
     key = api_key()
     if not key:
         return {"ok": False, "error": "save an Equibles API key first"}
-    status, body = _get(f"/stocks/{ticker}/investor-events", {"eventType": "EarningsCall", "limit": 1}, key=key)
+    status, body = _get(f"/stocks/{_seg(ticker)}/investor-events", {"eventType": "EarningsCall", "limit": 1}, key=key)
     if status == 401:
         return {"ok": False, "error": "key rejected (401): check it in Settings"}
     if status != 200:
@@ -229,7 +264,7 @@ def self_test(ticker: str = "AAPL") -> dict:
         return {"ok": False, "error": f"HTTP {status}" + (f": {msg}" if msg else "")}
     ev = (body.get("data") or [{}])[0]
     transcripts = f"{ticker} {ev.get('fiscalYear')} Q{ev.get('fiscalQuarter')}" if ev else "✓"
-    v_status, _ = _get(f"/stocks/{ticker}/options/volatility", {"limit": 1}, key=key)
+    v_status, _ = _get(f"/stocks/{_seg(ticker)}/options/volatility", {"limit": 1}, key=key)
     iv = "✓" if v_status == 200 else ("not in this key's plan: ZEUS keeps its own IV data" if v_status == 403
                                       else f"HTTP {v_status}")
     return {"ok": True, "transcripts": transcripts, "iv_rank": iv}

@@ -4,6 +4,12 @@
 
 What changed in each version of ZEUS Terminal. New features carry the <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> badge. Numbers in parentheses are the pull requests.
 
+## 0.9.1 — 2026-11-26
+
+### Security
+
+- With an Equibles key, the transcript cache names its files only from cleaned values: the fiscal year and quarter in the API's answer must be numbers, and every cache file is checked to stay in the cache folder. Before, an answer carrying `..` in those fields could, on Windows, write a file outside the folder. The ticker and the call's id also go into each API address as one escaped segment. (#83)
+
 ## 0.9.0 — 2026-11-26
 
 ### New features

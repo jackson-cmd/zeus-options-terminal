@@ -3,6 +3,7 @@
 No key means no request and no change; with a key the 📞 transcript and the checkup's IV rank
 come from Equibles, and a 401 / 403 / 429 falls back quietly and pauses that route for the day."""
 import json
+import os
 from pathlib import Path
 
 import pytest
@@ -163,3 +164,43 @@ def test_settings_test_reports_both_routes(api):
 def test_settings_test_rejected_key(api):
     api({"/stocks/AAPL/investor-events": (401, REC["unauthorized"])})
     assert eq.self_test() == {"ok": False, "error": "key rejected (401): check it in Settings"}
+
+
+# ─── cache file names stay in the cache folder ───────────────────────────────
+
+TRICKY = ["../../../tmp/zeus-x", "/tmp/zeus-x", "..\\..\\zeus-x", "C:\\Users\\Public\\zeus-x",
+          "C:zeus-x", "2026Q3/../../x", "2026Q3\0x"]
+
+
+@pytest.mark.parametrize("name", TRICKY)
+def test_cache_path_never_leaves_the_folder(api, name):
+    api({})
+    root = os.path.normpath(str(hc.data_dir("equibles")))
+    p = eq._cache(name)
+    assert p is None or os.path.normpath(str(p)).startswith(root + os.sep)
+
+
+@pytest.mark.parametrize("bad", TRICKY + [None, "", 0, -1, "2026.5"])
+def test_period_from_the_api_is_numbers_or_a_cleaned_id(bad):
+    period = eq._period({"id": "1a2b3c4d-ffff", "fiscalYear": bad, "fiscalQuarter": 3})
+    assert period == "1A2B3C4D"
+    assert eq._period({"id": "../../x", "fiscalYear": None}) == "....X"
+    assert eq._period({"id": "x", "fiscalYear": "2026", "fiscalQuarter": 3}) == "2026Q3"
+
+
+def test_period_with_path_characters_keeps_the_transcript_in_the_folder(api):
+    events = json.loads(json.dumps(REC["investor_events"]))
+    events["data"][0]["fiscalYear"] = "../../../../zeus-escape"
+    api({"/stocks/TSLA/investor-events": (200, events),
+         f"/investor-events/{EVENT_ID}/speakers": (200, REC["speakers"])})
+    assert eq.latest_transcript("TSLA")["turns"]
+    folder = Path(hc.data_dir("equibles"))
+    names = {p.name for p in folder.iterdir()}
+    assert f"TSLA_{eq._safe(EVENT_ID)[:8]}.json" in names
+    assert not any("escape" in n.lower() for n in names)
+
+
+def test_ticker_and_id_are_single_url_segments(api):
+    fake = api({})
+    eq.latest_transcript("../ADMIN?x=1")
+    assert fake.calls and fake.calls[0][0] == "/stocks/..%2FADMIN%3FX%3D1/investor-events"
