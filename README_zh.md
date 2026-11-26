@@ -86,10 +86,11 @@ ZEUS 照常在你的电脑上运行，手机在家、在外用流量都能打开
 
 ## 🆕 新功能
 
-<sub>最新版本 **0.8.0**（2026-11-24）。完整的更新历史见[更新记录](CHANGELOG_zh.md)。</sub>
+<sub>最新版本 **0.9.0**（2026-11-26）。完整的更新历史见[更新记录](CHANGELOG_zh.md)。</sub>
 
-| | 0.8.0、0.7.x、0.6.0、0.5.x、0.4.x、0.3.x 和 0.2.x 新加入 |
+| | 0.9.0、0.8.0、0.7.x、0.6.0、0.5.x、0.4.x、0.3.x 和 0.2.x 新加入 |
 |---|---|
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **📞 电话会按发言人分段**：在 ⚙ 设置里填一个可选的 Equibles API key，📞 按钮就打开最新一场财报电话会，每段标出发言人姓名和职务；开单前体检的 IV 层每天拿到 IV Rank，options_vol 清单外的票也有。不填 key 时一切照旧。[怎么用 →](docs/USER_GUIDE_zh.md#103-sec-文件阅读器) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **📱 在手机上用**：ZEUS 照常在电脑上运行，手机在家在外都能打开，还能装到主屏幕。Tailscale 走 HTTPS 把两边连起来，不向公网开放端口；设置里一个按钮开启，扫二维码就能登录。[怎么设置 →](docs/USER_GUIDE_zh.md#19-在手机上用) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🤖 进了官方 MCP Registry**：从这个目录安装 MCP 服务器的 AI 客户端能找到 ZEUS（`io.github.jackson-cmd/zeus-options-terminal`），自己用 `uvx zeus-options-terminal` 或 Docker 镜像把它启动起来。[连接智能体 →](docs/USER_GUIDE_zh.md#182-连接你的智能体) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **📦 pip 和 pipx**：`pipx install zeus-options-terminal` 之后运行 `zeus`，不用 clone 代码就能装好并启动 ZEUS；`pipx upgrade` 升级时设置和交易都保留。[用 pipx 安装 →](docs/USER_GUIDE_zh.md#18-用-pipx-安装) |
