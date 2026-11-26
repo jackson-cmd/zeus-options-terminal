@@ -87,10 +87,11 @@ Each phone logs in once with an access code, Settings open only on the computer,
 
 ## 🆕 What's new
 
-<sub>Latest release **0.8.0** (2026-11-24). The full history is in the [changelog](CHANGELOG.md).</sub>
+<sub>Latest release **0.9.0** (2026-11-26). The full history is in the [changelog](CHANGELOG.md).</sub>
 
-| | New in 0.8.0, 0.7.x, 0.6.0, 0.5.x, 0.4.x, 0.3.x and 0.2.x |
+| | New in 0.9.0, 0.8.0, 0.7.x, 0.6.0, 0.5.x, 0.4.x, 0.3.x and 0.2.x |
 |---|---|
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **📞 Earnings calls by speaker**: with an optional Equibles API key in ⚙ Settings, the 📞 button opens the latest earnings call turn by turn with each speaker's name and role, and the pre-trade checkup's IV layer gets a daily IV rank, also for tickers outside the options_vol list. With no key nothing changes. [How it works →](docs/USER_GUIDE.md#103-sec-filings-reader) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **📱 Use it on your phone**: ZEUS keeps running on your computer and your phone opens it at home or away, installed on the home screen. Tailscale connects the two over HTTPS without opening anything to the internet; Settings turns it on with one button and a QR code logs the phone in. [Set it up →](docs/USER_GUIDE.md#19-use-it-on-your-phone) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **🤖 In the official MCP Registry**: AI clients that install MCP servers from the registry can find ZEUS as `io.github.jackson-cmd/zeus-options-terminal` and start it themselves with `uvx zeus-options-terminal`, or from the Docker image. [Connect an agent →](docs/USER_GUIDE.md#182-connect-your-agent) |
 | <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **📦 pip and pipx**: `pipx install zeus-options-terminal`, then `zeus`, installs and starts ZEUS without cloning the code; `pipx upgrade` keeps your settings and trades. [Install with pipx →](docs/USER_GUIDE.md#18-install-with-pipx) |

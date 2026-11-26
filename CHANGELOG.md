@@ -4,6 +4,18 @@
 
 What changed in each version of ZEUS Terminal. New features carry the <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> badge. Numbers in parentheses are the pull requests.
 
+## 0.9.0 — 2026-11-26
+
+### New features
+
+| | Feature | Read more |
+|---|---|---|
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **📞 Earnings calls by speaker**: with an optional Equibles API key in ⚙ Settings → Other data, the 📞 button in the SEC filings reader opens the latest earnings call turn by turn, with each speaker's name and role above their words, so the CFO's guidance reads apart from an analyst's question. The same key gives the pre-trade checkup's IV layer a daily IV rank, also for tickers outside the options_vol list, ADRs included; before, those tickers passed the layer with "IVR 数据缺失". IV rank needs a plan with options data. With no key, or when Equibles has nothing, ZEUS keeps YouTube captions and its own IV data; a refused key falls back quietly for the rest of the day, and transcripts are cached per ticker and quarter. **Test connection · Equibles** shows what the key can use. (#81) | [How it works →](docs/USER_GUIDE.md#103-sec-filings-reader) |
+
+### Project
+
+- Website deploys no longer fail with "Found 0 artifact(s)" right after the upload: building and deploying run as separate jobs, and the deploy tries once more after 30 seconds. (#80)
+
 ## 0.8.0 — 2026-11-24
 
 ### New features

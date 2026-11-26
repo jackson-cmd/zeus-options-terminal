@@ -4,6 +4,18 @@
 
 ZEUS Terminal 每个版本改了什么。新功能前面挂着 <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> 标记，括号里的数字是对应的 PR 编号。
 
+## 0.9.0 —— 2026-11-26
+
+### 新功能
+
+| | 功能 | 详细说明 |
+|---|---|---|
+| <img src="https://img.shields.io/badge/NEW!-e5534b" alt="NEW!"> | **📞 电话会按发言人分段**：在 ⚙ 设置 → 其他数据 里填一个可选的 Equibles API key，SEC 文件阅读器的 📞 按钮就按发言顺序打开最新一场财报电话会，每段上面标出发言人姓名和职务，CFO 的指引和分析师的提问一眼就能分开。同一个 key 还让开单前体检的 IV 层每天拿到 IV Rank，options_vol 清单外的票（包括 ADR）也有；以前这些票在这一层只显示「IVR 数据缺失」然后放行。IV Rank 需要含期权数据的套餐。不填 key 或 Equibles 没有数据时，ZEUS 照旧用 YouTube 字幕和自己的 IV 数据；key 被拒时当天安静地退回原来的来源，文字稿按票和季度缓存在本地。**测试连接 · Equibles** 按钮显示这个 key 能用哪些数据。(#81) | [怎么用 →](docs/USER_GUIDE_zh.md#103-sec-文件阅读器) |
+
+### 项目
+
+- 发版后网站部署不再报「Found 0 artifact(s)」：构建和部署拆成两个 job，部署失败 30 秒后会再试一次。(#80)
+
 ## 0.8.0 —— 2026-11-24
 
 ### 新功能
