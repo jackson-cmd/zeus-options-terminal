@@ -205,7 +205,7 @@ ZEUS Terminal（宙斯期权终端）是我给自己做的网站。前前后后�
 ### 📅 事件
 - **财报日历**：你的票池和持仓，盘前 / 盘后时间，加上高影响宏观日期。
 - **企业事件**（Benzinga）：IPO、并购、增发、拆股、异动期权。
-- **SEC 文件阅读器**：10-K / 10-Q / 8-K 直接取自 EDGAR，中英对照；还有**财报电话会文字稿**（来自公开的电话会录音，需要 `yt-dlp`）。
+- **SEC 文件阅读器**：10-K / 10-Q / 8-K 直接取自 EDGAR，中英对照；还有**财报电话会文字稿**（来自公开的电话会录音，需要 `yt-dlp`；填了可选的 Equibles key 后，显示最新一场电话会，每段带发言人姓名和职务）。
 - 任何页面都能打开**风险雷达**。
 
 ### 📓 交易日记 —— 照妖镜
@@ -282,6 +282,7 @@ my.tastytrade.com → **Manage → API Access → OAuth Applications** → 新�
 | Finviz Elite token | 通过官方导出接口拿 Finviz 新闻（不填则用免费页面） | 可选 |
 | AI 提供方 | AI 总结、市场判断、AI 选股、AI 复盘、持仓点评 | 用你自己的 |
 | Barchart 账号 | Barchart 筛选器和信号榜单 | 需要 Barchart 账户 |
+| Equibles API key | 带发言人姓名和职务的财报电话会文字稿；体检用的每日 IV Rank，options_vol 清单外的票也有 | 可选 |
 | 邮件（SMTP） | 每条提醒同时发邮件，带测试按钮（macOS 和 Linux） | ✅ |
 | AI 智能体（MCP） | 你自己的智能体（Claude、通过 Codex 的 GPT、Gemini……）把 ZEUS 当工具用；默认开，智能体下模拟单默认关 | ✅ |
 

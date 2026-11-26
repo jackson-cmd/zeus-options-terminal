@@ -169,7 +169,7 @@ ZEUS does far more than the screenshots in the README show. There are 7 pages in
 | ✅ | 📋 Corporate events | IPOs, M&A, secondary offerings, splits | Benzinga |
 | ✅ | 📄 SEC filings reader | 10-K, 10-Q and 8-K straight from EDGAR, with a table of contents | Free |
 | ✅ | Bilingual filings | English and Chinese side by side | Free |
-| ✅ | 📞 Earnings-call transcripts | From public call recordings | Free (needs `yt-dlp`) |
+| ✅ | 📞 Earnings-call transcripts | From public call recordings; with an Equibles key, the latest call with each speaker's name and role | Free (needs `yt-dlp`); Equibles key optional |
 | ✅ | 📋 Company profile | A summary of the business written from the filing | AI |
 | ✅ | 🗂 Filing cache | Filings you already opened, available offline | Free |
 | ✅ | 📡 Risk radar | Also reachable from here | Free |
@@ -225,7 +225,7 @@ ZEUS does far more than the screenshots in the README show. There are 7 pages in
 | ✅ | News sources | Benzinga cookies, Benzinga data API key, Benzinga login, Finviz Elite token, which free sources to use, headline translation (Google / Bing / AI / off), Google translate key |
 | ✅ | AI | Provider, Claude CLI path, Anthropic or OpenAI-compatible key and URL, fast and smart models, answer language, scheduled AI jobs on / off |
 | ✅ | AI agents (MCP) | MCP server on / off, whether agents may place paper trades, the address and setup for each agent, a test button |
-| ✅ | Other data | Barchart login, Finviz "why is it moving" crawl on / off, SEC EDGAR User-Agent |
+| ✅ | Other data | Barchart login, Equibles API key with a test button, Finviz "why is it moving" crawl on / off, SEC EDGAR User-Agent |
 | ✅ | E-mail alerts | From, to, app password, SMTP server and port; a button sends a test e-mail |
 | ✅ | Phone access | Phone access on / off, keep the computer awake, the Tailscale https address, a QR code, the access code, sign out every phone |
 | ✅ | General | Language, listen address, port, desktop notifications |
@@ -262,6 +262,7 @@ Saved secrets are write-only: the page shows *set* or *not set* and never sends 
 | SEC EDGAR | Filings | Free |
 | Benzinga Pro | Live wire, pre-market, events, signals | Subscription |
 | Barchart | Screener and signal lists | Account |
+| Equibles | Earnings-call transcripts with speakers; daily IV rank for the checkup | API key (optional) |
 | Google / Bing / local engines | Headline translation | Free |
 
 ## 🛠 For developers

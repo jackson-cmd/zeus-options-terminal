@@ -232,6 +232,14 @@ SCHEMA: dict[str, tuple] = {
     "finviz_ai_crawl": ("on", False, "data", "Finviz 'why is it moving' crawl", "Finviz「为何异动」抓取",
                         "on / off. Slow polite crawl (~1 req/s) of your universe.",
                         "on / off：按票池慢速抓取（约每秒 1 次）。"),
+    "equibles_api_key": ("", True, "data", "Equibles API key (optional)", "Equibles API key（可选）",
+                         "Earnings-call transcripts with each speaker's name and role for the 📞 button, and a daily "
+                         "IV rank for the checkup's IV layer, including tickers outside the options_vol list. Create "
+                         "a key at equibles.com/dashboard/apikeys. IV rank needs a plan with options data; without "
+                         "it, or with no key, ZEUS keeps using YouTube and its own IV data.",
+                         "📞 按钮的财报电话会文字稿，每段带发言人姓名和职务；体检 IV 层用的每日 IV Rank，"
+                         "options_vol 清单外的票也有。在 equibles.com/dashboard/apikeys 创建 key。IV Rank 需要含期权数据的套餐；"
+                         "没有这个套餐或不填 key 时，ZEUS 照旧用 YouTube 和自己的 IV 数据。"),
     "sec_user_agent": ("ZEUS research contact@example.com", False, "data", "SEC EDGAR User-Agent",
                        "SEC EDGAR User-Agent",
                        "SEC asks for a contact e-mail in the User-Agent. Put your own.",
@@ -449,6 +457,7 @@ def status() -> dict:
         "benzinga_apikey": has_benzinga_apikey(),
         "finviz_elite": bool(get("finviz_elite_token")),
         "barchart": has_barchart(),
+        "equibles": bool(get("equibles_api_key")),
         "ai": ai,
         "mcp": get_bool("mcp_server"),
         "mcp_paper_trades": get_bool("mcp_paper_trades"),

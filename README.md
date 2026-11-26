@@ -206,7 +206,7 @@ This tour covers the highlights. ZEUS does far more than fits on one page: the *
 ### 📅 Events
 - **Earnings calendar** for your universe and positions, with before/after-market timing and high-impact macro dates.
 - **Corporate events** *(Benzinga)*: IPOs, M&A, secondary offerings, splits, unusual options activity.
-- **SEC filings reader**: 10-K / 10-Q / 8-K straight from EDGAR, bilingual side-by-side, plus **earnings-call transcripts** (from public call recordings, needs `yt-dlp`).
+- **SEC filings reader**: 10-K / 10-Q / 8-K straight from EDGAR, bilingual side-by-side, plus **earnings-call transcripts** (from public call recordings, needs `yt-dlp`; with an optional Equibles key, the latest call with each speaker's name and role).
 - **Risk radar** from any tab.
 
 ### 📓 Trade journal — the honest mirror
@@ -283,6 +283,7 @@ my.tastytrade.com → **Manage → API Access → OAuth Applications** → creat
 | Finviz Elite token | Finviz news through the official export (otherwise the free page) | optional |
 | AI provider | AI summaries, market brief, AI picker, AI journal review, position review | your own |
 | Barchart login | Barchart screener and signal lists | Barchart account |
+| Equibles API key | Earnings-call transcripts with speaker names and roles; a daily IV rank for the checkup, also for tickers outside the options_vol list | optional |
 | E-mail (SMTP) | Every alert also by e-mail, with a test button (macOS and Linux) | ✅ |
 | AI agents (MCP) | Your own agents (Claude, GPT through Codex, Gemini…) use ZEUS as tools; on by default, paper trading by agents off | ✅ |
 

@@ -325,6 +325,7 @@ Each broker block has its own **Test connection** button, and the manual block h
 | Setting | What it does |
 |---|---|
 | Barchart username / password (optional) | Barchart screener and signal lists in the picker |
+| Equibles API key (optional) | The 📞 Earnings call button opens the latest call with each speaker's name and role, and the checkup's IV layer gets a daily IV rank, also for tickers outside the options_vol list. **Test connection · Equibles** shows what the key can use. IV rank needs a plan with options data; without it, or with no key, ZEUS keeps YouTube and its own IV data |
 | Finviz "why is it moving" crawl | on / off; a slow crawl (about one request per second) of your universe for the ✦AI notes |
 | SEC EDGAR User-Agent | SEC asks for a contact e-mail; put your own |
 
@@ -739,7 +740,7 @@ SPY and QQQ daily candles over their full history, with major turning points mar
 1. Open **📄 SEC filings**, type a ticker and press **Fetch**.
 2. Pick a filing (10-K, 10-Q, 8-K). The table of contents on the side jumps to sections.
 3. **Bilingual EN/中** shows English and Chinese side by side.
-4. **📞 Earnings call** shows the call transcript from public recordings (needs `yt-dlp`).
+4. **📞 Earnings call** shows the call transcript from public recordings (needs `yt-dlp`). With an Equibles API key in Settings → Other data, it opens the latest call with each speaker's name and role, and falls back to the recordings when Equibles has none.
 5. **📋 Profile** writes a summary of the business from the filing (**Needs:** AI); **🔄 Regenerate** rebuilds it.
 6. **🗂 Cache** lists filings you already opened; they open offline.
 
@@ -908,7 +909,7 @@ The code folder never holds your data, so `git pull` and `git push` cannot touch
 
 ### 15.4 What goes over the network
 
-ZEUS has no telemetry. It talks only to the services you connect (tastytrade, Alpaca, Public, Benzinga, your AI provider, your SMTP server, Barchart) and to public market data: Cboe delayed quotes, Yahoo Finance, Finviz, SEC EDGAR, Dow Jones RSS (WSJ, MarketWatch) and the translation engines. The server listens on 127.0.0.1 only, refuses foreign Host headers, and every write needs a header that other websites cannot send. With Phone access on, a phone reaches it through Tailscale and only after logging in ([1.9](#19-use-it-on-your-phone)).
+ZEUS has no telemetry. It talks only to the services you connect (tastytrade, Alpaca, Public, Benzinga, your AI provider, your SMTP server, Barchart, Equibles) and to public market data: Cboe delayed quotes, Yahoo Finance, Finviz, SEC EDGAR, Dow Jones RSS (WSJ, MarketWatch) and the translation engines. The server listens on 127.0.0.1 only, refuses foreign Host headers, and every write needs a header that other websites cannot send. With Phone access on, a phone reaches it through Tailscale and only after logging in ([1.9](#19-use-it-on-your-phone)).
 
 ---
 

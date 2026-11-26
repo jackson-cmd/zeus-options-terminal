@@ -329,7 +329,8 @@ const TEST_KEYS = { account: ['账户', 'account'], positions: ['持仓', 'posit
   AAPL_option_quotes: ['AAPL 期权报价', 'AAPL option quotes'], SPX_option_quotes: ['SPX 期权报价', 'SPX option quotes'],
   with_greeks: ['带希腊值', 'with Greeks'], stock_feed: ['股票行情', 'stock feed'], options_feed: ['期权行情', 'options feed'],
   delay: ['延迟', 'delay'], ms: ['用时', 'took'], status: ['状态', 'status'], options_level: ['期权权限', 'options level'],
-  paper: ['模拟盘', 'paper'], accounts: ['账户数', 'accounts'] };
+  paper: ['模拟盘', 'paper'], accounts: ['账户数', 'accounts'], transcripts: ['电话会文字稿', 'transcripts'],
+  iv_rank: ['IV Rank', 'IV rank'] };
 const TEST_LABEL = { email: 'testmail', agents: 'testmcp' };
 function renderSection() {
   const g = (VIEW.groups || []).find(x => x[0] === ACTIVE) || VIEW.groups[0];
@@ -346,6 +347,7 @@ function renderSection() {
   h += '<div class="actions"><button class="primary" id="saveBtn">' + t('save') + '</button>';
   if (TESTS[g[0]]) h += '<button id="testBtn">' + t(TEST_LABEL[g[0]] || 'test') + '</button>';
   if (g[0] === 'news') h += '<button id="testBz">' + t('test') + ' · Benzinga</button>';
+  if (g[0] === 'data') h += '<button id="testEq">' + t('test') + ' · Equibles</button>';
   h += '<span class="msg" id="msg"></span></div>';
   if (g[0] === 'general') h += '<div class="note">' + tb('restart') + '</div>';
   if (g[0] === 'general' && (VIEW.status || {}).container) h += '<div class="note">' + tb('box_general') + '</div>';
@@ -360,6 +362,7 @@ function renderSection() {
   if ($('#testBtn')) $('#testBtn').onclick = () => runTest(TESTS[g[0]], $('#testBtn'));
   document.querySelectorAll('[data-test]').forEach(b => b.onclick = () => runTest(b.dataset.test, b, document.querySelector('[data-msg="' + b.dataset.test + '"]')));
   if ($('#testBz')) $('#testBz').onclick = () => runTest('benzinga', $('#testBz'));
+  if ($('#testEq')) $('#testEq').onclick = () => runTest('equibles', $('#testEq'));
   if (g[0] === 'broker') bindTrades();
   if (g[0] === 'agents') loadAgents();
   if (g[0] === 'phone') loadPhone();

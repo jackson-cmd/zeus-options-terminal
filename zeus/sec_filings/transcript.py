@@ -10,6 +10,10 @@ translator walks it unchanged. Cached per ticker on disk.
 Caveats: YouTube auto-captions have recognition errors and aren't official; not
 every company/quarter has a call on YouTube. yt-dlp solves YouTube's JS
 challenges via deno (must be on PATH).
+
+With an Equibles API key saved (Settings → Other data), the latest call comes from
+Equibles first, turn by turn with each speaker's name and role, and YouTube stays the
+fallback whenever Equibles has nothing (zeus_equibles returns None quietly).
 """
 from __future__ import annotations
 
@@ -158,6 +162,48 @@ def _render(ticker: str, pick: dict, paras: list) -> str:
         '</body></html>')
 
 
+def _render_equibles(tr: dict) -> str:
+    """Same page shell as _render, one block per turn with the speaker above the words."""
+    def who(t):
+        name, role = t.get("speakerName"), t.get("speakerRole")
+        if name and role:
+            return f"{name} · {role}"
+        idx = t.get("speakerIndex")
+        return name or role or (f"Speaker {idx}" if idx is not None else "Speaker")
+
+    turns = tr.get("turns") or []
+    labelled = tr.get("hasSpeakerLabels", True)
+    body = "\n".join(
+        (f'<div class="tr-sp">{_esc(who(t))}</div>' if labelled else "")
+        + f'<div class="tr-p">{_esc(t.get("text"))}</div>' for t in turns)
+    date = str(tr.get("callDate") or "")[:10]
+    note = ('这是公司提交的电话会摘要，不是逐字稿。' if tr.get("isFiledRecord")
+            else '文字稿来自 Equibles，每段标出发言人和职务。')
+    return (
+        '<!doctype html><html><head><meta charset="utf-8">'
+        f'<title>{_esc(tr.get("ticker"))} earnings call</title>'
+        '<style>body{font-family:-apple-system,system-ui,sans-serif;max-width:820px;'
+        'margin:0 auto;padding:22px 28px;color:#1a1a1a;line-height:1.65;background:#fff}'
+        'h1{font-size:19px;margin:0 0 4px}.meta{color:#666;font-size:13px;margin-bottom:18px}'
+        '.tr-sp{margin:18px 0 2px;font-size:13px;font-weight:600;color:#1a73e8}.tr-p{margin:2px 0 11px;font-size:15px}'
+        '.note{color:#999;font-size:12px;margin-top:26px;border-top:1px solid #eee;padding-top:10px}</style>'
+        '</head><body>'
+        f'<h1>{_esc(tr.get("ticker"))} · 财报电话会 transcript</h1>'
+        f'<div class="meta">{_esc(tr.get("title"))} · {_esc(date)} · 来源 Equibles</div>'
+        f'{body}'
+        f'<div class="note">{note}</div>'
+        '</body></html>')
+
+
+def _from_equibles(ticker: str, refresh: bool) -> str | None:
+    try:
+        import zeus_equibles
+        tr = zeus_equibles.latest_transcript(ticker, refresh=refresh)
+    except Exception:
+        return None
+    return _render_equibles(tr) if tr and tr.get("turns") else None
+
+
 def _err(ticker: str, msg: str) -> str:
     return (
         '<!doctype html><html><head><meta charset="utf-8"></head>'
@@ -170,6 +216,9 @@ def _err(ticker: str, msg: str) -> str:
 
 def get_transcript_html(ticker: str, refresh: bool = False) -> str:
     ticker = ticker.upper()
+    html = _from_equibles(ticker, refresh)
+    if html:
+        return html
     _CACHE_DIR.mkdir(parents=True, exist_ok=True)
     cache = _CACHE_DIR / f"{re.sub(r'[^A-Z0-9._-]', '', ticker) or '_'}.html"
     if cache.exists() and not refresh and (time.time() - cache.stat().st_mtime < _FRESH_SECS):

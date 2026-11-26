@@ -5,7 +5,7 @@
   /api/trades*                manual mode: add, import CSV, list, delete, export, sample portfolio
   /api/zeus/status         mode + capabilities for the UI (gear tooltip, settings cards)
   /api/zeus/test/*         connection tests (tastytrade, Alpaca, Public, free quotes, AI, news,
-                              Benzinga, e-mail, MCP)
+                              Benzinga, Equibles, e-mail, MCP)
   /api/freenews/*             Finviz / WSJ / MarketWatch wire status and refresh
 
 Security: the server listens on 127.0.0.1 by default. Write endpoints require
@@ -157,6 +157,9 @@ async def test_connection(what: str, request: Request):
             names = {c.get("name") for c in data if isinstance(c, dict)}
             hc.benzinga_cookies_path()
             return {"ok": bool(names), "cookies": len(names)}
+        if what == "equibles":
+            import zeus_equibles
+            return zeus_equibles.self_test()
         if what == "email":
             import zeus_mail
             if not hc.email_configured():

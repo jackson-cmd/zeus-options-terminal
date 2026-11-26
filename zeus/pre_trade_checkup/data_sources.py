@@ -58,8 +58,18 @@ def get_vix() -> Optional[float]:
 # ── IV Rank(data/options_vol/history.parquet) ──
 def get_ivr(ticker: str) -> dict:
     """{ivr, iv, asof} 取该 ticker 最新一行(按 date 排序取最后一条)。
-    查不到 → 全 None(Layer 3 按"数据缺失不阻断"处理)。"""
+    查不到 → 全 None(Layer 3 按"数据缺失不阻断"处理)。
+
+    Settings 里填了 Equibles API key 时先问 Equibles(每天一次,覆盖 options_vol 之外的票);
+    它没有数据、套餐不含(403)或出错时,照旧读下面的 parquet。"""
     out: dict = {"ivr": None, "iv": None, "asof": None}
+    try:
+        import zeus_equibles
+        eq = zeus_equibles.iv_rank(ticker)
+        if eq:
+            return {**out, **eq}
+    except Exception:
+        pass
     try:
         df = pd.read_parquet(OPTIONS_VOL_HISTORY, columns=[
             "ticker", "date", "weightedImpliedVolatility", "impliedVolatilityRank1y"])

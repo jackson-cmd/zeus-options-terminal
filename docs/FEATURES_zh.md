@@ -169,7 +169,7 @@ ZEUS 的功能远不止 README 截图里那些。顶栏有 7 个页面，后台�
 | ✅ | 📋 企业事件 | IPO、并购、增发、拆股 | Benzinga |
 | ✅ | 📄 SEC 文件阅读器 | 10-K、10-Q、8-K 直接取自 EDGAR，带目录 | 免费 |
 | ✅ | 双语文件 | 中英文左右对照 | 免费 |
-| ✅ | 📞 财报电话会文字稿 | 来自公开的电话会录音 | 免费（需要 `yt-dlp`） |
+| ✅ | 📞 财报电话会文字稿 | 来自公开的电话会录音；填了 Equibles key 后显示最新一场，每段带发言人姓名和职务 | 免费（需要 `yt-dlp`）；Equibles key 可选 |
 | ✅ | 📋 公司简介 | 根据文件写一段公司业务简介 | AI |
 | ✅ | 🗂 文件缓存 | 打开过的文件可以离线再看 | 免费 |
 | ✅ | 📡 风险雷达 | 这里也能打开 | 免费 |
@@ -225,7 +225,7 @@ ZEUS 的功能远不止 README 截图里那些。顶栏有 7 个页面，后台�
 | ✅ | 新闻源 | Benzinga cookie、Benzinga 数据 API key、Benzinga 账号、Finviz Elite token、用哪些免费新闻源、标题翻译（Google / Bing / AI / 关闭）、Google 翻译 key |
 | ✅ | AI | 提供方、Claude CLI 路径、Anthropic 或 OpenAI 兼容接口的 key 和地址、快模型和强模型、回答语言、定时 AI 任务开关 |
 | ✅ | AI 智能体（MCP） | MCP 接口开关、是否允许智能体下模拟单、接口地址和每个智能体的接法、测试按钮 |
-| ✅ | 其他数据 | Barchart 账号、Finviz「为什么在涨跌」抓取开关、SEC EDGAR 的 User-Agent |
+| ✅ | 其他数据 | Barchart 账号、Equibles API key（带测试按钮）、Finviz「为什么在涨跌」抓取开关、SEC EDGAR 的 User-Agent |
 | ✅ | 邮件提醒 | 发件人、收件人、应用专用密码、SMTP 服务器和端口；一个按钮发测试邮件 |
 | ✅ | 手机访问 | 手机访问开关、电脑不睡眠、Tailscale 的 https 地址、二维码、访问码、让所有手机退出登录 |
 | ✅ | 通用 | 语言、监听地址、端口、桌面通知 |
@@ -262,6 +262,7 @@ ZEUS 的功能远不止 README 截图里那些。顶栏有 7 个页面，后台�
 | SEC EDGAR | 公司文件 | 免费 |
 | Benzinga Pro | 实时新闻、盘前、事件、信号 | 订阅 |
 | Barchart | 筛选器和信号榜单 | 账户 |
+| Equibles | 带发言人的财报电话会文字稿；体检用的每日 IV Rank | API key（可选） |
 | Google / Bing / 本地引擎 | 标题翻译 | 免费 |
 
 ## 🛠 给开发者

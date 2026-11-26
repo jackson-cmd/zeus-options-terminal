@@ -325,6 +325,7 @@ CSV 格式见[第 14 节](#14-手动交易-csv-格式)。tastytrade 导出的文
 | 设置 | 作用 |
 |---|---|
 | Barchart 账号 / 密码（可选） | 选股页里的 Barchart 筛选器和信号榜单 |
+| Equibles API key（可选） | 📞 电话会按钮打开最新一场电话会，每段带发言人姓名和职务；体检的 IV 层拿到每日 IV Rank，options_vol 清单外的票也有。**测试连接 · Equibles** 显示这个 key 能用哪些数据。IV Rank 需要含期权数据的套餐；没有这个套餐或不填 key 时，ZEUS 照旧用 YouTube 和自己的 IV 数据 |
 | Finviz「为何异动」抓取 | on / off；按票池慢速抓取（约每秒 1 次），给 ✦AI 用 |
 | SEC EDGAR User-Agent | SEC 要求里面带联系邮箱，填你自己的 |
 
@@ -739,7 +740,7 @@ SPY 和 QQQ 全历史日线，标出每个大转折点。点一个转折点，AI
 1. 打开 **📄 SEC 文件**，输入代码，点 **拉取**。
 2. 选一份文件（10-K、10-Q、8-K），侧边的目录可以跳到各个章节。
 3. **双语 EN/中** 中英文左右对照。
-4. **📞 电话会** 显示财报电话会文字稿，来自公开的电话会录音（需要 `yt-dlp`）。
+4. **📞 电话会** 显示财报电话会文字稿，来自公开的电话会录音（需要 `yt-dlp`）。在 设置 → 其他数据 里填了 Equibles API key 后，打开的是最新一场电话会，每段带发言人姓名和职务；Equibles 没有时照旧用录音。
 5. **📋 简介** 根据文件写一段公司业务介绍（**需要**：AI），**🔄 重新生成** 重写。
 6. **🗂 缓存** 列出打开过的文件，离线也能看。
 
@@ -908,7 +909,7 @@ date,symbol,asset,side,effect,qty,price,fees,option_type,strike,expiration,multi
 
 ### 15.4 会连哪些网络服务
 
-ZEUS 没有任何遥测。它只连你自己接入的服务（tastytrade、Alpaca、Public、Benzinga、你的 AI、你的 SMTP 邮箱、Barchart），以及公开行情数据：Cboe 延迟行情、Yahoo Finance、Finviz、SEC EDGAR、道琼斯 RSS（华尔街日报、MarketWatch）和翻译引擎。服务只监听 127.0.0.1，拒绝陌生的 Host 头，每次写操作都要带一个其他网站发不出来的请求头。打开手机访问后，手机通过 Tailscale 连进来，而且要先登录（见 [1.9](#19-在手机上用)）。
+ZEUS 没有任何遥测。它只连你自己接入的服务（tastytrade、Alpaca、Public、Benzinga、你的 AI、你的 SMTP 邮箱、Barchart、Equibles），以及公开行情数据：Cboe 延迟行情、Yahoo Finance、Finviz、SEC EDGAR、道琼斯 RSS（华尔街日报、MarketWatch）和翻译引擎。服务只监听 127.0.0.1，拒绝陌生的 Host 头，每次写操作都要带一个其他网站发不出来的请求头。打开手机访问后，手机通过 Tailscale 连进来，而且要先登录（见 [1.9](#19-在手机上用)）。
 
 ---
 

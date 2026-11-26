@@ -1,0 +1,194 @@
+{
+ "_note": "Recorded from api.equibles.com on 2026-11-25 (TSLA), trimmed: two events, three turns with shortened text, one expiration. No key or account data.",
+ "investor_events": {
+  "data": [
+   {
+    "id": "aca9e2dd-3eb7-49e7-a9c0-2cd1d66cfe60",
+    "eventType": "EarningsCall",
+    "eventTypeName": "Earnings Call",
+    "title": "Tesla, Inc. Q3 FY2026 Earnings Call",
+    "callDate": "2026-10-21T21:30:00+00:00",
+    "callDateIsPeriodEnd": false,
+    "fiscalYear": 2026,
+    "fiscalQuarter": 3,
+    "status": "Concluded",
+    "statusName": "Concluded",
+    "webcastUrl": null,
+    "transcriptDocumentId": "86a76487-6ead-419b-b558-34ebd5a552ef",
+    "earningsReleaseDocumentId": "1e1febea-02ec-4fd4-9056-7acc6c414dc4",
+    "hasAudio": true,
+    "hasSlides": true,
+    "hasTranscript": true,
+    "materials": {
+     "transcript": {
+      "status": "available",
+      "reason": "Transcript on file",
+      "lastAttemptAt": null,
+      "nextAttemptAt": null
+     },
+     "audio": {
+      "status": "available",
+      "reason": "Recording captured",
+      "lastAttemptAt": null,
+      "nextAttemptAt": null
+     },
+     "slides": {
+      "status": "available",
+      "reason": "Slide deck captured",
+      "lastAttemptAt": "2026-10-22T10:03:34.693659+00:00",
+      "nextAttemptAt": null
+     }
+    }
+   },
+   {
+    "id": "bbabf67a-7e9d-4391-bb43-d6970b3a2a94",
+    "eventType": "EarningsCall",
+    "eventTypeName": "Earnings Call",
+    "title": "Tesla, Inc. Q2 FY2026 Earnings Call",
+    "callDate": "2026-07-22T00:00:00+00:00",
+    "callDateIsPeriodEnd": false,
+    "fiscalYear": 2026,
+    "fiscalQuarter": 2,
+    "status": "Concluded",
+    "statusName": "Concluded",
+    "webcastUrl": "https://www.youtube.com/watch?v=9H5y9Uag8AA",
+    "transcriptDocumentId": "392f3deb-739b-4cab-8e41-00568f9bc34f",
+    "earningsReleaseDocumentId": "ae54565e-ba64-4133-8e01-0dc132ab6bdb",
+    "hasAudio": true,
+    "hasSlides": true,
+    "hasTranscript": true,
+    "materials": {
+     "transcript": {
+      "status": "available",
+      "reason": "Transcript on file",
+      "lastAttemptAt": null,
+      "nextAttemptAt": null
+     },
+     "audio": {
+      "status": "available",
+      "reason": "Recording captured",
+      "lastAttemptAt": null,
+      "nextAttemptAt": null
+     },
+     "slides": {
+      "status": "available",
+      "reason": "Slide deck captured",
+      "lastAttemptAt": null,
+      "nextAttemptAt": null
+     }
+    }
+   }
+  ],
+  "meta": {
+   "limit": 8,
+   "offset": 0,
+   "count": 2,
+   "hasMore": true
+  }
+ },
+ "speakers": {
+  "eventId": "aca9e2dd-3eb7-49e7-a9c0-2cd1d66cfe60",
+  "ticker": "TSLA",
+  "eventTitle": "Tesla, Inc. Q3 FY2026 Earnings Call",
+  "callDate": "2026-10-21T21:30:00+00:00",
+  "fiscalYear": 2026,
+  "fiscalQuarter": 3,
+  "turnCount": 3,
+  "totalTurnCount": 61,
+  "offset": 0,
+  "hasMore": true,
+  "isFiledRecord": false,
+  "hasSpeakerLabels": true,
+  "data": [
+   {
+    "speakerIndex": 3,
+    "speakerName": "Travis Axelrod",
+    "speakerRole": "Head of Investor Relations",
+    "text": "Good afternoon everyone and welcome to Tesla's third quarter 2026 Q&A webcast. My name is Travis Axelrod, head of investor relations and I'm joined today by Elon Musk, Vibov Taneja and a number of other executives. Our Q",
+    "startSeconds": 0.0,
+    "endSeconds": 55.34
+   },
+   {
+    "speakerIndex": 10,
+    "speakerName": "Elon Musk",
+    "speakerRole": "CEO",
+    "text": "Thank you. So the third quarter was very strong, and I'd like to give a big congratulations to the whole Tesla team for working hard to make it happen. Demand is growing rapidly for our vehicles. It's exceeding our produ",
+    "startSeconds": 55.54,
+    "endSeconds": 610.96
+   },
+   {
+    "speakerIndex": 3,
+    "speakerName": "Travis Axelrod",
+    "speakerRole": "Head of Investor Relations",
+    "text": "Great. Thanks very much, Elon. And Vedbov has opening remarks as well. Vedbov?",
+    "startSeconds": 613.96,
+    "endSeconds": 618.1
+   }
+  ],
+  "corrections": []
+ },
+ "volatility": {
+  "ticker": "TSLA",
+  "companyName": "Tesla, Inc.",
+  "startDate": "2025-11-24",
+  "endDate": "2026-11-25",
+  "returned": 1,
+  "truncated": true,
+  "delayed": false,
+  "coverage": {
+   "backfillComplete": true,
+   "backfilledFrom": "2024-01-18",
+   "lastSession": "2026-11-24",
+   "lastQuotedSession": "2026-11-24",
+   "cadence": "nightly"
+  },
+  "sessions": [
+   {
+    "session": "2026-11-24",
+    "underlyingClose": 384.68,
+    "riskFreeRatePercent": 3.92,
+    "derivedIv30": 0.5311,
+    "derivedBasis": "interpolated",
+    "derivedContracts": 12,
+    "derivedTrades": 934,
+    "ivRank": 61.6,
+    "ivPercentile": 98.8,
+    "rankSessions": 252,
+    "quotedIv30": 0.5341,
+    "quotedBasis": "interpolated",
+    "quotedContracts": 12,
+    "quotedUnderlyingPrice": 382.69,
+    "quotedCapturedAt": "2026-11-24T20:45:52.914278Z",
+    "quotedWithheld": false,
+    "realizedVolatility30": 0.6535,
+    "expirations": [
+     {
+      "expiration": "2026-12-24",
+      "days": 30,
+      "atmStrike": 385.0,
+      "derivedAtmIv": 0.5311,
+      "derivedContracts": 6,
+      "derivedTrades": 609,
+      "quotedAtmIv": 0.5341,
+      "quotedContracts": 6,
+      "quotedAtmStrike": 385.0
+     }
+    ]
+   }
+  ]
+ },
+ "unauthorized": {
+  "error": {
+   "code": "unauthorized",
+   "message": "Invalid API key. It may have been deleted, or its account closed — check your keys at https://equibles.com/dashboard/apikeys.",
+   "status": 401
+  }
+ },
+ "not_found": {
+  "error": {
+   "code": "not_found",
+   "message": "Stock 'ZZZZQ' not found.",
+   "status": 404
+  }
+ }
+}

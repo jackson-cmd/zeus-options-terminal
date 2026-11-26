@@ -245,8 +245,9 @@ def docs(cik: str = Query(...), accession: str = Query(...)):
 def transcript(ticker: str = Query(..., min_length=1, max_length=10),
                refresh: int = Query(0)):
     """Earnings-call transcript for the SEC pane's 📞 button. SEC/Benzinga don't
-    host transcripts; we pull them from YouTube (yt-dlp) and render an HTML page
-    that loads in the same iframe so the bilingual translator just works."""
+    host transcripts; with an Equibles key the latest call comes from Equibles, else
+    from YouTube (yt-dlp), rendered as an HTML page that loads in the same iframe so
+    the bilingual translator just works."""
     if not re.match(r"^[A-Za-z.]{1,10}$", ticker):
         raise HTTPException(status_code=400, detail="bad ticker")
     from sec_filings.transcript import get_transcript_html
